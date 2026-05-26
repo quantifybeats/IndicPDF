@@ -1,8 +1,0 @@
-{
-  "rewrite": [{ "source": "/(.*)", "destination": "main.py" }],
-  "functions": {
-    "main.py": {
-      "runtime": "@vercel/python"
-    }
-  }
-}
