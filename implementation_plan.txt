@@ -1,0 +1,28 @@
+# IndicPDF AI - System Implementation Plan
+
+## Background & Motivation
+Converting DOCX files containing Indic-language text to PDF often results in broken glyphs, missing matras, and incorrect character ordering due to missing fonts, legacy encodings, and a lack of proper text shaping. The objective is to build a deterministic, production-grade system that converts these DOCX files into high-fidelity, Unicode-compliant, searchable PDFs without relying on OCR.
+
+## Proposed Technology Stack
+*   **Backend / Pipeline:** Python
+*   **API Framework:** FastAPI
+*   **DOCX Parsing:** `python-docx`
+*   **Text Shaping:** `uharfbuzz`
+*   **PDF Rendering:** `reportlab`
+*   **Frontend (UX Layer):** React / Next.js
+
+## Font Asset Layer
+Dedicated layer for deterministic font handling, fallback, and embedding.
+- **Directories:** /fonts/system, /fonts/fallback, /fonts/uploads
+- **Registry:** Scanned on startup using `fontTools` for PostScript names and Unicode ranges.
+
+## Implementation Paths
+1. **Core Processing (MVP):** DOCX -> Basic PDF (FastAPI setup, basic parsing/extraction).
+2. **Font Intelligence Layer:** Font Registry scanning, metadata extraction, deterministic fallback.
+3. **Encoding Integrity Layer:** Legacy-to-Unicode conversion, normalization.
+4. **Rendering Accuracy Layer:** `uharfbuzz` integration for shaping.
+5. **Output Reliability Layer:** Font subsetting and embedding.
+6. **UX & Trust Layer:** Frontend upload and transparency logs.
+
+## Execution Model
+Strict control loop: Implement -> Output -> Stop -> Ask.

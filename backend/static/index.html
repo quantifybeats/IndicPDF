@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IndicPDF — Professional DOCX to PDF</title>
+    <!-- Modern Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --info: #3b82f6;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg);
+            background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: var(--text-main);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .main-container {
+            max-width: 1000px;
+            margin: 4rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            letter-spacing: -0.025em;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, var(--primary), #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: 1.5rem;
+            box-shadow: var(--shadow-lg);
+            padding: 2.5rem;
+            border: 1px solid var(--border);
+        }
+
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: 1rem;
+            padding: 4rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            background: var(--bg);
+        }
+
+        .upload-zone:hover, .upload-zone.drag-over {
+            border-color: var(--primary);
+            background: #f0f4ff;
+            transform: translateY(-2px);
+        }
+
+        .upload-icon {
+            width: 64px;
+            height: 64px;
+            background: white;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            box-shadow: var(--shadow);
+            color: var(--primary);
+        }
+
+        .upload-zone h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-zone p {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            background: var(--border);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        #processing-view {
+            display: none;
+            margin-top: 3rem;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-badge.success { background: #ecfdf5; color: #065f46; }
+        .status-badge.processing { background: #eff6ff; color: #1e40af; }
+
+        .report-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .report-card {
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            background: var(--bg);
+        }
+
+        .report-card h4 {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .report-item {
+            background: white;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.9375rem;
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .report-item:last-child { margin-bottom: 0; }
+
+        .tag {
+            font-size: 0.75rem;
+            padding: 0.125rem 0.5rem;
+            border-radius: 4px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+
+        /* Shimmer loading */
+        .shimmer {
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 5rem;
+        }
+
+        .feature-item {
+            text-align: left;
+        }
+
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            color: white;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .feature-item h3 {
+            font-size: 1.125rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-item p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        [data-lucide] {
+            width: 20px;
+            height: 20px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-content">
+            <a href="/" class="logo">
+                <i data-lucide="file-text"></i>
+                IndicPDF
+            </a>
+            <div class="nav-links">
+                <a href="https://github.com/indicpdf" target="_blank" style="color: var(--text-muted); text-decoration: none; font-size: 0.875rem; font-weight: 500;">Documentation</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-container">
+        <section class="hero">
+            <h1>High-Fidelity Indic PDFs</h1>
+            <p>The first professional DOCX to PDF engine that treats Indic scripts with the respect they deserve.</p>
+        </section>
+
+        <section class="card">
+            <div class="upload-zone" id="drop-zone">
+                <div class="upload-icon">
+                    <i data-lucide="upload-cloud" style="width: 32px; height: 32px;"></i>
+                </div>
+                <h3>Convert your Document</h3>
+                <p>Drag and drop your <strong>.docx</strong> file here, or click to browse</p>
+                <div style="margin-top: 1.5rem;">
+                    <button class="btn" id="select-btn">
+                        <i data-lucide="plus"></i>
+                        Select File
+                    </button>
+                </div>
+                <input type="file" id="file-input" style="display: none;" accept=".docx">
+            </div>
+
+            <div id="processing-view">
+                <div class="report-header">
+                    <h2 id="processing-title">Processing Report</h2>
+                    <div id="status-badge-container">
+                        <span class="status-badge processing">
+                            <i data-lucide="loader-2" class="animate-spin"></i>
+                            Processing...
+                        </span>
+                    </div>
+                </div>
+
+                <div class="report-grid" id="report-grid">
+                    <!-- Shimmer Loading placeholders -->
+                    <div class="report-card shimmer" style="height: 100px;"></div>
+                    <div class="report-card shimmer" style="height: 150px;"></div>
+                </div>
+
+                <div style="margin-top: 2.5rem; text-align: center;" id="action-container">
+                    <!-- Download button will appear here -->
+                </div>
+            </div>
+        </section>
+
+        <section class="features-grid">
+            <div class="feature-item">
+                <div class="feature-icon"><i data-lucide="zap"></i></div>
+                <h3>Text Shaping</h3>
+                <p>Full support for complex ligatures, matras, and glyph reordering using HarfBuzz.</p>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon"><i data-lucide="font"></i></div>
+                <h3>Font Intelligence</h3>
+                <p>Deterministic font embedding and script-aware fallback for 100% visual fidelity.</p>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon"><i data-lucide="shield-check"></i></div>
+                <h3>Legacy Support</h3>
+                <p>Automatic conversion of legacy encodings (Anu, APS, etc.) to modern Unicode.</p>
+            </div>
+        </section>
+        <section class="how-it-works">
+            <h2>Deterministic Pipeline</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <h3>01. Deep Parsing</h3>
+                        <p>We extract raw XML, style runs, and font metadata directly from your DOCX file.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <h3>02. Script Intelligence</h3>
+                        <p>Our engine identifies scripts and normalizes legacy encodings to Unicode.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <h3>03. Text Shaping</h3>
+                        <p>HarfBuzz shapes your text, ensuring ligatures and matras are visually perfect.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <h3>04. Font Embedding</h3>
+                        <p>Final PDF is rendered with exact font subsets for global consistency.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2026 IndicPDF AI. Built for deterministic document rendering.</p>
+            <div class="footer-links">
+                <a href="#"><i data-lucide="github"></i></a>
+                <a href="#"><i data-lucide="twitter"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const selectBtn = document.getElementById('select-btn');
+        const processingView = document.getElementById('processing-view');
+        const reportGrid = document.getElementById('report-grid');
+        const statusBadgeContainer = document.getElementById('status-badge-container');
+        const actionContainer = document.getElementById('action-container');
+        const processingTitle = document.getElementById('processing-title');
+
+        selectBtn.onclick = () => fileInput.click();
+
+        // Drag and Drop
+        dropZone.ondragover = (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        };
+        dropZone.ondragleave = () => dropZone.classList.remove('drag-over');
+        dropZone.ondrop = (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            const file = e.dataTransfer.files[0];
+            if (file && file.name.endsWith('.docx')) handleUpload(file);
+        };
+
+        fileInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) handleUpload(file);
+        };
+
+        async function handleUpload(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // UI Feedback
+            processingView.style.display = 'block';
+            processingTitle.textContent = `Processing: ${file.name}`;
+            actionContainer.innerHTML = '';
+            statusBadgeContainer.innerHTML = `
+                <span class="status-badge processing">
+                    <i data-lucide="refresh-cw" style="animation: spin 2s linear infinite;"></i>
+                    Processing...
+                </span>
+            `;
+            lucide.createIcons();
+            
+            // Shimmer effect
+            reportGrid.innerHTML = `
+                <div class="report-card shimmer" style="height: 100px;"></div>
+                <div class="report-card shimmer" style="height: 150px;"></div>
+            `;
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+
+                if (response.ok) {
+                    renderReport(result);
+                } else {
+                    showError(result.detail || 'Processing failed');
+                }
+            } catch (err) {
+                showError('Connection error occurred');
+            }
+        }
+
+        function renderReport(result) {
+            statusBadgeContainer.innerHTML = `
+                <span class="status-badge success">
+                    <i data-lucide="check-circle"></i>
+                    Completed
+                </span>
+            `;
+
+            let html = '';
+
+            // Core Info
+            html += `
+                <div class="report-card">
+                    <h4><i data-lucide="info"></i> Document Info</h4>
+                    <div class="report-item">
+                        <span>Filename</span>
+                        <span class="tag">${result.filename}</span>
+                    </div>
+                    <div class="report-item">
+                        <span>Status</span>
+                        <span style="color: var(--success); font-weight: 600;">Success</span>
+                    </div>
+                </div>
+            `;
+
+            // Legacy Converted
+            if (result.report.legacy_conversions.length > 0) {
+                html += `
+                    <div class="report-card">
+                        <h4><i data-lucide="zap"></i> Legacy Encodings Fixed</h4>
+                        ${result.report.legacy_conversions.map(c => `
+                            <div class="report-item">
+                                <span>Font: <strong>${c.font}</strong></span>
+                                <span class="tag">${c.type} → Unicode</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            // Font Substitutions
+            if (result.report.font_substitutions.length > 0) {
+                html += `
+                    <div class="report-card">
+                        <h4><i data-lucide="shuffle"></i> Font Resolution</h4>
+                        ${result.report.font_substitutions.map(s => `
+                            <div class="report-item">
+                                <span>Requested: <strong>${s.requested}</strong></span>
+                                <span class="tag">→ ${s.resolved}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div class="report-card">
+                        <h4><i data-lucide="check"></i> Font Fidelity</h4>
+                        <div class="report-item" style="color: var(--success);">
+                            <i data-lucide="shield-check" style="margin-right: 0.5rem;"></i>
+                            Exact font matching achieved. No substitutions required.
+                        </div>
+                    </div>
+                `;
+            }
+
+            reportGrid.innerHTML = html;
+            
+            actionContainer.innerHTML = `
+                <a href="/download/${result.output}" class="btn">
+                    <i data-lucide="download"></i>
+                    Download PDF
+                </a>
+            `;
+
+            lucide.createIcons();
+        }
+
+        function showError(msg) {
+            statusBadgeContainer.innerHTML = `
+                <span class="status-badge" style="background: #fef2f2; color: #991b1b;">
+                    <i data-lucide="alert-circle"></i>
+                    Failed
+                </span>
+            `;
+            reportGrid.innerHTML = `
+                <div class="report-card" style="border-color: var(--error); background: #fff1f2;">
+                    <h4 style="color: var(--error);"><i data-lucide="alert-triangle"></i> Error Details</h4>
+                    <p style="color: var(--error);">${msg}</p>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+    </script>
+    <style>
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+
+        .how-it-works {
+            margin-top: 6rem;
+            text-align: center;
+        }
+
+        .how-it-works h2 {
+            font-size: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: left;
+            position: relative;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: 0;
+            top: 6px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--primary);
+            border: 4px solid var(--surface);
+            box-shadow: 0 0 0 2px var(--border);
+        }
+
+        .timeline-content h3 {
+            font-size: 1.125rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .timeline-content p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .footer {
+            margin-top: 8rem;
+            padding: 4rem 2rem;
+            border-top: 1px solid var(--border);
+            background: var(--surface);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary);
+        }
+    </style>
+</body>
+</html>
