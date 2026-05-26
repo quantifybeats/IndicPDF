@@ -153,8 +153,12 @@ class FontRegistry:
 font_registry = FontRegistry()
 
 def initialize_font_registry():
-    base_fonts_path = Path("fonts")
+    # Discovery absolute base path
+    backend_dir = Path(__file__).resolve().parent
+    base_dir = backend_dir.parent
+    base_fonts_path = base_dir / "fonts"
+    
     font_registry.scan_directory(base_fonts_path / "system")
     font_registry.scan_directory(base_fonts_path / "fallback")
     font_registry.scan_directory(base_fonts_path / "uploads")
-    print(f"Font Registry initialized with {len(font_registry.registry)} entries.")
+    print(f"Font Registry initialized with {len(font_registry.registry)} entries from {base_fonts_path}")
