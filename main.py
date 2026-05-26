@@ -6,8 +6,8 @@ from pathlib import Path
 
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, HTMLResponse
-from .processor import process_docx_to_pdf_final
-from .font_manager import initialize_font_registry
+from backend.processor import process_docx_to_pdf_final
+from backend.font_manager import initialize_font_registry
 
 app = FastAPI(title="IndicPDF API")
 
