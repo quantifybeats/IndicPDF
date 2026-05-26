@@ -39,8 +39,12 @@ class FontRegistry:
         try:
             collection = TTCollection(ttc_path)
             # Create a subfolder for extracted faces
-            extract_dir = ttc_path.parent / f"_{ttc_path.stem}_extracted"
-            extract_dir.mkdir(exist_ok=True)
+            if "VERCEL" in os.environ:
+                extract_dir = Path("/tmp/fonts_extracted") / ttc_path.stem
+            else:
+                extract_dir = ttc_path.parent / f"_{ttc_path.stem}_extracted"
+            
+            extract_dir.mkdir(parents=True, exist_ok=True)
 
             for i, font in enumerate(collection.fonts):
                 metadata = self._extract_metadata_from_obj(font, ttc_path)

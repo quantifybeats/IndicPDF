@@ -5,3 +5,4 @@ reportlab
 uharfbuzz
 fonttools
 python-multipart
+fpdf2

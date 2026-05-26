@@ -15,8 +15,9 @@ app = FastAPI(title="IndicPDF API")
 async def startup_event():
     initialize_font_registry()
 
-UPLOAD_DIR = Path("data/uploads")
-OUTPUT_DIR = Path("data/outputs")
+IS_VERCEL = "VERCEL" in os.environ
+UPLOAD_DIR = Path("/tmp/uploads") if IS_VERCEL else Path("data/uploads")
+OUTPUT_DIR = Path("/tmp/outputs") if IS_VERCEL else Path("data/outputs")
 STATIC_DIR = Path("backend/static")
 
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
