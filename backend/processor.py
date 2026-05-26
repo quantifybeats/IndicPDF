@@ -1,8 +1,12 @@
 from docx import Document
 from fpdf import FPDF
 from pathlib import Path
-from .font_manager import font_registry
-from .encoding_manager import encoding_manager
+try:
+    from .font_manager import font_registry
+    from .encoding_manager import encoding_manager
+except (ImportError, ValueError):
+    from font_manager import font_registry
+    from encoding_manager import encoding_manager
 
 class IndicPDF(FPDF):
     def header(self):

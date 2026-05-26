@@ -6,14 +6,28 @@ from pathlib import Path
 
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, HTMLResponse
-from .processor import process_docx_to_pdf_final
-from .font_manager import initialize_font_registry
+import sys
+
+# Ensure the backend directory is in the path for flexible imports
+current_dir = Path(__file__).parent
+if str(current_dir) not in sys.path:
+    sys.path.append(str(current_dir))
+
+try:
+    from .processor import process_docx_to_pdf_final
+    from .font_manager import initialize_font_registry
+except (ImportError, ValueError):
+    from processor import process_docx_to_pdf_final
+    from font_manager import initialize_font_registry
 
 app = FastAPI(title="IndicPDF API")
 
 @app.on_event("startup")
 async def startup_event():
-    initialize_font_registry()
+    try:
+        initialize_font_registry()
+    except Exception as e:
+        print(f"FAILED to initialize font registry: {e}")
 
 IS_VERCEL = "VERCEL" in os.environ
 UPLOAD_DIR = Path("/tmp/uploads") if IS_VERCEL else Path("data/uploads")
