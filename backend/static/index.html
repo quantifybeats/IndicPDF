@@ -334,14 +334,14 @@
                     <i data-lucide="upload-cloud" style="width: 32px; height: 32px;"></i>
                 </div>
                 <h3>Convert your Document</h3>
-                <p>Drag and drop your <strong>.docx</strong> file here, or click to browse</p>
+                <p>Drag and drop your <strong>.docx</strong> or <strong>.pdf</strong> file here, or click to browse</p>
                 <div style="margin-top: 1.5rem;">
                     <button class="btn" id="select-btn">
                         <i data-lucide="plus"></i>
                         Select File
                     </button>
                 </div>
-                <input type="file" id="file-input" style="display: none;" accept=".docx">
+                <input type="file" id="file-input" style="display: none;" accept=".docx,.pdf">
             </div>
 
             <div id="processing-view">
@@ -454,7 +454,7 @@
             e.preventDefault();
             dropZone.classList.remove('drag-over');
             const file = e.dataTransfer.files[0];
-            if (file && file.name.endsWith('.docx')) handleUpload(file);
+            if (file && (file.name.endsWith('.docx') || file.name.endsWith('.pdf'))) handleUpload(file);
         };
 
         fileInput.onchange = (e) => {
@@ -465,6 +465,9 @@
         async function handleUpload(file) {
             const formData = new FormData();
             formData.append('file', file);
+
+            const isPdf = file.name.endsWith('.pdf');
+            const endpoint = isPdf ? '/upload-pdf' : '/upload';
 
             // UI Feedback
             processingView.style.display = 'block';
@@ -485,14 +488,14 @@
             `;
 
             try {
-                const response = await fetch('/upload', {
+                const response = await fetch(endpoint, {
                     method: 'POST',
                     body: formData
                 });
                 const result = await response.json();
 
                 if (response.ok) {
-                    renderReport(result);
+                    renderReport(result, isPdf);
                 } else {
                     showError(result.detail || 'Processing failed');
                 }
@@ -501,7 +504,7 @@
             }
         }
 
-        function renderReport(result) {
+        function renderReport(result, isPdf = false) {
             statusBadgeContainer.innerHTML = `
                 <span class="status-badge success">
                     <i data-lucide="check-circle"></i>
@@ -519,6 +522,11 @@
                         <span>Filename</span>
                         <span class="tag">${result.filename}</span>
                     </div>
+                    ${isPdf ? `
+                    <div class="report-item">
+                        <span>Pages Processed</span>
+                        <span class="tag">${result.report.pages_processed}</span>
+                    </div>` : ''}
                     <div class="report-item">
                         <span>Status</span>
                         <span style="color: var(--success); font-weight: 600;">Success</span>
@@ -526,8 +534,8 @@
                 </div>
             `;
 
-            // Legacy Converted
-            if (result.report.legacy_conversions.length > 0) {
+            // Legacy Converted (DOCX only)
+            if (!isPdf && result.report.legacy_conversions && result.report.legacy_conversions.length > 0) {
                 html += `
                     <div class="report-card">
                         <h4><i data-lucide="zap"></i> Legacy Encodings Fixed</h4>
@@ -541,12 +549,15 @@
                 `;
             }
 
-            // Font Substitutions
-            if (result.report.font_substitutions.length > 0) {
+            // Font Substitutions / Matches
+            const substitutions = isPdf ? result.report.font_substitutions : result.report.font_substitutions;
+            const matches = isPdf ? result.report.font_matches : [];
+
+            if (substitutions && substitutions.length > 0) {
                 html += `
                     <div class="report-card">
-                        <h4><i data-lucide="shuffle"></i> Font Resolution</h4>
-                        ${result.report.font_substitutions.map(s => `
+                        <h4><i data-lucide="shuffle"></i> Font Substitutions</h4>
+                        ${substitutions.map(s => `
                             <div class="report-item">
                                 <span>Requested: <strong>${s.requested}</strong></span>
                                 <span class="tag">→ ${s.resolved}</span>
@@ -554,7 +565,23 @@
                         `).join('')}
                     </div>
                 `;
-            } else {
+            }
+
+            if (isPdf && matches && matches.length > 0) {
+                html += `
+                    <div class="report-card">
+                        <h4><i data-lucide="check-square"></i> Exact Font Matches</h4>
+                        ${matches.map(m => `
+                            <div class="report-item">
+                                <span>Found: <strong>${m.requested}</strong></span>
+                                <span class="tag">Local Asset Used</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            if ((!substitutions || substitutions.length === 0) && (!isPdf || (matches && matches.length === 0))) {
                 html += `
                     <div class="report-card">
                         <h4><i data-lucide="check"></i> Font Fidelity</h4>
@@ -568,10 +595,11 @@
 
             reportGrid.innerHTML = html;
             
+            const downloadBtnLabel = isPdf ? 'Download DOCX' : 'Download PDF';
             actionContainer.innerHTML = `
                 <a href="/download/${result.output}" class="btn">
                     <i data-lucide="download"></i>
-                    Download PDF
+                    ${downloadBtnLabel}
                 </a>
             `;
 

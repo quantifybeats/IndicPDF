@@ -6,3 +6,4 @@ uharfbuzz
 fonttools
 python-multipart
 fpdf2
+pdfminer.six

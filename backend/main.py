@@ -17,9 +17,11 @@ sys.path.append(str(BACKEND_DIR))
 
 try:
     from processor import process_docx_to_pdf_final
+    from pdf_processor import process_pdf_to_docx
     from font_manager import initialize_font_registry
 except ImportError:
     from .processor import process_docx_to_pdf_final
+    from .pdf_processor import process_pdf_to_docx
     from .font_manager import initialize_font_registry
 
 app = FastAPI(title="IndicPDF API")
@@ -79,6 +81,33 @@ async def upload_docx(file: UploadFile = File(...)):
 
     return {
         "filename": file.filename, 
+        "output": output_filename,
+        "report": report,
+        "status": "processed"
+    }
+
+
+@app.post("/upload-pdf")
+async def upload_pdf(file: UploadFile = File(...)):
+    ensure_fonts()
+    if not file.filename.endswith(".pdf"):
+        raise HTTPException(status_code=400, detail="Only .pdf files are supported")
+
+    file_path = UPLOAD_DIR / file.filename
+    with file_path.open("wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    output_filename = file_path.stem + ".docx"
+    output_path = OUTPUT_DIR / output_filename
+    
+    try:
+        report = process_pdf_to_docx(file_path, output_path)
+    except Exception as e:
+        logger.error(f"PDF processing failed: {e}")
+        raise HTTPException(status_code=500, detail=f"PDF processing failed: {str(e)}")
+
+    return {
+        "filename": file.filename,
         "output": output_filename,
         "report": report,
         "status": "processed"

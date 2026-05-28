@@ -4,13 +4,15 @@ from fontTools.ttLib import TTFont
 from typing import Dict, List, Set, Optional
 
 class FontMetadata:
-    def __init__(self, path: Path, postscript_name: str, full_name: str, family_name: str, unicode_ranges: Set[int], family_names: Set[str]):
+    def __init__(self, path: Path, postscript_name: str, full_name: str, family_name: str, unicode_ranges: Set[int], family_names: Set[str], weight: str = "regular", style: str = "normal"):
         self.path = path
         self.postscript_name = postscript_name
         self.full_name = full_name
         self.family_name = family_name
         self.unicode_ranges = unicode_ranges
         self.family_names = family_names # Includes localized names
+        self.weight = weight.lower()
+        self.style = style.lower()
 
 class FontRegistry:
     def __init__(self):
@@ -93,13 +95,28 @@ class FontRegistry:
             except:
                 continue
 
+        # Weight and Style detection from OS/2 table
+        weight = "regular"
+        style = "normal"
+        if 'OS/2' in font:
+            fs_selection = font['OS/2'].fsSelection
+            if fs_selection & 0x20: # Bold
+                weight = "bold"
+            if fs_selection & 0x01: # Italic
+                style = "italic"
+            
+            # Deeper weight check
+            us_weight_class = font['OS/2'].usWeightClass
+            if us_weight_class >= 700: weight = "bold"
+            elif us_weight_class <= 300: weight = "light"
+
         # Extract Unicode ranges
         unicode_ranges = set()
         if 'cmap' in font:
             for table in font['cmap'].tables:
                 unicode_ranges.update(table.cmap.keys())
 
-        return FontMetadata(path, postscript_name, full_name, family_name, unicode_ranges, family_names)
+        return FontMetadata(path, postscript_name, full_name, family_name, unicode_ranges, family_names, weight, style)
 
     def _map_to_scripts(self, metadata: FontMetadata):
         # Simplified Unicode block detection for fallback mapping
@@ -119,34 +136,53 @@ class FontRegistry:
                     self.script_fallback[script_name] = []
                 self.script_fallback[script_name].append(metadata)
 
-    def resolve_font(self, font_name: str, char_code: Optional[int] = None) -> Optional[Path]:
-        """Resolves a font name or character to a local file path."""
-        # 1. Normalize and check direct/family matches
+    def resolve_font(self, font_name: str, char_code: Optional[int] = None, bold: bool = False, italic: bool = False) -> Optional[Path]:
+        """Resolves a font name with weight/style preference."""
+        norm_requested = font_name.lower().replace(" ", "").replace("-", "")
+        target_weight = "bold" if bold else "regular"
+        target_style = "italic" if italic else "normal"
+        
+        candidates = []
+        
+        # Priority 1: Direct name match with scoring
+        for name, metadata in self.registry.items():
+            if name.lower().replace(" ", "").replace("-", "") == norm_requested or \
+               any(fam.lower().replace(" ", "").replace("-", "") == norm_requested for fam in metadata.family_names):
+                
+                # Score candidates
+                score = 0
+                if metadata.weight == target_weight: score += 10
+                if metadata.style == target_style: score += 10
+                candidates.append((score, metadata))
+
+        if candidates:
+            # Return best match
+            candidates.sort(key=lambda x: x[0], reverse=True)
+            return candidates[0][1].path
+
+        # 2. Fallback by character/script
+        if char_code:
+            for script_name, fonts in self.script_fallback.items():
+                for font in fonts:
+                    if char_code in font.unicode_ranges:
+                        return font.path
+        
+        return None
+
+    def get_font_metadata(self, font_name: str) -> Optional[FontMetadata]:
+        """Returns the FontMetadata for a given font name or similar name."""
         norm_requested = font_name.lower().replace(" ", "").replace("-", "")
         
         # Priority 1: Exact or Normalized name match (PS name, Full name)
         for name, metadata in self.registry.items():
             if name.lower().replace(" ", "").replace("-", "") == norm_requested:
-                return metadata.path
+                return metadata
         
-        # Priority 2: Family name match (including localized names)
+        # Priority 2: Family name match
         for name, metadata in self.registry.items():
             for fam in metadata.family_names:
                 if fam.lower().replace(" ", "").replace("-", "") == norm_requested:
-                    # Prefer Regular weight
-                    if "regular" in metadata.postscript_name.lower() or "regular" in metadata.full_name.lower():
-                        return metadata.path
-                    return metadata.path
-
-        # 2. Fallback by character/script
-        if char_code:
-            for script_name, fonts in self.script_fallback.items():
-                # Check if char_code is in the script's range (heuristic)
-                # For now, just return first font that supports the char
-                for font in fonts:
-                    if char_code in font.unicode_ranges:
-                        return font.path
-        
+                    return metadata
         return None
 
 # Global registry instance
