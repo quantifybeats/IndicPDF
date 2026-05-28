@@ -1,4 +1,5 @@
 import unicodedata
+import re
 from typing import Dict, Optional
 
 class EncodingManager:
@@ -78,6 +79,19 @@ class EncodingManager:
                 return self.legacy_maps[encoding_type][cid_val]
                 
         return None
+
+    def strip_all_junk(self, text: str) -> str:
+        """Aggressively removes (cid:N), ( : N), and other PDF extraction artifacts."""
+        if not text:
+            return ""
+        # Matches (cid:5), (cid : 5), ( : 5), (cid: 5), etc.
+        text = re.sub(r'\(cid\s*:\s*\d+\s*\)', '', text)
+        text = re.sub(r'\(\s*:\s*\d+\s*\)', '', text)
+        # Matches stray lone cid markers
+        text = re.sub(r'cid\s*:\s*\d+', '', text)
+        # Matches characters often mangled by extraction
+        text = re.sub(r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]', '', text) 
+        return text
 
 # Global instance
 encoding_manager = EncodingManager()
