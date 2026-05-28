@@ -1,55 +1,71 @@
-# IndicPDF
+# IndicPDF Engine
 
-IndicPDF is a production-grade DOCX to PDF conversion engine focused on high-fidelity, Unicode-compliant rendering for Indic languages (Telugu, Hindi, Tamil, etc.).
+## A. System Overview
 
-## Core Features
-- **Deterministic Font Asset Layer:** Operates independently of the host OS fonts. Scans internal font metadata (PostScript names, Unicode ranges) to ensure the correct font is always used.
-- **Legacy Encoding Support:** Detects legacy font encodings (like APS, Anu, etc.) and automatically converts text to standard Unicode (NFC normalized).
-- **Professional Text Shaping:** Integrated with `uharfbuzz` (HarfBuzz) to handle complex Indic ligatures, matra reordering, and glyph positioning.
-- **Reliable PDF Output:** Mandatory subsetting and embedding of fonts to ensure identical rendering across all devices and PDF readers.
-- **Trust Reporting:** Provides a processing log explaining font substitutions and encoding fixes to the user.
+IndicPDF is a production-grade document conversion pipeline specializing in bidirectional (DOCX ↔ PDF) processing of complex Indic scripts (Telugu, Devanagari, Tamil).
 
-## Project Structure
 ```text
-/backend
-├── main.py             # FastAPI entry point & API routes
-├── processor.py        # Core document processing & PDF generation logic
-├── font_manager.py     # Font Asset Layer & Metadata Registry
-├── encoding_manager.py # Legacy-to-Unicode conversion tables
-├── shaping_engine.py   # HarfBuzz (uharfbuzz) integration
-└── static/             # Frontend web interface
-/fonts
-├── system/             # Verified system fonts (e.g., Noto Sans)
-├── fallback/           # Script-aware fallbacks
-└── uploads/            # Document-specific font uploads
-/data
-├── uploads/            # Temporary storage for uploaded DOCX
-└── outputs/            # Generated PDF storage
+[ DOCX Upload ] --> [ Normalization & CID Cleaning ] --> [ Font Resolution ] --> [ HarfBuzz Shaping via fpdf2 ] --> [ PDF Output ]
+[ PDF Upload ]  --> [ Line-Level Extraction ]        --> [ CID Stripping ]   --> [ Font Mapping ]                 --> [ DOCX Output ]
 ```
 
-## Getting Started
+The system relies on a **deterministic font asset layer** rather than OS-level dependencies, allowing precise control over rendering fidelity.
 
-### 1. Prerequisites
-- Python 3.8+
-- Install dependencies:
-  ```bash
-  pip install -r requirements.txt
-  ```
+## B. Core Engine Design
 
-### 2. Font Setup
-Place your `.ttf` or `.otf` font files in the `fonts/system` or `fonts/fallback` directories. The system will automatically index them on startup.
+1.  **Rendering Engine (DOCX → PDF)**: Built on `fpdf2`. Crucially, it relies on `fpdf2`'s native integration with `uharfbuzz` for text shaping.
+2.  **Extraction Engine (PDF → DOCX)**: Built on `pdfminer.six`. It utilizes `LAParams` for line-level semantic grouping to reconstruct paragraphs without micro-fragmentation.
+3.  **Encoding & Normalization**: All incoming text is forced into Unicode Normalization Form C (NFC). An aggressive filter (`EncodingManager.strip_all_junk`) eliminates extraction artifacts like `(cid:N)`.
 
-### 3. Run the Server
-```bash
-python3 -m backend.main
-```
-Navigate to `http://localhost:8000` to access the web interface.
+## C. Key Design Decisions
 
-## Implementation Methodology
-This project was built following a strict 6-path deterministic execution model:
-1. **Core Processing (MVP):** End-to-end pipeline skeleton.
-2. **Font Intelligence Layer:** Metadata-based font registry.
-3. **Encoding Integrity Layer:** Normalization and legacy mapping.
-4. **Rendering Accuracy Layer:** Precise glyph shaping via HarfBuzz.
-5. **Output Reliability Layer:** Full font embedding.
-6. **UX & Trust Layer:** Transparency logs and UI.
+*   **`pdf.write()` Only**: Manual layout engines (measuring clusters and managing cursors) were abandoned. `fpdf2` maintains deep state regarding cursor position and cluster widths. Intercepting this with manual `pdf.text()` calls causes severe spacing anomalies (horizontal expansion).
+*   **Cluster-Level Rendering Abandoned**: Attempting to pre-wrap text by analyzing HarfBuzz grapheme clusters caused interference with `fpdf2`'s internal word-wrapping algorithm. The engine now trusts `fpdf2` + HarfBuzz to handle line breaks natively, provided the shaping script tags are set correctly.
+*   **Aggressive Junk Stripping**: Older PDF generators embed subsetted fonts without complete `ToUnicode` tables. This causes `pdfminer.six` to extract raw CIDs (e.g., `(cid:46)`). These are usually invisible formatting or control glyphs. A "scorched earth" regex filter is applied universally to prevent these from polluting the DOCX output or breaking shaping sequences.
+*   **Point (pt) Units**: The `IndicPDF` wrapper explicitly initializes `fpdf2` with `unit="pt"`. This prevents floating-point conversion errors between HarfBuzz (which operates in points) and `fpdf2` (which defaults to millimeters).
+
+## D. Module Breakdown
+
+*   **`backend/processor.py`**: The DOCX → PDF pipeline. Responsible for iterating over document runs, stripping junk, normalizing, resolving fonts, enabling shaping (`set_text_shaping`), and rendering via `pdf.write()`.
+*   **`backend/pdf_processor.py`**: The PDF → DOCX pipeline. Uses `pdfminer.six` to extract text boxes and lines, cleans the text, matches PDF subset fonts to local `FontRegistry` assets, and generates a formatted Word document.
+*   **`backend/encoding_manager.py`**: Handles text sanitization. Contains `strip_all_junk()` and infrastructure for legacy encoding conversions (e.g., APS/Anu mappings).
+*   **`backend/font_manager.py`**: Scans the `fonts/` directory using `fontTools`. Extracts Unicode coverage, weight, style, and family names. Provides a scoring-based `resolve_font()` method to find the best local match for a requested font.
+
+## E. Text Processing Pipeline (The "Golden Path")
+
+1.  **Input**: Raw text from DOCX run or PDF line.
+2.  **Sanitization**: `encoding_manager.strip_all_junk()` removes `(cid:N)` and `\x00-\x1F`.
+3.  **Normalization**: `unicodedata.normalize('NFC', text)` ensures base characters and matras are properly combined.
+4.  **Font Resolution**: `font_registry.resolve_font()` finds a local TTF/OTF that supports the script and matches the requested weight/style.
+5.  **Shaping State**: `pdf.set_text_shaping(use_shaping_engine=True, script="telu")` configures HarfBuzz.
+6.  **Rendering**: `pdf.write()` calculates advances and renders to PDF.
+
+## F. Known Constraints
+
+*   **fpdf2 Line Breaking**: While `fpdf2` supports HarfBuzz, its line-breaking algorithm is optimized for Latin spaces. Extremely long, unbroken Indic words may occasionally wrap awkwardly if no spaces are present.
+*   **Font Dependency**: The system's fidelity is 100% dependent on the presence of valid `GSUB`/`GPOS` tables in the loaded TTF/OTF files. A font without these tables will render without conjuncts/matras, even if shaping is enabled.
+*   **PDF Extraction Limits**: `pdfminer.six` cannot reconstruct reading order perfectly for complex, multi-column PDFs.
+
+## G. Extension Points
+
+*   **Adding Scripts**: Update the `script` detection logic in `processor.py` and the Unicode ranges in `font_manager.py` to support languages like Kannada (`knda`), Malayalam (`mlym`), or Bengali (`beng`).
+*   **Legacy Encodings**: Expand the `legacy_maps` dictionary in `encoding_manager.py` to support automated conversion of non-Unicode text (e.g., Shreelipi).
+
+## H. Debug Playbook
+
+**Symptom**: Characters are spaced unnaturally far apart.
+*   **Check**: Ensure `IndicPDF` is initialized with `unit="pt"`. Ensure no manual `pdf.set_x()` calls are overriding the cursor.
+
+**Symptom**: Matras are detached or rendering as dotted circles.
+*   **Check**: Verify `pdf.set_text_shaping` is being hit with the correct `script` tag (e.g., `telu`). Check the log to see if the chosen font actually supports the Unicode range.
+
+**Symptom**: Output contains `(cid:9)` or similar markers.
+*   **Check**: The `strip_all_junk` regex in `encoding_manager.py` needs updating to catch a new, malformed extraction pattern.
+
+## I. AI-Readable Design Notes
+
+*   `INV_01`: All strings MUST pass through NFC normalization before layout calculation.
+*   `INV_02`: `pdf.write()` is the exclusive mutation method for PDF text layout.
+*   `INV_03`: `shaping_engine=True` MUST be paired with a valid ISO 15924 script tag (`deva`, `telu`, etc.) for Indic text.
+*   `ASSUMP_01`: Local font registry contains authoritative TTF/OTF assets. PDF font requests are best-effort matched against this registry.
+*   `DEAD_CODE`: Manual HarfBuzz buffering (`uharfbuzz` direct usage) was removed in favor of `fpdf2` internal integration to maintain metric consistency. Do not reintroduce.
