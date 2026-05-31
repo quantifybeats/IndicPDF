@@ -1,0 +1,32 @@
+services:
+  # FastAPI API Service
+  - type: web
+    name: indicpdf-api
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python backend/main.py
+    envVars:
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: indicpdf-redis
+          property: connectionString
+
+  # RQ Background Worker
+  - type: worker
+    name: indicpdf-worker
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python backend/worker.py
+    envVars:
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: indicpdf-redis
+          property: connectionString
+
+# Redis Instance
+redis:
+  name: indicpdf-redis
+  plan: free
+  ipAllowList: [] # Only allow internal connections

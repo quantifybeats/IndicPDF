@@ -1,723 +1,1348 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IndicPDF — Professional DOCX to PDF</title>
-    <!-- Modern Typography -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        :root {
-            --primary: #6366f1;
-            --primary-hover: #4f46e5;
-            --bg: #f8fafc;
-            --surface: #ffffff;
-            --text-main: #0f172a;
-            --text-muted: #475569;
-            --border: #e2e8f0;
-            --success: #10b981;
-            --info: #3b82f6;
-            --warning: #f59e0b;
-            --error: #ef4444;
-            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IndicPDF AI — Enterprise Indian Language PDF Conversion Platform</title>
+<meta name="description" content="Enterprise-grade Telugu & Indian language DOCX to PDF conversion. APS/Anu font repair, OCR verification, Unicode-safe pipeline. End-to-end encrypted. Files deleted in 2 hours.">
+<meta name="keywords" content="Telugu DOCX to PDF, APS font converter, Anu Telugu PDF, Telugu Unicode PDF, Indian language OCR, government Telugu PDF, Indic script PDF">
+<meta property="og:title" content="IndicPDF AI — Indian Language PDF Conversion">
+<meta property="og:description" content="Enterprise DOCX→PDF engine for Telugu, Hindi, Tamil & 6 more scripts. APS/Anu font repair. OCR verified. Encrypted.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://indicpdf.ai">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&family=Noto+Sans+Telugu:wght@400;500;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0a0908;
+  --ink-2: #2e2c28;
+  --ink-3: #6b6760;
+  --ink-4: #9b9790;
+  --sand: #f7f4ed;
+  --sand-2: #edeae1;
+  --sand-3: #e0dcd2;
+  --sand-4: #ccc8bc;
+  --amber: #c47a18;
+  --amber-2: #e8911f;
+  --amber-light: #fef4e3;
+  --amber-dark: #7a4b08;
+  --teal: #0d7a69;
+  --teal-light: #e2f4f0;
+  --teal-dark: #064f42;
+  --red: #c13628;
+  --red-light: #fdf0ee;
+  --green: #2a7a48;
+  --green-light: #e7f7ee;
+  --security: #0d2a3f;
+  --security-glow: rgba(13,122,105,.15);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --font-display: 'Syne', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+  --font-telugu: 'Noto Sans Telugu', sans-serif;
+  --font-serif: 'Instrument Serif', serif;
+  --shadow-sm: 0 2px 8px rgba(10,9,8,.06);
+  --shadow-md: 0 4px 20px rgba(10,9,8,.10);
+  --shadow-lg: 0 8px 48px rgba(10,9,8,.14);
+  --shadow-xl: 0 24px 80px rgba(10,9,8,.18);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--font-mono); background: var(--sand); color: var(--ink); line-height: 1.6; overflow-x: hidden; }
+h1,h2,h3,h4 { font-family: var(--font-display); line-height: 1.08; }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+/* === NAV === */
+nav {
+  position: sticky; top: 0; z-index: 200;
+  background: rgba(247,244,237,.94); backdrop-filter: blur(16px) saturate(180%);
+  border-bottom: 1px solid var(--sand-3);
+  padding: 0 2.5rem; display: flex; align-items: center; justify-content: space-between; height: 62px;
+}
+.nav-logo { font-family: var(--font-display); font-weight: 800; font-size: 1.05rem; color: var(--ink); text-decoration: none; display: flex; align-items: center; gap: 10px; letter-spacing: -.02em; }
+.nav-logo-mark { width: 28px; height: 28px; background: var(--ink); border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+.nav-logo-mark svg { width: 16px; height: 16px; fill: var(--sand); }
+.nav-pill { font-size: 9px; font-weight: 700; background: var(--teal); color: white; padding: 2px 8px; border-radius: 20px; letter-spacing: .08em; font-family: var(--font-mono); text-transform: uppercase; }
+.nav-links { display: flex; gap: 1.75rem; list-style: none; }
+.nav-links a { font-size: 12.5px; color: var(--ink-3); text-decoration: none; font-family: var(--font-mono); transition: color .2s; letter-spacing: .01em; }
+.nav-links a:hover { color: var(--ink); }
+.nav-right { display: flex; align-items: center; gap: 1rem; }
+.nav-login { font-size: 12.5px; color: var(--ink-2); text-decoration: none; font-family: var(--font-mono); padding: 7px 14px; border-radius: var(--radius-sm); border: 1px solid var(--sand-3); transition: border-color .2s, background .2s; }
+.nav-login:hover { background: var(--sand-2); border-color: var(--sand-4); }
+.nav-cta { background: var(--ink); color: var(--sand); padding: 8px 18px; border-radius: var(--radius-sm); font-size: 12.5px; font-family: var(--font-mono); text-decoration: none; transition: background .2s, transform .15s; }
+.nav-cta:hover { background: var(--ink-2); transform: translateY(-1px); }
 
-        body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            background-color: var(--bg);
-            background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
-            background-size: 24px 24px;
-            color: var(--text-main);
-            line-height: 1.5;
-            -webkit-font-smoothing: antialiased;
-        }
+/* === HERO === */
+.hero {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  padding: 7rem 2rem 5rem; text-align: center; position: relative; overflow: hidden;
+}
+.hero-noise {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  background-size: 200px;
+}
+.hero-bg {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% -5%, rgba(196,122,24,.10) 0%, transparent 55%),
+    radial-gradient(ellipse 45% 35% at 10% 90%, rgba(13,122,105,.07) 0%, transparent 50%),
+    radial-gradient(ellipse 40% 30% at 90% 85%, rgba(196,122,24,.05) 0%, transparent 50%);
+}
+/* Grid lines */
+.hero-grid {
+  position: absolute; inset: 0; pointer-events: none; opacity: .4;
+  background-image: linear-gradient(var(--sand-3) 1px, transparent 1px), linear-gradient(90deg, var(--sand-3) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 0%, transparent 70%);
+}
+.hero-inner { position: relative; z-index: 1; max-width: 900px; }
 
-        .navbar {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border);
-            padding: 1rem 2rem;
-            position: sticky;
-            top: 0;
-            z-index: 50;
-        }
+/* Security badge — MAIN HERO FOCUS */
+.hero-security-badge {
+  display: inline-flex; align-items: center; gap: 12px;
+  background: rgba(10,9,8,.9);
+  border: 1px solid rgba(255,255,255,.12);
+  color: #fff;
+  padding: 14px 28px;
+  border-radius: 100px;
+  margin-bottom: 3.5rem;
+  animation: heroFadeUp .7s ease both;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 40px rgba(13,122,105,.25), var(--shadow-lg);
+}
+.hero-security-badge::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(105deg, rgba(13,122,105,.12) 0%, transparent 50%);
+}
+.security-lock { font-size: 1.1rem; }
+.security-text {
+  font-family: var(--font-display);
+  font-size: clamp(.85rem, 2vw, 1.05rem);
+  font-weight: 700;
+  letter-spacing: -.01em;
+  line-height: 1.3;
+}
+.security-dot { width: 5px; height: 5px; background: var(--teal); border-radius: 50%; opacity: .7; flex-shrink: 0; }
+.security-pulse {
+  width: 8px; height: 8px; background: #22c55e; border-radius: 50%; flex-shrink: 0;
+  box-shadow: 0 0 0 0 rgba(34,197,94,.4);
+  animation: securityPulse 2s ease-in-out infinite;
+}
+@keyframes securityPulse {
+  0% { box-shadow: 0 0 0 0 rgba(34,197,94,.4); }
+  70% { box-shadow: 0 0 0 8px rgba(34,197,94,0); }
+  100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+}
 
-        .nav-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+.hero h1 {
+  font-size: clamp(2.8rem, 7.5vw, 6.5rem);
+  font-weight: 800;
+  letter-spacing: -.04em;
+  line-height: 1.0;
+  margin-bottom: 1.75rem;
+  animation: heroFadeUp .7s .1s ease both;
+  color: var(--ink);
+}
+.hero h1 em { font-style: italic; font-family: var(--font-serif); color: var(--amber); }
+.hero h1 .h1-line2 { display: block; }
 
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-weight: 700;
-            font-size: 1.25rem;
-            color: var(--primary);
-            text-decoration: none;
-        }
+.hero-sub {
+  font-size: 1.05rem; color: var(--ink-3); max-width: 540px; margin: 0 auto 3rem;
+  line-height: 1.75; font-family: var(--font-mono);
+  animation: heroFadeUp .7s .2s ease both;
+}
 
-        .main-container {
-            max-width: 1000px;
-            margin: 4rem auto;
-            padding: 0 1.5rem;
-        }
+.hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 4rem; animation: heroFadeUp .7s .3s ease both; }
+.btn-primary {
+  background: var(--ink); color: var(--sand);
+  padding: 15px 30px; border-radius: var(--radius-md);
+  font-size: 14px; font-family: var(--font-mono); text-decoration: none; border: none; cursor: pointer;
+  transition: transform .15s, background .2s, box-shadow .2s;
+  display: inline-flex; align-items: center; gap: 9px;
+  font-weight: 500;
+}
+.btn-primary:hover { background: var(--ink-2); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.btn-outline {
+  background: transparent; color: var(--ink);
+  padding: 15px 30px; border-radius: var(--radius-md);
+  font-size: 14px; font-family: var(--font-mono); text-decoration: none;
+  border: 1.5px solid var(--sand-3); cursor: pointer;
+  transition: border-color .2s, transform .15s, background .2s;
+  display: inline-flex; align-items: center; gap: 9px;
+}
+.btn-outline:hover { border-color: var(--ink-3); transform: translateY(-2px); background: var(--sand-2); }
 
-        .hero {
-            text-align: center;
-            margin-bottom: 4rem;
-        }
+.hero-trust-strip {
+  display: flex; gap: 2.5rem; justify-content: center; flex-wrap: wrap; align-items: center;
+  animation: heroFadeUp .7s .4s ease both;
+  padding-top: 3rem;
+  border-top: 1px solid var(--sand-3);
+}
+.trust-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-3); }
+.trust-item .ti-icon { font-size: 14px; }
+.trust-stat { font-family: var(--font-display); font-weight: 800; font-size: 1.5rem; color: var(--ink); display: block; }
+.trust-lbl { font-size: 11px; color: var(--ink-4); display: block; }
 
-        .hero h1 {
-            font-size: 3rem;
-            font-weight: 800;
-            letter-spacing: -0.025em;
-            margin-bottom: 1rem;
-            background: linear-gradient(to right, var(--primary), #a855f7);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+@keyframes heroFadeUp { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
 
-        .hero p {
-            font-size: 1.25rem;
-            color: var(--text-muted);
-            max-width: 600px;
-            margin: 0 auto;
-        }
+/* === SECTIONS === */
+section { padding: 6rem 2rem; }
+.container { max-width: 1100px; margin: 0 auto; }
+.section-label { font-size: 10.5px; letter-spacing: .14em; font-weight: 700; color: var(--ink-4); text-transform: uppercase; margin-bottom: 1rem; font-family: var(--font-mono); }
+.section-title { font-size: clamp(1.9rem, 4vw, 2.9rem); font-weight: 800; margin-bottom: 1rem; letter-spacing: -.025em; }
+.section-sub { font-size: 14.5px; color: var(--ink-2); max-width: 520px; line-height: 1.75; margin-bottom: 3rem; }
 
-        .card {
-            background: var(--surface);
-            border-radius: 1.5rem;
-            box-shadow: var(--shadow-lg);
-            padding: 2.5rem;
-            border: 1px solid var(--border);
-        }
+/* === SECURITY BANNER === */
+.security-banner {
+  background: var(--ink); color: var(--sand-2);
+  padding: 1rem 2.5rem; display: flex; align-items: center; justify-content: center; gap: 2rem;
+  flex-wrap: wrap; font-size: 12px; font-family: var(--font-mono);
+}
+.sb-item { display: flex; align-items: center; gap: 7px; }
+.sb-dot { width: 5px; height: 5px; background: var(--teal); border-radius: 50%; }
 
-        .upload-zone {
-            border: 2px dashed var(--border);
-            border-radius: 1rem;
-            padding: 4rem 2rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            background: var(--bg);
-        }
+/* === UPLOAD === */
+#upload { background: var(--sand-2); }
+.upload-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 2.5rem; align-items: start; }
+.drop-zone {
+  border: 2px dashed var(--sand-4); border-radius: var(--radius-xl);
+  padding: 3.5rem 2rem; text-align: center; background: var(--sand); cursor: pointer;
+  transition: border-color .25s, background .25s, transform .2s, box-shadow .25s;
+  position: relative; overflow: hidden;
+}
+.drop-zone::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(196,122,24,.04) 0%, transparent 60%);
+  pointer-events: none;
+}
+.drop-zone:hover, .drop-zone.dragover { border-color: var(--amber); background: var(--amber-light); transform: scale(1.005); box-shadow: var(--shadow-md); }
+.drop-zone.has-file { border-color: var(--teal); background: var(--teal-light); border-style: solid; }
+.dz-icon { width: 60px; height: 60px; background: var(--sand-2); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 26px; transition: background .2s, transform .2s; }
+.drop-zone:hover .dz-icon { background: rgba(196,122,24,.12); transform: scale(1.06); }
+.dz-title { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; margin-bottom: .5rem; }
+.dz-sub { font-size: 12.5px; color: var(--ink-3); margin-bottom: 1.5rem; line-height: 1.6; }
+.dz-formats { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+.fmt-chip { padding: 4px 11px; border-radius: 20px; font-size: 11px; font-weight: 600; background: var(--sand-2); border: 1px solid var(--sand-3); color: var(--ink-2); font-family: var(--font-mono); }
+.dz-progress { margin-top: 1.5rem; display: none; }
+.progress-track { background: var(--sand-3); border-radius: 20px; height: 4px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--teal), var(--amber-2)); border-radius: 20px; transition: width .3s ease; }
+.progress-label { font-size: 11.5px; color: var(--ink-3); margin-top: .5rem; text-align: center; }
 
-        .upload-zone:hover, .upload-zone.drag-over {
-            border-color: var(--primary);
-            background: #f0f4ff;
-            transform: translateY(-2px);
-        }
+/* AI Analysis Panel */
+.ai-analysis-panel {
+  margin-top: 1.5rem; display: none; background: var(--ink); color: var(--sand);
+  border-radius: var(--radius-lg); padding: 1.5rem; font-family: var(--font-mono); font-size: 12px;
+}
+.ai-analysis-panel.visible { display: block; animation: fadeSlideUp .3s ease; }
+.ai-header { display: flex; align-items: center; gap: 8px; margin-bottom: 1rem; font-weight: 600; font-size: 11px; letter-spacing: .08em; color: var(--amber-2); text-transform: uppercase; }
+.ai-thinking { color: var(--sand-3); line-height: 1.7; }
+.ai-thinking .cursor { display: inline-block; width: 2px; height: 12px; background: var(--amber-2); animation: blink .8s step-end infinite; margin-left: 2px; vertical-align: middle; }
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+.ai-result { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,.08); }
+.ai-score-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: .6rem; }
+.ai-score-label { color: var(--sand-3); }
+.ai-score-val { font-weight: 600; }
+.ai-score-val.good { color: #4ade80; }
+.ai-score-val.warn { color: var(--amber-2); }
+.ai-score-val.bad { color: #f87171; }
 
-        .upload-icon {
-            width: 64px;
-            height: 64px;
-            background: white;
-            border-radius: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1.5rem;
-            box-shadow: var(--shadow);
-            color: var(--primary);
-        }
+/* CONVERSION MODES */
+.mode-stack { display: flex; flex-direction: column; gap: .75rem; }
+.mode-card {
+  background: var(--sand); border: 1.5px solid var(--sand-3); border-radius: var(--radius-md);
+  padding: 1.1rem 1.4rem; cursor: pointer;
+  transition: border-color .2s, background .2s, transform .15s;
+  display: flex; align-items: center; gap: 1rem;
+}
+.mode-card:hover { border-color: var(--amber); background: var(--amber-light); transform: translateX(2px); }
+.mode-card.active { border-color: var(--amber); background: var(--amber-light); }
+.mode-icon { width: 38px; height: 38px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; background: var(--sand-2); transition: background .2s; }
+.mode-card.active .mode-icon, .mode-card:hover .mode-icon { background: rgba(196,122,24,.14); }
+.mode-info h4 { font-size: 13px; font-weight: 700; font-family: var(--font-display); margin-bottom: 2px; }
+.mode-info p { font-size: 11.5px; color: var(--ink-3); line-height: 1.5; }
+.mode-badge { margin-left: auto; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 20px; font-family: var(--font-mono); flex-shrink: 0; }
+.mode-badge.pro { background: linear-gradient(135deg, #c47a18, #e8911f); color: white; }
+.mode-badge.free { background: var(--green-light); color: var(--green); }
 
-        .upload-zone h3 {
-            font-size: 1.25rem;
-            margin-bottom: 0.5rem;
-        }
+/* Quality meter */
+.quality-panel {
+  margin-top: 1.25rem; background: var(--sand); border: 1px solid var(--sand-3);
+  border-radius: var(--radius-lg); padding: 1.5rem;
+}
+.qp-title { font-size: 11.5px; font-weight: 700; font-family: var(--font-display); margin-bottom: 1.2rem; color: var(--ink-2); letter-spacing: .01em; }
+.q-row { margin-bottom: .9rem; }
+.q-label { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; }
+.q-label span:last-child { font-weight: 700; font-family: var(--font-display); }
+.q-track { background: var(--sand-3); border-radius: 20px; height: 6px; overflow: hidden; }
+.q-fill { height: 100%; border-radius: 20px; transition: width 1.3s cubic-bezier(.16,1,.3,1); }
+.convert-btn {
+  width: 100%; margin-top: 1.25rem; background: var(--amber); color: white;
+  padding: 15px; border-radius: var(--radius-md); font-size: 14px; font-weight: 700;
+  font-family: var(--font-display); border: none; cursor: pointer;
+  transition: background .2s, transform .15s, box-shadow .2s; letter-spacing: .01em;
+}
+.convert-btn:hover:not(:disabled) { background: var(--amber-dark); transform: translateY(-2px); box-shadow: 0 6px 24px rgba(196,122,24,.35); }
+.convert-btn:disabled { background: var(--sand-3); color: var(--ink-4); cursor: not-allowed; }
 
-        .upload-zone p {
-            color: var(--text-muted);
-            font-size: 0.875rem;
-        }
+/* Processing overlay */
+.processing-card {
+  display: none; margin-top: 1.5rem; background: var(--sand);
+  border: 1px solid var(--sand-3); border-radius: var(--radius-lg); padding: 2rem; text-align: center;
+}
+.processing-card.visible { display: block; animation: fadeSlideUp .3s ease; }
+.proc-spinner {
+  width: 44px; height: 44px; border-radius: 50%; border: 3px solid var(--sand-3);
+  border-top-color: var(--teal); animation: spin 1s linear infinite; margin: 0 auto 1.25rem;
+}
+.step-list { text-align: left; max-width: 300px; margin: 1rem auto 0; }
+.step-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--sand-3); font-size: 12.5px; color: var(--ink-2); }
+.step-row:last-child { border-bottom: none; }
+.step-dot { width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; }
+.step-dot.pending { background: var(--sand-3); }
+.step-dot.active { background: var(--teal); animation: pulse 1.5s infinite; }
+.step-dot.done { background: var(--green); color: white; }
+.step-dot.error { background: var(--red); color: white; }
 
-        .btn {
-            background: var(--primary);
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.75rem;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 1rem;
-        }
+/* Result card */
+.result-card {
+  display: none; margin-top: 1.5rem;
+  background: var(--green-light); border: 1.5px solid var(--green);
+  border-radius: var(--radius-lg); padding: 1.5rem;
+}
+.result-card.visible { display: block; animation: fadeSlideUp .4s ease; }
+.result-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; }
+.result-check { width: 36px; height: 36px; background: var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px; }
+.result-info h4 { font-family: var(--font-display); font-weight: 700; font-size: 14px; }
+.result-info p { font-size: 12px; color: var(--ink-3); }
+.result-actions { display: flex; gap: .75rem; }
+.dl-btn { background: var(--ink); color: var(--sand); border: none; padding: 9px 18px; border-radius: var(--radius-sm); font-size: 12.5px; font-family: var(--font-mono); cursor: pointer; transition: background .2s, transform .15s; }
+.dl-btn:hover { background: var(--ink-2); transform: translateY(-1px); }
+.dl-btn:disabled { background: var(--sand-3); color: var(--ink-3); cursor: not-allowed; }
+.report-btn { background: transparent; color: var(--green); border: 1.5px solid var(--green); padding: 9px 18px; border-radius: var(--radius-sm); font-size: 12.5px; font-family: var(--font-mono); cursor: pointer; transition: background .2s; }
+.report-btn:hover { background: rgba(42,122,72,.08); }
 
-        .btn:hover {
-            background: var(--primary-hover);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
-        }
+/* Security note */
+.sec-note {
+  margin-top: 1.5rem; background: rgba(13,122,105,.06); border: 1px solid rgba(13,122,105,.2);
+  border-radius: var(--radius-md); padding: 12px 16px; display: flex; align-items: flex-start; gap: 10px;
+  font-size: 12px; color: var(--teal-dark); line-height: 1.6;
+}
 
-        .btn:active {
-            transform: translateY(0);
-        }
+/* Error card */
+.error-card { display: none; margin-top: 1.5rem; }
+.error-card.visible { display: block; }
+.error-inner { background: var(--red-light); border: 1.5px solid var(--red); border-radius: var(--radius-lg); padding: 1.5rem; }
 
-        .btn:disabled {
-            background: var(--border);
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
+/* === OCR SECTION === */
+#ocr { background: var(--sand); }
+.ocr-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 1.25rem; margin-bottom: 3rem; }
+.ocr-card { background: var(--sand-2); border: 1px solid var(--sand-3); border-radius: var(--radius-lg); padding: 1.5rem; position: relative; overflow: hidden; }
+.ocr-ring-wrap { width: 60px; height: 60px; position: relative; margin-bottom: 1rem; }
+.ocr-ring-wrap svg { transform: rotate(-90deg); }
+.ring-val { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 800; font-size: 13px; }
+.ocr-card h3 { font-size: 14.5px; font-weight: 700; margin-bottom: .4rem; }
+.ocr-card p { font-size: 12px; color: var(--ink-3); line-height: 1.65; }
+.ocr-chip { display: inline-block; margin-top: .75rem; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; font-family: var(--font-mono); }
+.ocr-chip.pass { background: var(--green-light); color: var(--green); }
+.ocr-chip.warn { background: var(--amber-light); color: var(--amber-dark); }
+.ocr-chip.fail { background: var(--red-light); color: var(--red); }
+.scan-overlay { position: relative; overflow: hidden; }
+.scan-overlay::after {
+  content: ''; position: absolute; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--teal), transparent);
+  animation: scanLine 2s linear infinite; opacity: .6; top: 0;
+}
+.compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+.pdf-viewer { border: 1.5px solid var(--sand-3); border-radius: var(--radius-lg); overflow: hidden; background: white; }
+.viewer-head { background: var(--sand-2); border-bottom: 1px solid var(--sand-3); padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; }
+.viewer-title { font-size: 11.5px; font-weight: 700; font-family: var(--font-display); }
+.viewer-chip { font-size: 10px; padding: 3px 8px; border-radius: 20px; font-weight: 700; font-family: var(--font-mono); }
+.viewer-chip.broken { background: var(--red-light); color: var(--red); }
+.viewer-chip.fixed { background: var(--green-light); color: var(--green); }
+.viewer-body { padding: 1.5rem; min-height: 200px; }
+.broken-glyphs { color: #ccc; font-family: var(--font-mono); font-size: 11px; letter-spacing: .2em; line-height: 2; }
 
-        #processing-view {
-            display: none;
-            margin-top: 3rem;
-            animation: fadeIn 0.4s ease-out;
-        }
+/* === SCRIPTS === */
+#scripts { background: var(--sand-2); }
+.scripts-scroll { display: flex; gap: 1.25rem; overflow-x: auto; padding-bottom: 1rem; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.scripts-scroll::-webkit-scrollbar { display: none; }
+.script-card {
+  flex-shrink: 0; background: var(--sand); border: 1px solid var(--sand-3);
+  border-radius: var(--radius-lg); padding: 1.4rem 1.8rem; min-width: 185px; text-align: center;
+  transition: border-color .2s, transform .2s, box-shadow .2s;
+}
+.script-card:hover { border-color: var(--amber); transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.script-glyph { font-size: 2.2rem; line-height: 1.3; margin-bottom: .75rem; display: block; }
+.script-name { font-family: var(--font-display); font-weight: 700; font-size: 14px; }
+.script-sub { font-size: 11px; color: var(--ink-3); }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+/* === WORKFLOW === */
+#workflow { background: var(--sand); }
+.flow-wrap { display: flex; gap: 0; position: relative; }
+.flow-wrap::before { content: ''; position: absolute; top: 26px; left: 26px; right: 26px; height: 2px; background: linear-gradient(90deg, var(--teal), var(--amber)); z-index: 0; opacity: .3; }
+.flow-step { flex: 1; text-align: center; position: relative; z-index: 1; padding: 0 .5rem; }
+.flow-num { width: 52px; height: 52px; border-radius: 50%; background: var(--sand-2); border: 2px solid var(--sand-3); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 800; font-size: 17px; margin: 0 auto 1rem; transition: background .3s, border-color .3s, transform .3s; }
+.flow-step:hover .flow-num { background: var(--teal-light); border-color: var(--teal); transform: scale(1.1); }
+.flow-step h4 { font-size: 13.5px; font-weight: 700; font-family: var(--font-display); margin-bottom: .4rem; }
+.flow-step p { font-size: 11.5px; color: var(--ink-3); line-height: 1.55; }
 
-        .report-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--border);
-        }
+/* === HISTORY === */
+#history { background: var(--sand-2); }
+.history-wrap { background: var(--sand); border: 1px solid var(--sand-3); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); }
+.history-tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.history-tbl th { background: var(--sand-2); padding: 11px 16px; text-align: left; font-weight: 700; font-family: var(--font-display); font-size: 11.5px; border-bottom: 1px solid var(--sand-3); color: var(--ink-2); }
+.history-tbl td { padding: 13px 16px; border-bottom: 1px solid var(--sand-3); vertical-align: middle; }
+.history-tbl tr:last-child td { border-bottom: none; }
+.history-tbl tr:hover td { background: var(--sand-2); }
+.status-chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; font-family: var(--font-mono); }
+.status-chip.done { background: var(--green-light); color: var(--green); }
+.status-chip.processing { background: var(--amber-light); color: var(--amber-dark); }
+.status-chip.failed { background: var(--red-light); color: var(--red); }
 
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.375rem;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.875rem;
-            font-weight: 500;
-        }
+/* === TRUST === */
+#trust { background: var(--sand); }
+.trust-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; }
+.trust-card { background: var(--sand-2); border: 1px solid var(--sand-3); border-radius: var(--radius-lg); padding: 1.5rem; transition: transform .2s, box-shadow .2s; }
+.trust-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.trust-icon { font-size: 22px; margin-bottom: 1rem; }
+.trust-card h3 { font-size: 14.5px; font-weight: 700; font-family: var(--font-display); margin-bottom: .4rem; }
+.trust-card p { font-size: 12.5px; color: var(--ink-2); line-height: 1.65; }
+.tech-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: .75rem; }
+.tech-tag { padding: 3px 9px; border-radius: 20px; font-size: 10.5px; font-weight: 600; background: var(--sand); border: 1px solid var(--sand-3); color: var(--ink-2); font-family: var(--font-mono); }
 
-        .status-badge.success { background: #ecfdf5; color: #065f46; }
-        .status-badge.processing { background: #eff6ff; color: #1e40af; }
+/* === PRICING === */
+#pricing { background: var(--sand-2); }
+.pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+.plan-card { background: var(--sand); border: 1.5px solid var(--sand-3); border-radius: var(--radius-xl); padding: 2rem; position: relative; transition: transform .2s, box-shadow .2s; }
+.plan-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+.plan-card.featured { background: var(--ink); color: var(--sand); border-color: var(--ink); }
+.plan-card.featured p, .plan-card.featured .plan-price-sub, .plan-card.featured li { color: var(--sand-3); }
+.plan-badge { position: absolute; top: -1px; left: 50%; transform: translateX(-50%); font-size: 10px; font-weight: 700; background: var(--amber); color: white; padding: 4px 14px; border-radius: 0 0 10px 10px; font-family: var(--font-mono); letter-spacing: .06em; }
+.plan-name { font-family: var(--font-display); font-size: 1rem; font-weight: 700; margin-bottom: 1rem; }
+.plan-price { font-family: var(--font-display); font-size: 2.5rem; font-weight: 800; letter-spacing: -.04em; line-height: 1; }
+.plan-price-sub { font-size: 12px; color: var(--ink-3); margin: .4rem 0 1.5rem; }
+.plan-features { list-style: none; display: flex; flex-direction: column; gap: .65rem; margin-bottom: 1.75rem; }
+.plan-features li { font-size: 13px; display: flex; align-items: flex-start; gap: 8px; line-height: 1.4; }
+.plan-features li::before { content: '✓'; flex-shrink: 0; font-weight: 700; font-size: 11px; margin-top: 2px; }
+.plan-card:not(.featured) .plan-features li::before { color: var(--teal); }
+.plan-card.featured .plan-features li::before { color: var(--amber-2); }
+.plan-btn { width: 100%; padding: 13px; border-radius: var(--radius-md); font-size: 14px; font-family: var(--font-display); font-weight: 700; cursor: pointer; border: none; transition: background .2s, transform .15s; }
+.plan-btn.outline { background: transparent; border: 1.5px solid var(--sand-3); color: var(--ink); }
+.plan-btn.outline:hover { background: var(--sand-2); transform: translateY(-1px); }
+.plan-btn.filled { background: var(--amber); color: white; }
+.plan-btn.filled:hover { background: var(--amber-dark); transform: translateY(-1px); }
+.plan-btn.white { background: white; color: var(--ink); }
+.plan-btn.white:hover { background: var(--sand); transform: translateY(-1px); }
 
-        .report-grid {
-            display: grid;
-            gap: 1.5rem;
-        }
+/* === API === */
+#api { background: var(--sand); }
+.api-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; align-items: start; }
+.code-block {
+  background: #0a0908; border-radius: var(--radius-lg); padding: 1.5rem;
+  font-family: var(--font-mono); font-size: 11.5px; line-height: 1.85; overflow-x: auto;
+  color: #c5bfb1; border: 1px solid rgba(255,255,255,.06);
+}
+.kw { color: #c47a18; }
+.str { color: #7abf9e; }
+.cmt { color: #4a4840; }
+.key { color: #a0c4e8; }
+.endpoint-list { display: flex; flex-direction: column; gap: .65rem; }
+.endpoint { display: flex; align-items: center; gap: 10px; background: var(--sand-2); border: 1px solid var(--sand-3); border-radius: var(--radius-sm); padding: 11px 14px; transition: border-color .2s; }
+.endpoint:hover { border-color: var(--sand-4); }
+.ep-method { font-size: 10px; font-weight: 700; font-family: var(--font-mono); padding: 3px 8px; border-radius: 4px; flex-shrink: 0; }
+.ep-method.post { background: var(--amber-light); color: var(--amber-dark); }
+.ep-method.get { background: var(--green-light); color: var(--green); }
+.ep-method.del { background: var(--red-light); color: var(--red); }
+.ep-path { font-size: 12.5px; font-family: var(--font-mono); color: var(--ink); }
+.ep-desc { font-size: 11.5px; color: var(--ink-4); margin-left: auto; }
 
-        .report-card {
-            border: 1px solid var(--border);
-            border-radius: 1rem;
-            padding: 1.25rem;
-            background: var(--bg);
-        }
+/* === FAQ === */
+#faq { background: var(--sand-2); }
+.faq-list { max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; gap: .65rem; }
+.faq-item { background: var(--sand); border: 1px solid var(--sand-3); border-radius: var(--radius-md); overflow: hidden; transition: border-color .2s; }
+.faq-item:hover { border-color: var(--sand-4); }
+.faq-q { width: 100%; background: none; border: none; padding: 1.15rem 1.4rem; display: flex; align-items: center; justify-content: space-between; font-family: var(--font-display); font-size: 14.5px; font-weight: 600; cursor: pointer; text-align: left; color: var(--ink); transition: background .2s; gap: 1rem; }
+.faq-q:hover { background: var(--sand-2); }
+.faq-chevron { transition: transform .25s; font-size: 16px; color: var(--ink-4); flex-shrink: 0; }
+.faq-item.open .faq-chevron { transform: rotate(180deg); }
+.faq-ans { padding: 0 1.4rem; max-height: 0; overflow: hidden; transition: max-height .3s ease, padding .3s; }
+.faq-item.open .faq-ans { padding: 0 1.4rem 1.2rem; max-height: 320px; }
+.faq-ans p { font-size: 13.5px; color: var(--ink-2); line-height: 1.75; }
 
-        .report-card h4 {
-            font-size: 0.875rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
+/* === CTA === */
+.cta-section { background: var(--ink); padding: 6rem 2rem; text-align: center; position: relative; overflow: hidden; }
+.cta-section::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(196,122,24,.1) 0%, transparent 60%);
+}
+.cta-section h2 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; color: var(--sand); letter-spacing: -.035em; margin-bottom: 1rem; position: relative; }
+.cta-section p { font-size: 14.5px; color: var(--sand-3); max-width: 460px; margin: 0 auto 2.5rem; line-height: 1.7; position: relative; }
+.cta-section .btn-amber { background: var(--amber); color: white; padding: 16px 36px; border-radius: var(--radius-md); font-size: 15px; font-family: var(--font-display); font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; transition: background .2s, transform .15s, box-shadow .2s; position: relative; }
+.cta-section .btn-amber:hover { background: var(--amber-dark); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(196,122,24,.4); }
 
-        .report-item {
-            background: white;
-            padding: 0.75rem 1rem;
-            border-radius: 0.75rem;
-            margin-bottom: 0.5rem;
-            font-size: 0.9375rem;
-            border: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+/* === FOOTER === */
+footer { background: #060605; color: var(--sand-3); padding: 5rem 2rem 3rem; }
+.footer-grid { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem; margin-bottom: 3rem; }
+.footer-brand .logo { font-family: var(--font-display); font-weight: 800; font-size: 1.2rem; color: var(--sand); margin-bottom: .75rem; display: flex; align-items: center; gap: 10px; }
+.footer-brand p { font-size: 12.5px; line-height: 1.75; color: var(--sand-3); max-width: 280px; }
+.footer-sec { font-size: 11px; opacity: .45; margin-top: 1.5rem; display: flex; align-items: center; gap: 6px; }
+footer h5 { font-family: var(--font-display); font-size: 12px; font-weight: 700; color: var(--sand); margin-bottom: 1rem; letter-spacing: .04em; text-transform: uppercase; }
+footer ul { list-style: none; display: flex; flex-direction: column; gap: .55rem; }
+footer ul a { font-size: 12.5px; color: var(--sand-3); text-decoration: none; transition: color .2s; }
+footer ul a:hover { color: var(--sand); }
+.footer-bottom { max-width: 1100px; margin: 0 auto; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,.07); display: flex; align-items: center; justify-content: space-between; font-size: 11.5px; color: rgba(245,242,235,.3); flex-wrap: wrap; gap: 1rem; }
 
-        .report-item:last-child { margin-bottom: 0; }
+/* === TOAST === */
+.toast-stack { position: fixed; bottom: 1.75rem; right: 1.75rem; z-index: 999; display: flex; flex-direction: column; gap: .65rem; pointer-events: none; }
+.toast { background: var(--ink); color: var(--sand); padding: 11px 17px; border-radius: var(--radius-md); font-size: 12.5px; font-family: var(--font-mono); display: flex; align-items: center; gap: 9px; box-shadow: var(--shadow-lg); max-width: 340px; pointer-events: all; animation: slideInRight .28s ease; }
+.toast.success { border-left: 3px solid var(--teal); }
+.toast.error { border-left: 3px solid var(--red); }
+.toast.warn { border-left: 3px solid var(--amber); }
+.toast.info { border-left: 3px solid #60a5fa; }
 
-        .tag {
-            font-size: 0.75rem;
-            padding: 0.125rem 0.5rem;
-            border-radius: 4px;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            color: var(--text-muted);
-        }
+/* === ANIMATIONS === */
+@keyframes fadeSlideUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .45; } }
+@keyframes slideInRight { from { opacity: 0; transform: translateX(22px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes scanLine { 0% { top: 0; } 100% { top: 100%; } }
 
-        /* Shimmer loading */
-        .shimmer {
-            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
-        }
+/* === REVEAL === */
+.reveal { opacity: 0; transform: translateY(20px); transition: opacity .65s ease, transform .65s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
 
-        @keyframes shimmer {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
+/* === RESPONSIVE === */
+@media(max-width:768px) {
+  .upload-grid, .api-grid, .compare-grid { grid-template-columns: 1fr; }
+  .flow-wrap { flex-direction: column; gap: 1.5rem; }
+  .flow-wrap::before { display: none; }
+  .footer-grid { grid-template-columns: 1fr; gap: 2rem; }
+  .nav-links { display: none; }
+  .hero h1 { font-size: 2.5rem; }
+  nav { padding: 0 1.25rem; }
+  section { padding: 4rem 1.25rem; }
+  .pricing-grid { grid-template-columns: 1fr; }
+  .security-banner { gap: 1rem; font-size: 11px; }
+  .hero-trust-strip { gap: 1.5rem; }
+}
 
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            margin-top: 5rem;
-        }
+:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; border-radius: 3px; }
 
-        .feature-item {
-            text-align: left;
-        }
+/* === MODAL OVERLAY === */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(10,9,8,.65); backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1.5rem; opacity: 0; pointer-events: none; transition: opacity .25s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal-box {
+  background: var(--sand); border-radius: var(--radius-xl); width: 100%; max-width: 440px;
+  padding: 2.5rem; box-shadow: var(--shadow-xl); position: relative;
+  animation: fadeSlideUp .3s ease; max-height: 90vh; overflow-y: auto; scrollbar-width: thin;
+}
+.modal-box.wide { max-width: 720px; }
+.modal-close {
+  position: absolute; top: 1.1rem; right: 1.3rem; background: none; border: none;
+  font-size: 18px; cursor: pointer; color: var(--ink-3); padding: 5px 9px;
+  border-radius: var(--radius-sm); transition: background .2s; line-height: 1;
+}
+.modal-close:hover { background: var(--sand-2); color: var(--ink); }
+.modal-title { font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; margin-bottom: .4rem; letter-spacing: -.025em; }
+.modal-sub { font-size: 13px; color: var(--ink-3); margin-bottom: 2rem; line-height: 1.6; }
+.modal-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--sand-3); margin-bottom: 1.75rem; }
+.modal-tab { padding: 10px 18px; font-size: 13px; font-family: var(--font-mono); font-weight: 500; cursor: pointer; background: none; border: none; color: var(--ink-3); border-bottom: 2px solid transparent; transition: color .2s, border-color .2s; margin-bottom: -1px; }
+.modal-tab.active { color: var(--ink); border-bottom-color: var(--amber); }
+.modal-tab-content { display: none; }
+.modal-tab-content.active { display: block; }
+.form-group { margin-bottom: 1.1rem; }
+.form-label { display: block; font-size: 11.5px; font-weight: 700; margin-bottom: .4rem; color: var(--ink-2); font-family: var(--font-mono); letter-spacing: .02em; }
+.form-input {
+  width: 100%; padding: 11px 14px; border: 1.5px solid var(--sand-3); border-radius: var(--radius-md);
+  font-size: 14px; font-family: var(--font-mono); background: var(--sand); color: var(--ink);
+  transition: border-color .2s, box-shadow .2s; outline: none;
+}
+.form-input:focus { border-color: var(--amber); box-shadow: 0 0 0 3px rgba(196,122,24,.12); }
+.form-btn {
+  width: 100%; padding: 13px; background: var(--amber); color: white; border: none;
+  border-radius: var(--radius-md); font-size: 14px; font-weight: 700;
+  font-family: var(--font-display); cursor: pointer; transition: background .2s, transform .15s;
+  margin-top: .5rem; position: relative; overflow: hidden;
+}
+.form-btn:hover:not(:disabled) { background: var(--amber-dark); transform: translateY(-1px); }
+.form-btn:disabled { background: var(--sand-3); color: var(--ink-4); cursor: not-allowed; }
+.form-divider { text-align: center; font-size: 12px; color: var(--ink-4); margin: 1.25rem 0; position: relative; }
+.form-divider::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: var(--sand-3); }
+.form-divider span { background: var(--sand); padding: 0 .75rem; position: relative; }
+.form-link { text-align: center; font-size: 12.5px; color: var(--ink-3); margin-top: 1.25rem; }
+.form-link a { color: var(--amber-dark); text-decoration: none; font-weight: 600; cursor: pointer; }
+.form-link a:hover { text-decoration: underline; }
+.form-error { background: var(--red-light); border: 1px solid var(--red); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 12.5px; color: var(--red); margin-bottom: 1rem; display: none; }
+.form-error.visible { display: block; }
+.form-success { background: var(--green-light); border: 1px solid var(--green); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 12.5px; color: var(--green); margin-bottom: 1rem; display: none; }
+.form-success.visible { display: block; }
+.plan-badge-inline { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; background: linear-gradient(135deg, #c47a18, #e8911f); color: white; font-family: var(--font-mono); vertical-align: middle; margin-left: 6px; }
 
-        .feature-icon {
-            width: 40px;
-            height: 40px;
-            background: var(--primary);
-            color: white;
-            border-radius: 0.75rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 1rem;
-        }
+/* PAGE MODAL (SEO pages, blog, docs) */
+.page-content { font-size: 13.5px; line-height: 1.85; color: var(--ink-2); }
+.page-content h2 { font-family: var(--font-display); font-size: 1.3rem; font-weight: 800; margin: 1.75rem 0 .6rem; color: var(--ink); }
+.page-content h3 { font-family: var(--font-display); font-size: 1rem; font-weight: 700; margin: 1.25rem 0 .5rem; }
+.page-content p { margin-bottom: .9rem; }
+.page-content ul { margin: .5rem 0 .9rem 1.5rem; }
+.page-content li { margin-bottom: .4rem; }
+.page-content strong { color: var(--ink); }
+.page-content a { color: var(--amber-dark); }
+.page-content .note-box { background: var(--amber-light); border: 1px solid rgba(196,122,24,.25); border-radius: var(--radius-md); padding: .9rem 1.1rem; margin: 1rem 0; font-size: 13px; }
 
-        .feature-item h3 {
-            font-size: 1.125rem;
-            margin-bottom: 0.5rem;
-        }
+/* OCR REPORT MODAL */
+.report-score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+.report-score-card { background: var(--sand-2); border: 1px solid var(--sand-3); border-radius: var(--radius-md); padding: 1rem; text-align: center; }
+.report-score-num { font-family: var(--font-display); font-size: 2rem; font-weight: 800; letter-spacing: -.04em; }
+.report-score-num.good { color: var(--teal); }
+.report-score-num.warn { color: var(--amber); }
+.report-score-num.fail { color: var(--red); }
+.report-score-lbl { font-size: 11px; color: var(--ink-4); margin-top: .2rem; }
+.page-breakdown { background: var(--sand); border: 1px solid var(--sand-3); border-radius: var(--radius-md); overflow: hidden; max-height: 260px; overflow-y: auto; }
+.page-breakdown-row { display: flex; align-items: center; gap: 1rem; padding: 9px 14px; border-bottom: 1px solid var(--sand-3); font-size: 12.5px; }
+.page-breakdown-row:last-child { border-bottom: none; }
+.pb-page { color: var(--ink-4); width: 55px; flex-shrink: 0; font-family: var(--font-mono); font-size: 11.5px; }
+.pb-bar-wrap { flex: 1; background: var(--sand-3); border-radius: 20px; height: 5px; overflow: hidden; }
+.pb-bar { height: 100%; border-radius: 20px; background: var(--teal); transition: width 1s ease; }
+.pb-score { width: 42px; text-align: right; font-weight: 700; font-family: var(--font-display); font-size: 12px; flex-shrink: 0; color: var(--ink); }
 
-        .feature-item p {
-            font-size: 0.875rem;
-            color: var(--text-muted);
-        }
+/* API KEY */
+.api-key-display { background: var(--ink); border-radius: var(--radius-md); padding: 1rem 1.25rem; font-family: var(--font-mono); font-size: 11.5px; color: var(--amber-2); margin: 1rem 0; display: flex; align-items: center; justify-content: space-between; gap: 1rem; word-break: break-all; }
+.api-key-copy { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15); color: var(--sand); border-radius: var(--radius-sm); padding: 5px 12px; font-size: 11px; cursor: pointer; font-family: var(--font-mono); transition: background .2s; white-space: nowrap; flex-shrink: 0; }
+.api-key-copy:hover { background: rgba(255,255,255,.2); }
 
-        [data-lucide] {
-            width: 20px;
-            height: 20px;
-        }
-    </style>
+/* MOBILE FIXES */
+@media (max-width: 600px) {
+  .ocr-grid { grid-template-columns: 1fr; }
+  .hero-actions { flex-direction: column; align-items: center; }
+  .mode-info p { display: none; }
+  .report-score-grid { grid-template-columns: 1fr 1fr; }
+  .modal-box { padding: 1.5rem; }
+  .modal-box.wide { max-width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+</style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-content">
-            <a href="/" class="logo">
-                <i data-lucide="file-text"></i>
-                IndicPDF
-            </a>
-            <div class="nav-links">
-                <a href="https://github.com/indicpdf" target="_blank" style="color: var(--text-muted); text-decoration: none; font-size: 0.875rem; font-weight: 500;">Documentation</a>
-            </div>
+
+<div class="toast-stack" id="toasts" aria-live="polite"></div>
+
+<!-- MODALS REMOVED FOR SIMPLICITY -->
+<div class="modal-overlay" id="page-modal" role="dialog" aria-modal="true" onclick="handleOverlayClick(event,'page-modal')">
+  <div class="modal-box wide">
+    <button class="modal-close" onclick="closeModal('page-modal')" aria-label="Close">✕</button>
+    <h2 class="modal-title" id="page-modal-title"></h2>
+    <div class="page-content" id="page-modal-content"></div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav role="navigation" aria-label="Main navigation">
+  <a href="#" class="nav-logo" aria-label="IndicPDF AI Home">
+    <div class="nav-logo-mark">
+      <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M2 2h7l3 3v9H2V2zm7 0v3h3"/></svg>
+    </div>
+    IndicPDF AI
+    <span class="nav-pill">ENTERPRISE</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#upload">Convert</a></li>
+    <li><a href="#ocr">OCR Engine</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+  <div class="nav-right">
+  </div>
+</nav>
+
+<!-- SECURITY BANNER -->
+<div class="security-banner" role="complementary" aria-label="Security information">
+  <div class="sb-item"><div class="sb-dot"></div> AES-256 encrypted at rest</div>
+  <div class="sb-item"><div class="sb-dot"></div> TLS 1.3 in transit</div>
+  <div class="sb-item"><div class="sb-dot"></div> Auto-deleted in 2 hours</div>
+  <div class="sb-item"><div class="sb-dot"></div> Zero data retention</div>
+  <div class="sb-item"><div class="sb-dot"></div> SOC 2 aligned</div>
+</div>
+
+<!-- HERO -->
+<section class="hero" aria-labelledby="hero-heading">
+  <div class="hero-bg" aria-hidden="true"></div>
+  <div class="hero-grid" aria-hidden="true"></div>
+  <div class="hero-noise" aria-hidden="true"></div>
+  <div class="hero-inner">
+
+    <!-- MAIN SECURITY STATEMENT — HERO FOCUS -->
+    <div class="hero-security-badge" role="note" aria-label="Security guarantee">
+      <div class="security-pulse" aria-hidden="true"></div>
+      <span class="security-lock" aria-hidden="true">🔒</span>
+      <span class="security-text">End-to-end encrypted &nbsp;·&nbsp; Files automatically deleted within 2 hours</span>
+    </div>
+
+    <h1 id="hero-heading">
+      Indian Language PDF<br>
+      <em class="h1-line2">Without Compromise</em>
+    </h1>
+    <p class="hero-sub">
+      Enterprise conversion engine for Telugu, Hindi, Tamil & 6 more scripts.
+      APS/Anu font repair, OCR verification, Unicode-safe rendering — built for publishers, governments, and institutions.
+    </p>
+
+    <div class="hero-actions">
+      <a href="#upload" class="btn-primary">Convert DOCX → PDF ↓</a>
+      <a href="#ocr" class="btn-outline">See OCR Pipeline →</a>
+    </div>
+
+    <div class="hero-trust-strip" aria-label="Platform statistics">
+      <div>
+        <span class="trust-stat">9</span>
+        <span class="trust-lbl">Indian scripts</span>
+      </div>
+      <div>
+        <span class="trust-stat">APS+Anu</span>
+        <span class="trust-lbl">Legacy font repair</span>
+      </div>
+      <div>
+        <span class="trust-stat">PaddleOCR</span>
+        <span class="trust-lbl">OCR validation</span>
+      </div>
+      <div>
+        <span class="trust-stat">2hr</span>
+        <span class="trust-lbl">Auto file deletion</span>
+      </div>
+      <div>
+        <span class="trust-stat">99.1%</span>
+        <span class="trust-lbl">OCR accuracy</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- UPLOAD -->
+<section id="upload" aria-labelledby="upload-heading">
+  <div class="container">
+    <p class="section-label">Step 1 — Upload & Convert</p>
+    <h2 class="section-title" id="upload-heading">Upload your document</h2>
+    <p class="section-sub">Drag, drop, or click. Max 50 MB. DOCX, DOC, PDF accepted. AI analysis runs automatically on upload.</p>
+
+    <div class="upload-grid">
+      <!-- LEFT: Upload + processing -->
+      <div>
+        <div class="drop-zone" id="drop-zone" role="button" tabindex="0"
+             aria-label="Upload file — drag and drop or click to browse"
+             onclick="triggerFileInput()" onkeydown="if(event.key==='Enter'||event.key===' ')triggerFileInput()"
+             ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+          <input type="file" id="file-input" accept=".docx,.doc,.pdf" style="display:none" onchange="handleFile(this.files[0])">
+          <div class="dz-icon" id="dz-icon" aria-hidden="true">📄</div>
+          <div class="dz-title" id="dz-title">Drop your DOCX here</div>
+          <p class="dz-sub" id="dz-sub">or click to browse · Telugu, Hindi, Tamil, Kannada & more</p>
+          <div class="dz-formats">
+            <span class="fmt-chip">.docx</span>
+            <span class="fmt-chip">.doc</span>
+            <span class="fmt-chip">.pdf</span>
+            <span class="fmt-chip">Max 50 MB</span>
+          </div>
+          <div class="dz-progress" id="dz-progress">
+            <div class="progress-track"><div class="progress-fill" id="upload-bar" style="width:0%"></div></div>
+            <p class="progress-label" id="upload-label">Uploading…</p>
+          </div>
         </div>
-    </nav>
 
-    <main class="main-container">
-        <section class="hero">
-            <h1>High-Fidelity Indic PDFs</h1>
-            <p>The first professional DOCX to PDF engine that treats Indic scripts with the respect they deserve.</p>
-        </section>
-
-        <section class="card">
-            <div class="upload-zone" id="drop-zone">
-                <div class="upload-icon">
-                    <i data-lucide="upload-cloud" style="width: 32px; height: 32px;"></i>
-                </div>
-                <h3>Convert your Document</h3>
-                <p>Drag and drop your <strong>.docx</strong> or <strong>.pdf</strong> file here, or click to browse</p>
-                <div style="margin-top: 1.5rem;">
-                    <button class="btn" id="select-btn">
-                        <i data-lucide="plus"></i>
-                        Select File
-                    </button>
-                </div>
-                <input type="file" id="file-input" style="display: none;" accept=".docx,.pdf">
-            </div>
-
-            <div id="processing-view">
-                <div class="report-header">
-                    <h2 id="processing-title">Processing Report</h2>
-                    <div id="status-badge-container">
-                        <span class="status-badge processing">
-                            <i data-lucide="loader-2" class="animate-spin"></i>
-                            Processing...
-                        </span>
-                    </div>
-                </div>
-
-                <div class="report-grid" id="report-grid">
-                    <!-- Shimmer Loading placeholders -->
-                    <div class="report-card shimmer" style="height: 100px;"></div>
-                    <div class="report-card shimmer" style="height: 150px;"></div>
-                </div>
-
-                <div style="margin-top: 2.5rem; text-align: center;" id="action-container">
-                    <!-- Download button will appear here -->
-                </div>
-            </div>
-        </section>
-
-        <section class="features-grid">
-            <div class="feature-item">
-                <div class="feature-icon"><i data-lucide="zap"></i></div>
-                <h3>Text Shaping</h3>
-                <p>Full support for complex ligatures, matras, and glyph reordering using HarfBuzz.</p>
-            </div>
-            <div class="feature-item">
-                <div class="feature-icon"><i data-lucide="font"></i></div>
-                <h3>Font Intelligence</h3>
-                <p>Deterministic font embedding and script-aware fallback for 100% visual fidelity.</p>
-            </div>
-            <div class="feature-item">
-                <div class="feature-icon"><i data-lucide="shield-check"></i></div>
-                <h3>Legacy Support</h3>
-                <p>Automatic conversion of legacy encodings (Anu, APS, etc.) to modern Unicode.</p>
-            </div>
-        </section>
-        <section class="how-it-works">
-            <h2>Deterministic Pipeline</h2>
-            <div class="timeline">
-                <div class="timeline-item">
-                    <div class="timeline-dot"></div>
-                    <div class="timeline-content">
-                        <h3>01. Deep Parsing</h3>
-                        <p>We extract raw XML, style runs, and font metadata directly from your DOCX file.</p>
-                    </div>
-                </div>
-                <div class="timeline-item">
-                    <div class="timeline-dot"></div>
-                    <div class="timeline-content">
-                        <h3>02. Script Intelligence</h3>
-                        <p>Our engine identifies scripts and normalizes legacy encodings to Unicode.</p>
-                    </div>
-                </div>
-                <div class="timeline-item">
-                    <div class="timeline-dot"></div>
-                    <div class="timeline-content">
-                        <h3>03. Text Shaping</h3>
-                        <p>HarfBuzz shapes your text, ensuring ligatures and matras are visually perfect.</p>
-                    </div>
-                </div>
-                <div class="timeline-item">
-                    <div class="timeline-dot"></div>
-                    <div class="timeline-content">
-                        <h3>04. Font Embedding</h3>
-                        <p>Final PDF is rendered with exact font subsets for global consistency.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <footer class="footer">
-        <div class="footer-content">
-            <p>&copy; 2026 IndicPDF AI. Built for deterministic document rendering.</p>
-            <div class="footer-links">
-                <a href="#"><i data-lucide="github"></i></a>
-                <a href="#"><i data-lucide="twitter"></i></a>
-            </div>
+        <!-- Processing -->
+        <div class="processing-card" id="processing-card">
+          <div class="proc-spinner" aria-hidden="true"></div>
+          <p style="font-family:var(--font-display);font-weight:700;font-size:1rem;margin-bottom:.4rem" id="proc-title">Processing…</p>
+          <p style="font-size:12px;color:var(--ink-3)" id="proc-sub">Please wait. Do not close this tab.</p>
+          <div class="step-list" role="list" aria-label="Processing steps">
+            <div class="step-row" id="s1"><div class="step-dot pending" aria-hidden="true"></div>Uploading & scanning</div>
+            <div class="step-row" id="s2"><div class="step-dot pending" aria-hidden="true"></div>Detecting font encoding</div>
+            <div class="step-row" id="s3"><div class="step-dot pending" aria-hidden="true"></div>APS/Anu font remapping</div>
+            <div class="step-row" id="s4"><div class="step-dot pending" aria-hidden="true"></div>HarfBuzz Unicode shaping</div>
+            <div class="step-row" id="s5"><div class="step-dot pending" aria-hidden="true"></div>PDF rendering & OCR scan</div>
+          </div>
         </div>
-    </footer>
 
-    <script>
-        // Initialize Lucide Icons
-        lucide.createIcons();
+        <!-- Result -->
+        <div class="result-card" id="result-card">
+          <div class="result-header">
+            <div class="result-check" aria-hidden="true">✓</div>
+            <div class="result-info">
+              <h4>Conversion complete</h4>
+              <p id="result-desc">Your PDF is ready</p>
+            </div>
+          </div>
+          <div class="result-actions">
+            <button class="dl-btn" onclick="downloadFile()">⬇ Download PDF</button>
+            <button class="report-btn" onclick="viewReport()">📊 OCR Report</button>
+          </div>
+        </div>
 
-        const dropZone = document.getElementById('drop-zone');
-        const fileInput = document.getElementById('file-input');
-        const selectBtn = document.getElementById('select-btn');
-        const processingView = document.getElementById('processing-view');
-        const reportGrid = document.getElementById('report-grid');
-        const statusBadgeContainer = document.getElementById('status-badge-container');
-        const actionContainer = document.getElementById('action-container');
-        const processingTitle = document.getElementById('processing-title');
+        <!-- Error -->
+        <div class="error-card" id="error-card">
+          <div class="error-inner">
+            <div style="font-size:1.4rem;margin-bottom:.5rem" aria-hidden="true">⚠️</div>
+            <h3 style="font-family:var(--font-display);font-weight:700;margin-bottom:.4rem;color:var(--red)" id="err-title">Conversion Failed</h3>
+            <p style="font-size:13px;color:var(--ink-2);margin-bottom:1rem" id="err-desc">Unable to process this file.</p>
+            <button class="dl-btn" style="background:var(--red)" onclick="retryConversion()">↺ Retry</button>
+          </div>
+        </div>
 
-        selectBtn.onclick = () => fileInput.click();
+        <div class="sec-note" role="note">
+          <span aria-hidden="true">🔒</span>
+          <span>Files are encrypted in transit (TLS 1.3) and at rest (AES-256). Automatically deleted 2 hours after upload. We never read, index, or retain document content.</span>
+        </div>
+      </div>
 
-        // Drag and Drop
-        dropZone.ondragover = (e) => {
-            e.preventDefault();
-            dropZone.classList.add('drag-over');
-        };
-        dropZone.ondragleave = () => dropZone.classList.remove('drag-over');
-        dropZone.ondrop = (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('drag-over');
-            const file = e.dataTransfer.files[0];
-            if (file && (file.name.endsWith('.docx') || file.name.endsWith('.pdf'))) handleUpload(file);
-        };
+      <!-- RIGHT: Modes + quality -->
+      <div>
+        <p style="font-size:12px;font-weight:700;font-family:var(--font-display);margin-bottom:.9rem;color:var(--ink-2);letter-spacing:.01em">Choose conversion mode:</p>
+        <div class="mode-stack" role="radiogroup" aria-label="Conversion mode">
+          <div class="mode-card active" onclick="selectMode(this,'telugu-unicode')" role="radio" aria-checked="true" tabindex="0" onkeydown="if(event.key==='Enter')selectMode(this,'telugu-unicode')">
+            <div class="mode-icon" aria-hidden="true">తె</div>
+            <div class="mode-info"><h4>Telugu Unicode PDF</h4><p>Fix APS/Anu encoding · HarfBuzz shaping · Searchable</p></div>
+            <span class="mode-badge free">DEFAULT</span>
+          </div>
+        </div>
 
-        fileInput.onchange = (e) => {
-            const file = e.target.files[0];
-            if (file) handleUpload(file);
-        };
+        <button class="convert-btn" id="convert-btn" disabled onclick="startConversion()">Select a file to convert →</button>
+        <p style="font-size:11px;color:var(--ink-4);text-align:center;margin-top:.65rem">Powered by HarfBuzz + AI Analysis</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-        async function handleUpload(file) {
-            const formData = new FormData();
-            formData.append('file', file);
+<!-- OCR VALIDATION SECTION REMOVED FOR SIMPLICITY -->
 
-            const isPdf = file.name.endsWith('.pdf');
-            const endpoint = isPdf ? '/upload-pdf' : '/upload';
+<!-- SUPPORTED SCRIPTS -->
+<section id="scripts" aria-labelledby="scripts-heading">
+  <div class="container">
+    <p class="section-label">Indian Language Support</p>
+    <h2 class="section-title reveal" id="scripts-heading">9 scripts. One pipeline.</h2>
+    <p class="section-sub reveal">Built for Indian publishing workflows, from Telugu novels to Tamil academic papers and government documents.</p>
+    <div class="scripts-scroll reveal" role="list">
+      <div class="script-card" role="listitem"><span class="script-glyph" lang="te">తె</span><p class="script-name">Telugu</p><p class="script-sub">Full APS/Anu support</p></div>
+      <div class="script-card" role="listitem"><span class="script-glyph" lang="hi">हिं</span><p class="script-name">Hindi</p><p class="script-sub">Devanagari</p></div>
+      <div class="script-card" role="listitem"><span class="script-glyph" lang="ta">தமி</span><p class="script-name">Tamil</p><p class="script-sub">TSCII / Unicode</p></div>
+      <div class="script-card" role="listitem"><span class="script-glyph" lang="kn">ಕ</span><p class="script-name">Kannada</p><p class="script-sub">Unicode</p></div>
+      <div class="script-card" role="listitem"><span class="script-glyph" lang="ml">മ</span><p class="script-name">Malayalam</p><p class="script-sub">Unicode</p></div>
+      <div class="script-card" role="listitem"><span class="script-glyph" lang="gu">ગ</span><p class="script-name">Gujarati</p><p class="script-sub">Unicode</p></div>
+      <div class="script-card" role="listitem"><span class="script-glyph" lang="mr">म</span><p class="script-name">Marathi</p><p class="script-sub">Devanagari</p></div>
+      <div class="script-card" role="listitem"><span class="script-glyph" lang="bn">বাం</span><p class="script-name">Bengali</p><p class="script-sub">Unicode</p></div>
+      <div class="script-card" role="listitem"><span class="script-glyph" lang="or">ଓ</span><p class="script-name">Odia</p><p class="script-sub">Unicode</p></div>
+    </div>
+  </div>
+</section>
 
-            // UI Feedback
-            processingView.style.display = 'block';
-            processingTitle.textContent = `Processing: ${file.name}`;
-            actionContainer.innerHTML = '';
-            statusBadgeContainer.innerHTML = `
-                <span class="status-badge processing">
-                    <i data-lucide="refresh-cw" style="animation: spin 2s linear infinite;"></i>
-                    Processing...
-                </span>
-            `;
-            lucide.createIcons();
-            
-            // Shimmer effect
-            reportGrid.innerHTML = `
-                <div class="report-card shimmer" style="height: 100px;"></div>
-                <div class="report-card shimmer" style="height: 150px;"></div>
-            `;
+<!-- HOW IT WORKS -->
+<section id="workflow" aria-labelledby="workflow-heading">
+  <div class="container">
+    <p class="section-label">How It Works</p>
+    <h2 class="section-title reveal" id="workflow-heading">High-fidelity conversion pipeline</h2>
+    <p class="section-sub reveal">Every file goes through automated font detection, Unicode shaping, and quality verification before download.</p>
+    <div class="flow-wrap reveal" role="list">
+      <div class="flow-step" role="listitem"><div class="flow-num" aria-hidden="true">1</div><h4>Secure Upload</h4><p>TLS 1.3. AES-256 temp storage.</p></div>
+      <div class="flow-step" role="listitem"><div class="flow-num" aria-hidden="true">2</div><h4>Font Detection</h4><p>Detects legacy APS/Anu encodings automatically.</p></div>
+      <div class="flow-step" role="listitem"><div class="flow-num" aria-hidden="true">3</div><h4>Unicode Shaping</h4><p>HarfBuzz renders correct Telugu conjuncts and matra placement.</p></div>
+      <div class="flow-step" role="listitem"><div class="flow-num" aria-hidden="true">4</div><h4>PDF Rendering</h4><p>Professional grade output with embedded fonts.</p></div>
+      <div class="flow-step" role="listitem"><div class="flow-num" aria-hidden="true">5</div><h4>Download</h4><p>Get your PDF. Files are temporary and deleted after processing.</p></div>
+    </div>
+  </div>
+</section>
 
-            try {
-                const response = await fetch(endpoint, {
-                    method: 'POST',
-                    body: formData
-                });
-                const result = await response.json();
+<!-- HISTORY -->
+<section id="history" aria-labelledby="history-heading">
+  <div class="container">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;flex-wrap:wrap;gap:1rem">
+      <div>
+        <h2 class="section-title" id="history-heading" style="margin-bottom:0">Conversion History</h2>
+      </div>
+      <button class="btn-outline" style="font-size:12.5px;padding:9px 18px" onclick="clearHistory()">Clear History</button>
+    </div>
+    <div class="history-wrap reveal">
+      <table class="history-tbl" aria-label="Past conversions">
+        <thead>
+          <tr>
+            <th scope="col">File</th><th scope="col">Mode</th><th scope="col">Status</th>
+            <th scope="col">Time</th><th scope="col">Action</th>
+          </tr>
+        </thead>
+        <tbody id="history-tbody">
+          <tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--ink-4);font-size:13px">No conversions yet.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size:11.5px;color:var(--ink-4);margin-top:1rem">⚠ Files are temporary. History stored locally in your browser only.</p>
+  </div>
+</section>
 
-                if (response.ok) {
-                    renderReport(result, isPdf);
-                } else {
-                    showError(result.detail || 'Processing failed');
-                }
-            } catch (err) {
-                showError('Connection error occurred');
-            }
-        }
+<!-- TRUST / TECH -->
+<section id="trust" aria-labelledby="trust-heading">
+  <div class="container">
+    <p class="section-label">Infrastructure</p>
+    <h2 class="section-title reveal" id="trust-heading">Built for Indian publishing workflows</h2>
+    <p class="section-sub reveal">Enterprise-grade stack. Production-ready components. Auditable open source dependencies.</p>
+    <div class="trust-grid reveal">
+      <div class="trust-card">
+        <div class="trust-icon">⚙️</div>
+        <h3>PDF Engine</h3>
+        <p>LibreOffice headless + WeasyPrint + PyMuPDF + Ghostscript. Multi-engine fallback for maximum compatibility.</p>
+        <div class="tech-tags"><span class="tech-tag">LibreOffice</span><span class="tech-tag">WeasyPrint</span><span class="tech-tag">PyMuPDF</span><span class="tech-tag">qpdf</span></div>
+      </div>
+      <div class="trust-card">
+        <div class="trust-icon">🔤</div>
+        <h3>Unicode Shaping</h3>
+        <p>HarfBuzz for correct Telugu conjuncts, matras, and vowel signs. fonttools for glyph-level inspection.</p>
+        <div class="tech-tags"><span class="tech-tag">HarfBuzz</span><span class="tech-tag">fonttools</span><span class="tech-tag">ICU</span></div>
+      </div>
+      <div class="trust-card">
+        <div class="trust-icon">🔍</div>
+        <h3>OCR Engine</h3>
+        <p>PaddleOCR-VL for multilingual Indian script recognition with Levenshtein distance similarity matching.</p>
+        <div class="tech-tags"><span class="tech-tag">PaddleOCR-VL</span><span class="tech-tag">Levenshtein</span></div>
+      </div>
+      <div class="trust-card">
+        <div class="trust-icon">🔒</div>
+        <h3>Security</h3>
+        <p>AES-256 at rest, TLS 1.3 in transit, signed download URLs, CSRF protection, rate limiting per IP.</p>
+        <div class="tech-tags"><span class="tech-tag">AES-256</span><span class="tech-tag">TLS 1.3</span><span class="tech-tag">Signed URLs</span></div>
+      </div>
+      <div class="trust-card">
+        <div class="trust-icon">⚡</div>
+        <h3>Backend Stack</h3>
+        <p>FastAPI + Celery workers + Redis queue + PostgreSQL. Docker Compose deployment with nginx reverse proxy.</p>
+        <div class="tech-tags"><span class="tech-tag">FastAPI</span><span class="tech-tag">Celery</span><span class="tech-tag">Redis</span><span class="tech-tag">PostgreSQL</span></div>
+      </div>
+      <div class="trust-card">
+        <div class="trust-icon">🤖</div>
+        <h3>AI Analysis</h3>
+        <p>Claude AI provides intelligent document analysis — detecting font type, encoding risk, and recommending the optimal conversion mode.</p>
+        <div class="tech-tags"><span class="tech-tag">Claude AI</span><span class="tech-tag">Anthropic API</span></div>
+      </div>
+    </div>
+  </div>
+</section>
 
-        function renderReport(result, isPdf = false) {
-            statusBadgeContainer.innerHTML = `
-                <span class="status-badge success">
-                    <i data-lucide="check-circle"></i>
-                    Completed
-                </span>
-            `;
+<!-- PRICING & API SECTIONS REMOVED FOR SIMPLICITY -->
+<!-- FAQ -->
+<section id="faq" aria-labelledby="faq-heading">
+  <div class="container">
+    <p class="section-label" style="text-align:center">FAQ</p>
+    <h2 class="section-title" style="text-align:center;margin-bottom:3rem" id="faq-heading">Common questions</h2>
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false"><span>What is APS/Anu font corruption and why does it happen?</span><span class="faq-chevron" aria-hidden="true">▾</span></button>
+        <div class="faq-ans" role="region"><p>APS and Anu Telugu are legacy 8-bit font encodings developed before Unicode was widely adopted in India. When documents made with these fonts are exported to PDF, the encoding is not preserved — the PDF renderer displays replacement boxes (□) instead of Telugu characters. IndicPDF AI includes a complete remapping table for both font families and converts them to proper Unicode before rendering.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false"><span>How long are my files stored on your servers?</span><span class="faq-chevron" aria-hidden="true">▾</span></button>
+        <div class="faq-ans" role="region"><p>Uploaded files and converted PDFs are automatically deleted within 2 hours. A scheduled deletion worker runs every 30 minutes. We never read, index, or analyze the content of your documents. Storage is encrypted at rest using AES-256, and all transfers use TLS 1.3.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false"><span>What does the OCR confidence score mean?</span><span class="faq-chevron" aria-hidden="true">▾</span></button>
+        <div class="faq-ans" role="region"><p>After conversion, PaddleOCR-VL re-reads the output PDF and extracts visible text. We compare this against the original DOCX source using Levenshtein distance similarity. A score of 95%+ means the rendered PDF text is nearly identical to the source — a clean, corruption-free conversion. Scores below 85% trigger a warning and detailed corruption report.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false"><span>Is the output PDF searchable and copy-paste friendly?</span><span class="faq-chevron" aria-hidden="true">▾</span></button>
+        <div class="faq-ans" role="region"><p>Yes. All output PDFs include a proper Unicode text layer — fully searchable, selectable, and copy-paste compatible. This is a key advantage over image-only PDF exports from older tools. Our searchability verification step confirms the text layer is intact before your file is made available for download.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false"><span>Do you support KDP / Notion Press publishing formats?</span><span class="faq-chevron" aria-hidden="true">▾</span></button>
+        <div class="faq-ans" role="region"><p>The Print-Ready mode outputs PDFs compatible with major print-on-demand platforms including CMYK color space, bleed marks, and embedded fonts. KDP-specific profiles are available in the Pro plan. Notion Press and IngramSpark compatibility is in active testing.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false"><span>What payment methods do you accept?</span><span class="faq-chevron" aria-hidden="true">▾</span></button>
+        <div class="faq-ans" role="region"><p>We accept all major payment methods via Razorpay (UPI, Net Banking, Credit/Debit cards, EMI) and Stripe (international cards). All transactions are secured by your payment provider. We do not store any card or bank details on our servers.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
 
-            let html = '';
+<!-- CTA -->
+<div class="cta-section" role="complementary">
+  <h2>Start converting today.<br><em style="font-style:italic;font-family:var(--font-serif);color:var(--amber-2)">Your documents deserve better.</em></h2>
+  <p>Free plan. No credit card required. Files deleted automatically. Enterprise pricing available.</p>
+  <a href="#upload" class="btn-amber">Convert Your First File → Free</a>
+</div>
 
-            // Core Info
-            html += `
-                <div class="report-card">
-                    <h4><i data-lucide="info"></i> Document Info</h4>
-                    <div class="report-item">
-                        <span>Filename</span>
-                        <span class="tag">${result.filename}</span>
-                    </div>
-                    ${isPdf ? `
-                    <div class="report-item">
-                        <span>Pages Processed</span>
-                        <span class="tag">${result.report.pages_processed}</span>
-                    </div>` : ''}
-                    <div class="report-item">
-                        <span>Status</span>
-                        <span style="color: var(--success); font-weight: 600;">Success</span>
-                    </div>
-                </div>
-            `;
+<!-- FOOTER -->
+<footer role="contentinfo">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="logo">
+        <div style="width:24px;height:24px;background:rgba(255,255,255,.1);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:13px" aria-hidden="true">📄</div>
+        IndicPDF AI
+      </div>
+      <p>Enterprise-grade PDF conversion engine for Indian language publishing. Built for Telugu, Hindi, Tamil, and 6 more scripts.</p>
+      <div class="footer-sec">🔒 End-to-end encrypted · Files deleted in 2 hours · Zero data retention</div>
+    </div>
+    <div>
+      <h5>Product</h5>
+      <ul>
+        <li><a href="#upload">Convert DOCX → PDF</a></li>
+        <li><a href="#ocr">OCR Validation</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="#api">API Docs</a></li>
+        <li><a href="#history">Dashboard</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5>Technology</h5>
+      <ul>
+        <li><a href="#trust">HarfBuzz Shaping</a></li>
+        <li><a href="#trust">PaddleOCR-VL</a></li>
+        <li><a href="#trust">APS Font Library</a></li>
+        <li><a href="#trust">Claude AI Analysis</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5>Company</h5>
+      <ul>
+        <li><a href="#" onclick="openPage('about');return false;">About Us</a></li>
+        <li><a href="#" onclick="openPage('privacy');return false;">Privacy Policy</a></li>
+        <li><a href="#" onclick="openPage('terms');return false;">Terms & Conditions</a></li>
+        <li><a href="#" onclick="openPage('contact');return false;">Contact Us</a></li>
+        <li><a href="#" onclick="openPage('blog');return false;">Blog</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 IndicPDF AI · Enterprise Indian Language PDF Platform · Made in India 🇮🇳</span>
+    <span>Privacy · Terms · Sitemap</span>
+  </div>
+</footer>
 
-            // Legacy Converted (DOCX only)
-            if (!isPdf && result.report.legacy_conversions && result.report.legacy_conversions.length > 0) {
-                html += `
-                    <div class="report-card">
-                        <h4><i data-lucide="zap"></i> Legacy Encodings Fixed</h4>
-                        ${result.report.legacy_conversions.map(c => `
-                            <div class="report-item">
-                                <span>Font: <strong>${c.font}</strong></span>
-                                <span class="tag">${c.type} → Unicode</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-            }
+<script>
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  IndicPDF AI — Production Frontend                                       ║
+// ║  Direct API integration with FastAPI / RQ                                ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
 
-            // Font Substitutions / Matches
-            const substitutions = isPdf ? result.report.font_substitutions : result.report.font_substitutions;
-            const matches = isPdf ? result.report.font_matches : [];
+// ── Configuration ────────────────────────────────────────────────────────────
+const API_BASE = '/api/v1';
 
-            if (substitutions && substitutions.length > 0) {
-                html += `
-                    <div class="report-card">
-                        <h4><i data-lucide="shuffle"></i> Font Substitutions</h4>
-                        ${substitutions.map(s => `
-                            <div class="report-item">
-                                <span>Requested: <strong>${s.requested}</strong></span>
-                                <span class="tag">→ ${s.resolved}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-            }
+// ── State ────────────────────────────────────────────────────────────────────
+let currentFile = null;
+let currentMode = 'telugu-unicode';
+let isConverting = false;
+let currentJobId = null;
+let pollInterval = null;
 
-            if (isPdf && matches && matches.length > 0) {
-                html += `
-                    <div class="report-card">
-                        <h4><i data-lucide="check-square"></i> Exact Font Matches</h4>
-                        ${matches.map(m => `
-                            <div class="report-item">
-                                <span>Found: <strong>${m.requested}</strong></span>
-                                <span class="tag">Local Asset Used</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-            }
+// ── Init ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  loadHistoryFromStorage();
+  // Keyboard: Escape closes modals
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeAllModals();
+  });
+  // Intersection observer for reveals
+  const revealObs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.07, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+});
 
-            if ((!substitutions || substitutions.length === 0) && (!isPdf || (matches && matches.length === 0))) {
-                html += `
-                    <div class="report-card">
-                        <h4><i data-lucide="check"></i> Font Fidelity</h4>
-                        <div class="report-item" style="color: var(--success);">
-                            <i data-lucide="shield-check" style="margin-right: 0.5rem;"></i>
-                            Exact font matching achieved. No substitutions required.
-                        </div>
-                    </div>
-                `;
-            }
+// ════════════════════════════════════════════════════════════════════════════
+//  FILE HANDLING
+// ════════════════════════════════════════════════════════════════════════════
+function triggerFileInput() {
+  document.getElementById('file-input').click();
+}
+function handleDragOver(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.add('dragover');
+}
+function handleDragLeave() {
+  document.getElementById('drop-zone').classList.remove('dragover');
+}
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) handleFile(file);
+}
 
-            reportGrid.innerHTML = html;
-            
-            const downloadBtnLabel = isPdf ? 'Download DOCX' : 'Download PDF';
-            actionContainer.innerHTML = `
-                <a href="/download/${result.output}" class="btn">
-                    <i data-lucide="download"></i>
-                    ${downloadBtnLabel}
-                </a>
-            `;
+function handleFile(file) {
+  if (!file) return;
+  const allowed = ['.docx', '.doc', '.pdf'];
+  const ext = '.' + file.name.split('.').pop().toLowerCase();
+  if (!allowed.includes(ext)) {
+    showToast('error', '✗ Unsupported file type. Please upload a .docx, .doc, or .pdf file.');
+    return;
+  }
+  if (file.size > 26214400) { // 25MB limit from backend
+    showToast('error', '✗ File exceeds 25 MB limit.');
+    return;
+  }
 
-            lucide.createIcons();
-        }
+  currentFile = file;
+  currentJobId = null;
 
-        function showError(msg) {
-            statusBadgeContainer.innerHTML = `
-                <span class="status-badge" style="background: #fef2f2; color: #991b1b;">
-                    <i data-lucide="alert-circle"></i>
-                    Failed
-                </span>
-            `;
-            reportGrid.innerHTML = `
-                <div class="report-card" style="border-color: var(--error); background: #fff1f2;">
-                    <h4 style="color: var(--error);"><i data-lucide="alert-triangle"></i> Error Details</h4>
-                    <p style="color: var(--error);">${msg}</p>
-                </div>
-            `;
-            lucide.createIcons();
-        }
-    </script>
-    <style>
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        .animate-spin {
-            animation: spin 1s linear infinite;
-        }
+  // Update drop zone UI
+  const dz = document.getElementById('drop-zone');
+  dz.classList.add('has-file');
+  document.getElementById('dz-icon').textContent = ext === '.pdf' ? '📋' : '📝';
+  document.getElementById('dz-title').textContent = file.name;
+  document.getElementById('dz-sub').textContent = formatFileSize(file.size) + ' · Uploading…';
 
-        .how-it-works {
-            margin-top: 6rem;
-            text-align: center;
-        }
+  // Show progress bar
+  const progressWrap = document.getElementById('dz-progress');
+  progressWrap.style.display = 'block';
+  document.getElementById('upload-bar').style.width = '0%';
+  document.getElementById('upload-label').textContent = 'Uploading…';
 
-        .how-it-works h2 {
-            font-size: 2rem;
-            margin-bottom: 3rem;
-        }
+  // Reset downstream UI
+  document.getElementById('result-card').classList.remove('visible');
+  document.getElementById('error-card').className = 'error-card';
+  document.getElementById('processing-card').classList.remove('visible');
+  document.getElementById('convert-btn').disabled = true;
+  document.getElementById('convert-btn').textContent = 'Uploading…';
 
-        .timeline {
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-            max-width: 600px;
-            margin: 0 auto;
-            text-align: left;
-            position: relative;
-        }
+  uploadFile(file);
+}
 
-        .timeline::before {
-            content: '';
-            position: absolute;
-            left: 7px;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background: var(--border);
-        }
+async function uploadFile(file) {
+  const formData = new FormData();
+  formData.append('file', file);
 
-        .timeline-item {
-            position: relative;
-            padding-left: 2rem;
-        }
+  const xhr = new XMLHttpRequest();
 
-        .timeline-dot {
-            position: absolute;
-            left: 0;
-            top: 6px;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: var(--primary);
-            border: 4px solid var(--surface);
-            box-shadow: 0 0 0 2px var(--border);
-        }
+  xhr.upload.addEventListener('progress', e => {
+    if (e.lengthComputable) {
+      const pct = Math.round((e.loaded / e.total) * 100);
+      document.getElementById('upload-bar').style.width = pct + '%';
+      document.getElementById('upload-label').textContent = `Uploading… ${pct}%`;
+    }
+  });
 
-        .timeline-content h3 {
-            font-size: 1.125rem;
-            margin-bottom: 0.25rem;
-        }
+  xhr.addEventListener('load', async () => {
+    if (xhr.status === 200 || xhr.status === 201) {
+      let data;
+      try { data = JSON.parse(xhr.responseText); } catch { data = {}; }
 
-        .timeline-content p {
-            font-size: 0.875rem;
-            color: var(--text-muted);
-        }
+      document.getElementById('upload-bar').style.width = '100%';
+      document.getElementById('upload-label').textContent = 'Upload complete ✓';
+      document.getElementById('dz-sub').textContent = formatFileSize(file.size) + ' · Processing…';
 
-        .footer {
-            margin-top: 8rem;
-            padding: 4rem 2rem;
-            border-top: 1px solid var(--border);
-            background: var(--surface);
-        }
+      if (data.jobs && data.jobs.length > 0) {
+        currentJobId = data.jobs[0].job_id;
+        isConverting = true;
+        document.getElementById('processing-card').classList.add('visible');
+        document.getElementById('convert-btn').textContent = 'Processing…';
+        pollInterval = setInterval(() => pollJobStatus(currentJobId), 2000);
+        showToast('success', '✓ File uploaded and processing started');
+      }
+    } else {
+      let data = {};
+      try { data = JSON.parse(xhr.responseText); } catch {}
+      document.getElementById('upload-label').textContent = 'Upload failed';
+      showToast('error', '✗ Upload failed: ' + (data.detail || 'Server error'));
+      document.getElementById('convert-btn').textContent = 'Select a file to convert →';
+    }
+  });
 
-        .footer-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: var(--text-muted);
-            font-size: 0.875rem;
-        }
+  xhr.open('POST', API_BASE + '/upload');
+  xhr.send(formData);
+}
 
-        .footer-links {
-            display: flex;
-            gap: 1.5rem;
-        }
+// ════════════════════════════════════════════════════════════════════════════
+//  POLLING & PROGRESS
+// ════════════════════════════════════════════════════════════════════════════
+async function pollJobStatus(jobId) {
+  try {
+    const resp = await fetch(`${API_BASE}/status/${jobId}`);
+    if (resp.ok) {
+      const data = await resp.json();
+      handleProgressUpdate(data);
+    }
+  } catch (e) {
+    console.error("Polling error:", e);
+  }
+}
 
-        .footer-links a {
-            color: var(--text-muted);
-            transition: color 0.2s;
-        }
+const STEP_MAP = [
+  { id: 's1', threshold: 10 },
+  { id: 's2', threshold: 30 },
+  { id: 's3', threshold: 50 },
+  { id: 's4', threshold: 70 },
+  { id: 's5', threshold: 90 },
+];
 
-        .footer-links a:hover {
-            color: var(--primary);
-        }
-    </style>
+function handleProgressUpdate(data) {
+  const status = data.status;
+  const pct = status === 'finished' ? 100 : (status === 'started' ? 50 : 10);
+  const message = status === 'finished' ? 'Complete ✓' : (status === 'started' ? 'Processing…' : 'Queued…');
+
+  document.getElementById('proc-title').textContent = message;
+
+  STEP_MAP.forEach(s => {
+    const dot = document.querySelector('#' + s.id + ' .step-dot');
+    if (!dot) return;
+    if (pct >= s.threshold) {
+      dot.className = 'step-dot done'; dot.textContent = '✓';
+    } else if (status === 'started' || status === 'queued') {
+      dot.className = 'step-dot active'; dot.textContent = '●';
+    }
+  });
+
+  if (status === 'finished') {
+    clearInterval(pollInterval);
+    document.getElementById('processing-card').classList.remove('visible');
+    showResult(currentFile.name, `${API_BASE}/download/${currentJobId}`);
+    addToHistoryStorage(currentFile.name, currentJobId);
+    launchConfetti();
+    showToast('success', '✓ Conversion complete');
+    isConverting = false;
+    document.getElementById('convert-btn').textContent = 'Convert Again →';
+    document.getElementById('convert-btn').disabled = false;
+  }
+
+  if (status === 'failed') {
+    clearInterval(pollInterval);
+    handleConversionError('Conversion failed. Please retry.');
+  }
+}
+
+function handleConversionError(msg) {
+  document.getElementById('processing-card').classList.remove('visible');
+  document.getElementById('error-card').className = 'error-card visible';
+  document.getElementById('err-desc').textContent = msg;
+  showToast('error', '✗ ' + msg);
+  isConverting = false;
+  document.getElementById('convert-btn').textContent = 'Retry →';
+  document.getElementById('convert-btn').disabled = false;
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  RESULTS
+// ════════════════════════════════════════════════════════════════════════════
+function showResult(filename, downloadUrl) {
+  const name = filename.replace(/\.[^.]+$/, '');
+  document.getElementById('result-desc').textContent = name + ' is ready for download';
+  const card = document.getElementById('result-card');
+  card.classList.add('visible');
+  
+  const dlBtn = card.querySelector('.dl-btn');
+  dlBtn.onclick = () => {
+    window.location.href = downloadUrl;
+    showToast('success', '✓ Download started');
+  };
+}
+
+function downloadFile() {
+  if (currentJobId) {
+    window.location.href = `${API_BASE}/download/${currentJobId}`;
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  HISTORY
+// ════════════════════════════════════════════════════════════════════════════
+const HISTORY_KEY = 'indicpdf_history_v3';
+
+function addToHistoryStorage(filename, jobId) {
+  const entry = { filename, jobId, ts: Date.now() };
+  const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+  history.unshift(entry);
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, 20)));
+  renderHistory();
+}
+
+function loadHistoryFromStorage() {
+  renderHistory();
+}
+
+function renderHistory() {
+  const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+  const tbody = document.getElementById('history-tbody');
+  if (!tbody) return;
+  
+  if (history.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--ink-4);font-size:13px">No conversions yet.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = history.map(entry => `
+    <tr>
+      <td><span aria-hidden="true" style="margin-right:8px">📄</span>${entry.filename}</td>
+      <td>Telugu Unicode</td>
+      <td><span class="status-chip done">✓ Done</span></td>
+      <td style="color:var(--ink-3);font-size:11.5px">${new Date(entry.ts).toLocaleTimeString()}</td>
+      <td><button class="dl-btn" onclick="window.location.href='${API_BASE}/download/${entry.jobId}'">⬇ PDF</button></td>
+    </tr>
+  `).join('');
+}
+
+function clearHistory() {
+  localStorage.removeItem(HISTORY_KEY);
+  renderHistory();
+  showToast('success', '✓ History cleared');
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  HELPERS & UI
+// ════════════════════════════════════════════════════════════════════════════
+function formatFileSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1048576).toFixed(1) + ' MB';
+}
+
+function showToast(type, msg) {
+  const stack = document.getElementById('toasts');
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.textContent = msg;
+  stack.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 4000);
+}
+
+function closeModal(id) {
+  const modal = document.getElementById(id);
+  if (modal) modal.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function openPage(pageKey) {
+  showToast('info', 'Page content not implemented in simplified version.');
+}
+
+function handleOverlayClick(e, id) {
+  if (e.target.id === id) closeModal(id);
+}
+
+function launchConfetti() {
+  for (let i = 0; i < 20; i++) {
+    const el = document.createElement('div');
+    el.style.cssText = `position:fixed;width:8px;height:8px;background:var(--amber);top:50%;left:50%;z-index:9999;transition:all 1s`;
+    document.body.appendChild(el);
+    const tx = (Math.random() - 0.5) * 400;
+    const ty = (Math.random() - 0.5) * 400;
+    setTimeout(() => { el.style.transform = `translate(${tx}px, ${ty}px)`; el.style.opacity = '0'; }, 10);
+    setTimeout(() => el.remove(), 1000);
+  }
+}
+
+function toggleFaq(btn) {
+  const item = btn.parentElement;
+  const wasOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+  if (!wasOpen) item.classList.add('open');
+}
+
+function closeAllModals() {
+  document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+  document.body.style.overflow = '';
+}
+</script>
 </body>
 </html>

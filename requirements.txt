@@ -7,3 +7,6 @@ fonttools
 python-multipart
 fpdf2
 pdfminer.six
+rq
+redis
+pypdf

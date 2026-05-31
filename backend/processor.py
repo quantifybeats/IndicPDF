@@ -38,18 +38,37 @@ def process_docx_to_pdf_final(docx_path: Path, pdf_output_path: Path):
             continue
 
         for run in para.runs:
-            # 1. Aggressive Junk Stripping
-            p_text = encoding_manager.strip_all_junk(run.text)
-            if not p_text: continue
-            
-            p_text = unicodedata.normalize('NFC', p_text)
-            
             req_font = run.font.name or "Normal"
             f_size = run.font.size.pt if (run.font and run.font.size) else 12
             
+            input_text = run.text
+            if not input_text: continue
+            
+            # Stage Logging
+            logger.info(f"Processing Run: Font={req_font}, Chars={len(input_text)}")
+            
+            # 1. Detect and Intercept Legacy Encodings (Mantra Fix)
+            legacy_encoding = encoding_manager.detect_legacy_encoding(req_font)
+            if legacy_encoding:
+                processed_text = encoding_manager.convert_to_unicode(input_text, legacy_encoding)
+                logger.info(f"Legacy Conversion ({legacy_encoding}): {len(input_text)} -> {len(processed_text)}")
+            else:
+                processed_text = input_text
+            
+            # 2. Aggressive Junk Stripping
+            processed_text = encoding_manager.strip_all_junk(processed_text)
+            
+            # 3. Unicode Normalization (NFC)
+            processed_text = unicodedata.normalize('NFC', processed_text)
+            
+            if input_text and not processed_text.strip() and any(c.isalnum() for c in input_text):
+                logger.error(f"DATA LOSS DETECTED: Input had alphanumeric text, output is empty. Input: {input_text[:20]}")
+                # We don't necessarily raise here to avoid total failure, but we log it.
+            
+            # 4. Font Resolution
             res_path = font_registry.resolve_font(req_font, bold=run.bold, italic=run.italic)
             if not res_path:
-                res_path = font_registry.resolve_font(req_font, ord(p_text.strip()[0]) if p_text.strip() else None)
+                res_path = font_registry.resolve_font(req_font, ord(processed_text.strip()[0]) if processed_text.strip() else None)
 
             if res_path:
                 f_id = res_path.stem
@@ -61,16 +80,25 @@ def process_docx_to_pdf_final(docx_path: Path, pdf_output_path: Path):
                 
                 pdf.set_font(f_id, size=f_size)
                 
-                script = "telu" if any(0x0C00 <= ord(c) <= 0x0C7F for c in p_text) else None
+                # 5. Text Shaping Detection (Hindi Fix)
+                script = None
+                if any(0x0900 <= ord(c) <= 0x097F for c in processed_text):
+                    script = "deva" # Devanagari
+                elif any(0x0C00 <= ord(c) <= 0x0C7F for c in processed_text):
+                    script = "telu" # Telugu
+                elif any(0x0B80 <= ord(c) <= 0x0BFF for c in processed_text):
+                    script = "taml" # Tamil
+                
                 if script:
                     pdf.set_text_shaping(use_shaping_engine=True, script=script)
                 else:
                     pdf.set_text_shaping(False)
                 
-                pdf.write(h=f_size * 1.3, text=p_text)
+                # 6. Rendering (Layout Stability)
+                pdf.write(h=f_size * 1.3, text=processed_text)
             else:
                 pdf.set_font("helvetica", size=f_size)
-                pdf.write(h=f_size * 1.2, text=p_text)
+                pdf.write(h=f_size * 1.2, text=processed_text)
         
         pdf.ln(14)
 
