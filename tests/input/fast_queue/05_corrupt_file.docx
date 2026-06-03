@@ -1,0 +1,1 @@
+This is not a real DOCX file. It should fail magic byte validation because it lacks PK signature.

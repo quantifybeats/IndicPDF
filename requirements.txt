@@ -10,3 +10,4 @@ pdfminer.six
 rq
 redis
 pypdf
+cryptography

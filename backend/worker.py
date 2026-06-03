@@ -14,10 +14,17 @@ REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379")
 
 def run_worker():
     redis_conn = Redis.from_url(REDIS_URL)
-    # Define the queue
-    listen = ['default']
-    # Start the worker
-    worker = Worker(listen, connection=redis_conn)
+    # Define the queues in priority order
+    listen = ['fast', 'slow', 'default']
+    
+    try:
+        from tasks import handle_job_failure
+        handlers = [handle_job_failure]
+    except ImportError:
+        handlers = None
+        
+    # Start the worker with memory safeguards via exception handling
+    worker = Worker(listen, connection=redis_conn, exception_handlers=handlers)
     worker.work()
 
 if __name__ == "__main__":

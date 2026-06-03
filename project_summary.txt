@@ -1,0 +1,102 @@
+================================================================================
+IndicPDF: Complete System & Engine Summary
+Date: May 28, 2026
+================================================================================
+
+1. Project Overview & Core Features
+-----------------------------------
+IndicPDF is a full-stack, production-grade document processing system engineered 
+to solve the complex challenges of Indic script typography (specifically Telugu, 
+Devanagari, and Tamil).
+
+Key Features:
+* Bidirectional Conversion: Seamlessly convert DOCX to PDF, and PDF to DOCX.
+* High-Fidelity Indic Shaping: Correctly renders complex ligatures, matras 
+  (vowel signs), and vattus (subscripts) using professional text shaping.
+* Legacy Encoding Migration: Automatically detects older encoding formats 
+  (e.g., APS, Anu) and converts them to standard Unicode NFC.
+* Deterministic Font Asset Layer: Operates entirely independently of the host 
+  OS's installed fonts, guaranteeing the exact same output on any machine.
+* Modern Web Interface: Drag-and-drop UI with real-time processing feedback 
+  and highly detailed font-substitution transparency reports.
+* Artifact Scrubbing: Aggressively cleans PDF extraction anomalies, ensuring 
+  zero "junk" characters in the final output.
+
+2. Technology Stack & Engine Details
+------------------------------------
+The system is built on a modern Python stack optimized for typography:
+* Backend Framework: `FastAPI` (with `Uvicorn` for asynchronous serving).
+* Rendering Engine (DOCX->PDF): `fpdf2` compiled with `uharfbuzz` (HarfBuzz) 
+  for native, accurate complex script shaping.
+* Extraction Engine (PDF->DOCX): `pdfminer.six` utilizing `LAParams` for 
+  semantic line-level layout analysis.
+* Word Document Engine: `python-docx` for parsing and generating `.docx` files.
+* Font Analysis: `fontTools` for deep parsing of TTF/OTF tables (OS/2, cmap, name) 
+  to extract weight, style, and Unicode coverage.
+
+3. Engine Mechanics & Pipelines
+-------------------------------
+A. The Rendering Pipeline (`backend/processor.py`)
+   - Parses DOCX paragraphs and runs.
+   - Normalizes all text to Unicode NFC.
+   - Resolves the requested font against the local FontRegistry using a scoring 
+     system (matching family, weight, and style).
+   - Sets the global shaping script (e.g., `telu` for Telugu) for `fpdf2`.
+   - Uses `pdf.write()` with `unit="pt"` to allow the HarfBuzz shaping engine 
+     to natively calculate and enforce horizontal character advances and line breaks.
+
+B. The Extraction Pipeline (`backend/pdf_processor.py`)
+   - Uses `pdfminer` to group bounding boxes and lines semantically.
+   - Scrubs the extracted text using `strip_all_junk()` to remove `(cid:N)` markers.
+   - Reconstructs DOCX paragraphs on a line-by-line basis to prevent the creation 
+     of micro-runs, avoiding artificial spacing in MS Word.
+   - Maps embedded PDF fonts back to their local desktop equivalents.
+
+C. The Encoding & Font Managers (`encoding_manager.py`, `font_manager.py`)
+   - Font Registry: Recursively scans `fonts/system/`. Extracts TrueType collections 
+     (`.ttc`) into standalone `.ttf` faces. Organizes fonts by language coverage.
+   - Encoding Manager: Houses the CID junk stripper (`\x00-\x1F` and `(cid:N)` regex) 
+     and the translation tables for legacy Indic encodings.
+
+4. API & Worker Architecture (`backend/main.py`, `backend/worker.py`)
+-------------------------------------------------------------------
+* `POST /upload`: Accepts multiple `.docx` or `.pdf` files, assigns unique job IDs, 
+  and enqueues tasks into Redis.
+* `GET /status/{job_id}`: Allows the UI to poll for real-time processing status 
+  (queued, started, finished, failed).
+* `GET /download/{job_id}`: Serves the finalized files once the background worker 
+  completes the task.
+* **Background Worker**: Dedicated Python process (`worker.py`) that executes 
+  heavy conversion tasks asynchronously, preventing API timeouts and supporting 
+  parallel batch processing.
+
+5. Deployment & Infrastructure
+------------------------------
+* **Render Native**: Fully configured via `render.yaml` for managed Web, 
+  Worker, and Redis services.
+* **Scalable Queue**: Uses `RQ` (Redis Queue) for reliable task management 
+  with built-in retry logic (max 2 retries with exponential backoff).
+* **Isolation**: Each job operates on a unique file path, ensuring zero 
+  cross-talk between concurrent conversions.
+
+5. Recent Engine Optimizations
+------------------------------
+* Eliminated Spacing Anomalies: Removed manual cluster-aware wrapping in favor of 
+  native `fpdf2.write()` with `unit="pt"`, completely resolving horizontal expansion 
+  and "floating" matras.
+* Automated Asset Organization: Fonts are automatically hashed, deduplicated, and 
+  sorted into language-specific folders (/telugu, /devanagari, /latin) based on 
+  their internal cmap tables.
+
+6. System Invariants (Golden Rules)
+-----------------------------------
+* NEVER use `pdf.text()` for Indic layout; always rely on `pdf.write()` to respect 
+  HarfBuzz metrics.
+* ALWAYS apply `unicodedata.normalize('NFC', text)` before rendering.
+* ALWAYS strip CID junk before processing extracted PDF text.
+* The system is "Drop-and-Go" for fonts. Adding a new font only requires dropping 
+  it into the `fonts/system/` folder and restarting the server.
+
+================================================================================
+End of Document
+================================================================================

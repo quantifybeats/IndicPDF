@@ -104,3 +104,65 @@ def process_docx_to_pdf_final(docx_path: Path, pdf_output_path: Path):
 
     pdf.output(str(pdf_output_path))
     return report
+
+def process_txt_to_pdf(txt_path: Path, pdf_output_path: Path):
+    """Convert a plain text file to PDF with full Indic shaping support."""
+    report = {"status": "success"}
+    
+    try:
+        with open(txt_path, "r", encoding="utf-8") as f:
+            content = f.read()
+    except UnicodeDecodeError:
+        # Fallback to latin-1 if utf-8 fails
+        with open(txt_path, "r", encoding="latin-1") as f:
+            content = f.read()
+
+    pdf = IndicPDF(unit="pt", format="A4")
+    pdf.set_auto_page_break(auto=True, margin=36)
+    pdf.add_page()
+    
+    # Default styling for TXT
+    f_size = 12
+    registered_fonts = {}
+    
+    # Split into paragraphs
+    paragraphs = content.split('\n')
+    
+    for para_text in paragraphs:
+        if not para_text.strip():
+            pdf.ln(f_size * 1.2)
+            continue
+            
+        # 1. Junk Stripping & Normalization
+        processed_text = encoding_manager.strip_all_junk(para_text)
+        processed_text = unicodedata.normalize('NFC', processed_text)
+        
+        # 2. Font Resolution (Using generic fallback)
+        res_path = font_registry.resolve_font("Normal", ord(processed_text.strip()[0]) if processed_text.strip() else None)
+        
+        if res_path:
+            f_id = res_path.stem
+            if f_id not in registered_fonts:
+                try:
+                    pdf.add_font(f_id, "", str(res_path))
+                    registered_fonts[f_id] = f_id
+                except: pass
+            
+            pdf.set_font(f_id, size=f_size)
+            
+            # 3. Shaping
+            script = None
+            if any(0x0900 <= ord(c) <= 0x097F for c in processed_text): script = "deva"
+            elif any(0x0C00 <= ord(c) <= 0x0C7F for c in processed_text): script = "telu"
+            elif any(0x0B80 <= ord(c) <= 0x0BFF for c in processed_text): script = "taml"
+            
+            pdf.set_text_shaping(use_shaping_engine=True if script else False, script=script)
+            pdf.write(h=f_size * 1.3, text=processed_text)
+        else:
+            pdf.set_font("helvetica", size=f_size)
+            pdf.write(h=f_size * 1.2, text=processed_text)
+            
+        pdf.ln(f_size * 1.2)
+
+    pdf.output(str(pdf_output_path))
+    return report
