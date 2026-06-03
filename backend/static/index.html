@@ -592,52 +592,67 @@ function startPolling(jobIds) {
             const res = await fetch(API_BASE + `/status/${mainJobId}`);
             if(res.ok) {
                 const data = await res.json();
-                if(data.status === 'started') {
+                const status = data.status;
+                
+                if(status === 'queued') {
+                    // Stay on step 1
+                } else if(status === 'started') {
                     updateStep(1, 'done');
                     updateStep(2, 'active');
-                }
-                if(data.status === 'finished') {
+                } else if(status === 'finished') {
                     clearInterval(pollInterval);
                     finishProcess(jobIds);
-                }
-                if(data.status === 'failed') {
+                } else if(status === 'failed' || status === 'canceled') {
                     clearInterval(pollInterval);
-                    showToast("Processing failed.");
-                    resetWorkspace();
+                    handleFailure(data.exc_info || "The background process failed unexpectedly.");
                 }
+            } else if (res.status === 404) {
+                clearInterval(pollInterval);
+                handleFailure("Job tracking lost. Please try uploading again.");
             }
-        } catch(e) {}
+        } catch(e) {
+            console.error("Polling error:", e);
+        }
     }, 2000);
 }
 
-function updateStep(idx, state) {
-    const el = document.getElementById('step-' + idx);
-    if(el) el.className = 'step ' + state;
+function handleFailure(msg) {
+    document.getElementById('ws-proc-stage').classList.remove('active');
+    // We'll reuse the success stage but style it for error
+    const stage = document.getElementById('ws-success-stage');
+    stage.classList.add('active');
+    stage.style.background = '#fff5f5';
+    stage.style.borderColor = '#feb2b2';
+    
+    stage.querySelector('div').textContent = '⚠️';
+    stage.querySelector('h3').textContent = 'Processing Failed';
+    document.getElementById('ws-success-msg').textContent = msg.length > 100 ? msg.substring(0, 100) + '...' : msg;
+    document.getElementById('ws-dl-btn').style.display = 'none';
 }
 
-function finishProcess(jobIds) {
-    updateStep(2, 'done');
-    updateStep(3, 'done');
-    setTimeout(() => {
-        document.getElementById('ws-proc-stage').classList.remove('active');
-        document.getElementById('ws-success-stage').classList.add('active');
-        
-        if(jobIds.length === 1) {
-            document.getElementById('ws-dl-btn').textContent = 'Download File';
-            document.getElementById('ws-dl-btn').onclick = () => window.location.href = API_BASE + `/download/${jobIds[0]}`;
-        } else {
-            document.getElementById('ws-dl-btn').textContent = `Download All (${jobIds.length} files)`;
-            document.getElementById('ws-dl-btn').onclick = () => {
-                jobIds.forEach((id, index) => {
-                    setTimeout(() => {
-                        const link = document.createElement('a');
-                        link.href = API_BASE + `/download/${id}`;
-                        link.click();
-                    }, index * 500);
-                });
-            };
-        }
-    }, 500);
+function resetWorkspace() {
+    currentFiles = [];
+    document.getElementById('ws-upload-stage').style.display = 'block';
+    document.getElementById('ws-proc-stage').classList.remove('active');
+    
+    const successStage = document.getElementById('ws-success-stage');
+    successStage.classList.remove('active');
+    successStage.style.background = '';
+    successStage.style.borderColor = '';
+    successStage.querySelector('div').textContent = '🎉';
+    successStage.querySelector('h3').textContent = 'Conversion Complete!';
+    document.getElementById('ws-dl-btn').style.display = 'inline-block';
+
+    document.getElementById('ws-dz').className = 'drop-zone';
+    document.getElementById('ws-dz-title').textContent = activeToolId ? `Select ${TOOLS[activeToolId].title.split(' ')[0]} files` : 'Select Files';
+    document.getElementById('ws-upload-progress').style.display = 'none';
+    document.getElementById('ws-auto-analysis').style.display = 'none';
+    document.getElementById('ws-action-btn').disabled = true;
+    document.getElementById('ws-action-btn').textContent = activeToolId ? TOOLS[activeToolId].action : 'Upload';
+    document.getElementById('ws-action-btn').onclick = () => startProcess();
+    
+    // Reset steps
+    document.querySelectorAll('.step').forEach(s => s.className = 'step');
 }
 
 function showToast(msg) {
