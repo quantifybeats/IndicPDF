@@ -491,6 +491,7 @@ function handleFiles(files) {
     }
     
     currentFiles = validFiles;
+    console.log("Selected files:", currentFiles);
     document.getElementById('ws-dz').classList.add('has-file');
     if(currentFiles.length === 1) {
         document.getElementById('ws-dz-title').textContent = currentFiles[0].name;
@@ -584,34 +585,43 @@ function startPolling(jobIds) {
     document.getElementById('ws-upload-stage').style.display = 'none';
     document.getElementById('ws-proc-stage').classList.add('active');
     
+    console.log("Starting polling for jobs:", jobIds);
     const mainJobId = jobIds[0];
     updateStep(1, 'active');
     
     pollInterval = setInterval(async () => {
         try {
+            console.log("Polling status for:", mainJobId);
             const res = await fetch(API_BASE + `/status/${mainJobId}`);
             if(res.ok) {
                 const data = await res.json();
                 const status = data.status;
+                console.log("Job status:", status);
                 
                 if(status === 'queued') {
-                    // Stay on step 1
+                    updateStep(1, 'active');
                 } else if(status === 'started') {
                     updateStep(1, 'done');
                     updateStep(2, 'active');
                 } else if(status === 'finished') {
+                    console.log("Job finished successfully!");
+                    updateStep(1, 'done');
+                    updateStep(2, 'done');
+                    updateStep(3, 'active');
                     clearInterval(pollInterval);
-                    finishProcess(jobIds);
+                    setTimeout(() => finishProcess(jobIds), 1000);
                 } else if(status === 'failed' || status === 'canceled') {
+                    console.error("Job failed:", data.exc_info);
                     clearInterval(pollInterval);
                     handleFailure(data.exc_info || "The background process failed unexpectedly.");
                 }
             } else if (res.status === 404) {
+                console.warn("Job not found (404)");
                 clearInterval(pollInterval);
                 handleFailure("Job tracking lost. Please try uploading again.");
             }
         } catch(e) {
-            console.error("Polling error:", e);
+            console.error("Polling fetch error:", e);
         }
     }, 2000);
 }
@@ -626,7 +636,7 @@ function handleFailure(msg) {
     
     stage.querySelector('div').textContent = '⚠️';
     stage.querySelector('h3').textContent = 'Processing Failed';
-    document.getElementById('ws-success-msg').textContent = msg.length > 100 ? msg.substring(0, 100) + '...' : msg;
+    document.getElementById('ws-success-msg').textContent = msg.length > 200 ? msg.substring(0, 200) + '...' : msg;
     document.getElementById('ws-dl-btn').style.display = 'none';
 }
 
@@ -656,6 +666,7 @@ function resetWorkspace() {
 }
 
 function showToast(msg) {
+    console.log("Toast:", msg);
     const stack = document.getElementById('toasts');
     const t = document.createElement('div');
     t.className = 'toast';
@@ -667,7 +678,11 @@ function showToast(msg) {
 // Support for Analyser-only tool
 document.getElementById('ws-action-btn').addEventListener('click', () => {
     if(activeToolId === 'analyser') {
-        runAutoAnalysis(currentFile);
+        if(currentFiles.length > 0) {
+            runAutoAnalysis(currentFiles[0]);
+        } else {
+            showToast("Select a file first.");
+        }
     }
 });
 
