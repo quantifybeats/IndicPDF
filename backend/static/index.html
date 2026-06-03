@@ -604,8 +604,6 @@ function startPolling(jobIds) {
             if(!res.ok) {
                 if (res.status === 404) {
                     console.warn("Job 404 - checking if it was just too fast...");
-                    // Sometimes fast jobs disappear or move to another registry
-                    // We'll try to download anyway as a last resort in finishProcess
                     clearInterval(pollInterval);
                     finishProcess(jobIds);
                     return;
@@ -634,12 +632,27 @@ function startPolling(jobIds) {
             }
         } catch(e) {
             console.error("Polling error:", e);
-            // Don't stop polling on a single network error, wait for a few retries
         }
     }, 1500);
 }
 
-// ... rest of helper functions ...
+function updateStep(idx, state) {
+    const el = document.getElementById('step-' + idx);
+    if(el) el.className = 'step ' + state;
+}
+
+function handleFailure(msg) {
+    document.getElementById('ws-proc-stage').classList.remove('active');
+    const stage = document.getElementById('ws-success-stage');
+    stage.classList.add('active');
+    stage.style.background = '#fff5f5';
+    stage.style.borderColor = '#feb2b2';
+    
+    stage.querySelector('div').textContent = '⚠️';
+    stage.querySelector('h3').textContent = 'Processing Failed';
+    document.getElementById('ws-success-msg').textContent = msg.length > 200 ? msg.substring(0, 200) + '...' : msg;
+    document.getElementById('ws-dl-btn').style.display = 'none';
+}
 
 function finishProcess(jobIds) {
     console.log("Finishing process for:", jobIds);
@@ -668,7 +681,7 @@ function finishProcess(jobIds) {
                     setTimeout(() => {
                         const link = document.createElement('a');
                         link.href = API_BASE + `/download/${id}`;
-                        link.download = ''; // Hint for browser
+                        link.download = '';
                         document.body.appendChild(link);
                         link.click();
                         document.body.removeChild(link);
