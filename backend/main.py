@@ -66,7 +66,7 @@ def retry_logic():
     from rq import Retry
     return Retry(max=2, interval=[10, 30])
 
-@app.post("/upload", dependencies=[Depends(get_api_key)])
+@app.post("/upload")
 async def upload_files(files: List[UploadFile] = File(...)):
     """Accept multiple files, encrypt, and enqueue processing jobs."""
     job_ids = []
@@ -146,7 +146,7 @@ async def upload_files(files: List[UploadFile] = File(...)):
         
     return {"jobs": job_ids}
 
-@app.post("/batch/upload", dependencies=[Depends(get_api_key)])
+@app.post("/batch/upload")
 async def upload_batch(files: List[UploadFile] = File(...)):
     """Accept multiple files for batch processing, encrypt, and enqueue with size routing."""
     if len(files) > 10:
@@ -236,7 +236,7 @@ async def upload_batch(files: List[UploadFile] = File(...)):
     
     return {"batch_id": batch_id, "jobs": job_ids}
 
-@app.post("/batch/upload/unified", dependencies=[Depends(get_api_key)])
+@app.post("/batch/upload/unified")
 async def upload_unified(
     pdf_files: List[UploadFile] = File(None), 
     docx_files: List[UploadFile] = File(None),
@@ -296,7 +296,7 @@ async def upload_unified(
 
     return results
 
-@app.get("/status/{job_id}", dependencies=[Depends(get_api_key)])
+@app.get("/status/{job_id}")
 async def get_status(job_id: str):
     """Check the status of a specific job."""
     try:
@@ -314,7 +314,7 @@ async def get_status(job_id: str):
         "exc_info": job.exc_info if job.is_failed else None
     }
 
-@app.get("/batch/status/{batch_id}", dependencies=[Depends(get_api_key)])
+@app.get("/batch/status/{batch_id}")
 async def get_batch_status(batch_id: str):
     """Check the status of a batch."""
     batch_key = f"batch:{batch_id}"
@@ -335,7 +335,7 @@ async def get_batch_status(batch_id: str):
         "final_output_ready": "final_output_path" in data
     }
 
-@app.get("/download/{job_id}", dependencies=[Depends(get_api_key)])
+@app.get("/download/{job_id}")
 async def download_result(job_id: str):
     """Download and decrypt an individual processed file on-the-fly."""
     try:
@@ -364,7 +364,7 @@ async def download_result(job_id: str):
         logger.error(f"Decryption failed during download: {e}")
         raise HTTPException(status_code=500, detail="Decryption error")
 
-@app.get("/batch/download/{batch_id}", dependencies=[Depends(get_api_key)])
+@app.get("/batch/download/{batch_id}")
 async def download_batch_result(batch_id: str):
     """Download and decrypt the merged result of a batch on-the-fly."""
     batch_key = f"batch:{batch_id}"

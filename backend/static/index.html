@@ -322,10 +322,11 @@ footer {
             <!-- Upload Stage -->
             <div id="ws-upload-stage">
                 <div class="drop-zone" id="ws-dz" 
+                     onclick="document.getElementById('ws-file-input').click()"
                      ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
-                    <input type="file" id="ws-file-input" style="display:none" onchange="handleFile(this.files[0])">
+                    <input type="file" id="ws-file-input" style="display:none" multiple onchange="handleFiles(this.files)">
                     <div class="dz-icon" id="ws-dz-icon">📄</div>
-                    <div class="dz-title" id="ws-dz-title">Select File</div>
+                    <div class="dz-title" id="ws-dz-title">Select Files</div>
                     <p class="dz-sub" id="ws-dz-sub">or drag and drop here</p>
                 </div>
                 
@@ -418,7 +419,7 @@ const TOOLS = {
 
 // ── State ────────────────────────────────────────────────────────────────────
 let activeToolId = null;
-let currentFile = null;
+let currentFiles = [];
 let pollInterval = null;
 
 // ── Workspace Handling ────────────────────────────────────────────────────────
@@ -427,8 +428,8 @@ function openWorkspace(id) {
     const tool = TOOLS[id];
     document.getElementById('ws-title').textContent = tool.title;
     document.getElementById('ws-dz-icon').textContent = tool.icon;
-    document.getElementById('ws-dz-title').textContent = `Select ${tool.title.split(' ')[0]} file`;
-    document.getElementById('ws-dz-sub').textContent = `or drag and drop your ${tool.accept} file here`;
+    document.getElementById('ws-dz-title').textContent = `Select ${tool.title.split(' ')[0]} files`;
+    document.getElementById('ws-dz-sub').textContent = `or drag and drop your ${tool.accept} files here`;
     document.getElementById('ws-action-btn').textContent = tool.action;
     
     resetWorkspace();
@@ -443,14 +444,16 @@ function closeWorkspace() {
 }
 
 function resetWorkspace() {
-    currentFile = null;
+    currentFiles = [];
     document.getElementById('ws-upload-stage').style.display = 'block';
     document.getElementById('ws-proc-stage').classList.remove('active');
     document.getElementById('ws-success-stage').classList.remove('active');
     document.getElementById('ws-dz').className = 'drop-zone';
+    document.getElementById('ws-dz-title').textContent = activeToolId ? `Select ${TOOLS[activeToolId].title.split(' ')[0]} files` : 'Select Files';
     document.getElementById('ws-upload-progress').style.display = 'none';
     document.getElementById('ws-auto-analysis').style.display = 'none';
     document.getElementById('ws-action-btn').disabled = true;
+    document.getElementById('ws-action-btn').textContent = activeToolId ? TOOLS[activeToolId].action : 'Upload';
     document.getElementById('ws-action-btn').onclick = () => startProcess();
     
     // Reset steps
@@ -458,7 +461,7 @@ function resetWorkspace() {
 }
 
 function handleOverlayClick(e) {
-    if(e.target.id === 'workspace-overlay') closeWorkspace();
+    if(e.target.id === 'workspace-overlay') e.stopPropagation();
 }
 
 // ── File Handling ────────────────────────────────────────────────────────────
@@ -467,28 +470,41 @@ function handleDragLeave() { document.getElementById('ws-dz').classList.remove('
 function handleDrop(e) {
     e.preventDefault();
     handleDragLeave();
-    if(e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+    if(e.dataTransfer.files.length > 0) handleFiles(e.dataTransfer.files);
 }
 
-function handleFile(file) {
-    if(!file) return;
+function handleFiles(files) {
+    if(!files || files.length === 0) return;
     const tool = TOOLS[activeToolId];
-    const ext = '.' + file.name.split('.').pop().toLowerCase();
+    const validFiles = [];
     
-    if(ext !== tool.accept) {
-        showToast(`Please upload a ${tool.accept} file.`);
+    for(let file of files) {
+        const ext = '.' + file.name.split('.').pop().toLowerCase();
+        if(ext === tool.accept) {
+            validFiles.push(file);
+        }
+    }
+    
+    if(validFiles.length === 0) {
+        showToast(`Please upload ${tool.accept} files.`);
         return;
     }
     
-    currentFile = file;
+    currentFiles = validFiles;
     document.getElementById('ws-dz').classList.add('has-file');
-    document.getElementById('ws-dz-title').textContent = file.name;
-    document.getElementById('ws-dz-sub').textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+    if(currentFiles.length === 1) {
+        document.getElementById('ws-dz-title').textContent = currentFiles[0].name;
+        document.getElementById('ws-dz-sub').textContent = (currentFiles[0].size / 1024 / 1024).toFixed(2) + ' MB';
+    } else {
+        document.getElementById('ws-dz-title').textContent = `${currentFiles.length} files selected`;
+        const totalSize = currentFiles.reduce((acc, f) => acc + f.size, 0);
+        document.getElementById('ws-dz-sub').textContent = (totalSize / 1024 / 1024).toFixed(2) + ' MB total';
+    }
     document.getElementById('ws-action-btn').disabled = false;
     
-    // Automatic Scan for PDFs
-    if(ext === '.pdf') {
-        runAutoAnalysis(file);
+    // Automatic Scan for PDFs (only first one for preview)
+    if(tool.accept === '.pdf' && currentFiles.length > 0) {
+        runAutoAnalysis(currentFiles[0]);
     } else {
         document.getElementById('ws-auto-analysis').style.display = 'none';
     }
@@ -519,11 +535,15 @@ async function runAutoAnalysis(file) {
 async function startProcess() {
     const tool = TOOLS[activeToolId];
     if(activeToolId === 'analyser') {
-        // Special case: Analyser tool just does analysis
+        runAutoAnalysis(currentFiles[0]);
         return; 
     }
 
-    const fd = new FormData(); fd.append('files', currentFile);
+    const fd = new FormData();
+    for(let file of currentFiles) {
+        fd.append('files', file);
+    }
+    
     document.getElementById('ws-action-btn').disabled = true;
     document.getElementById('ws-upload-progress').style.display = 'block';
     
@@ -539,25 +559,37 @@ async function startProcess() {
     xhr.onload = () => {
         if(xhr.status === 200 || xhr.status === 201) {
             const data = JSON.parse(xhr.responseText);
-            if(data.jobs) startPolling(data.jobs[0].job_id);
+            if(data.jobs && data.jobs.length > 0) {
+                // If multiple jobs, we could track them all, but for now we poll the first one
+                // or handle as a batch if the backend supported a single batch ID here.
+                // Our backend /upload returns a list of jobs.
+                startPolling(data.jobs.map(j => j.job_id));
+            }
+        } else if (xhr.status === 403) {
+            showToast("Access Denied: API Key missing or invalid.");
+            document.getElementById('ws-action-btn').disabled = false;
         } else {
-            showToast("Upload failed. Check file size.");
+            showToast(`Upload failed (${xhr.status}). Check file size or connection.`);
             document.getElementById('ws-action-btn').disabled = false;
         }
     };
     
     xhr.open('POST', API_BASE + tool.endpoint);
+    // Note: We are not sending the X-API-Key yet. 
+    // If the backend requires it, this will fail with 403.
     xhr.send(fd);
 }
 
-function startPolling(jobId) {
+function startPolling(jobIds) {
     document.getElementById('ws-upload-stage').style.display = 'none';
     document.getElementById('ws-proc-stage').classList.add('active');
     
+    const mainJobId = jobIds[0];
     updateStep(1, 'active');
+    
     pollInterval = setInterval(async () => {
         try {
-            const res = await fetch(API_BASE + `/status/${jobId}`);
+            const res = await fetch(API_BASE + `/status/${mainJobId}`);
             if(res.ok) {
                 const data = await res.json();
                 if(data.status === 'started') {
@@ -566,7 +598,7 @@ function startPolling(jobId) {
                 }
                 if(data.status === 'finished') {
                     clearInterval(pollInterval);
-                    finishProcess(jobId);
+                    finishProcess(jobIds);
                 }
                 if(data.status === 'failed') {
                     clearInterval(pollInterval);
@@ -583,13 +615,28 @@ function updateStep(idx, state) {
     if(el) el.className = 'step ' + state;
 }
 
-function finishProcess(jobId) {
+function finishProcess(jobIds) {
     updateStep(2, 'done');
     updateStep(3, 'done');
     setTimeout(() => {
         document.getElementById('ws-proc-stage').classList.remove('active');
         document.getElementById('ws-success-stage').classList.add('active');
-        document.getElementById('ws-dl-btn').onclick = () => window.location.href = API_BASE + `/download/${jobId}`;
+        
+        if(jobIds.length === 1) {
+            document.getElementById('ws-dl-btn').textContent = 'Download File';
+            document.getElementById('ws-dl-btn').onclick = () => window.location.href = API_BASE + `/download/${jobIds[0]}`;
+        } else {
+            document.getElementById('ws-dl-btn').textContent = `Download All (${jobIds.length} files)`;
+            document.getElementById('ws-dl-btn').onclick = () => {
+                jobIds.forEach((id, index) => {
+                    setTimeout(() => {
+                        const link = document.createElement('a');
+                        link.href = API_BASE + `/download/${id}`;
+                        link.click();
+                    }, index * 500);
+                });
+            };
+        }
     }, 500);
 }
 
