@@ -2,31 +2,41 @@ services:
   # FastAPI API Service
   - type: web
     name: indicpdf-api
-    env: python
+    runtime: python
     buildCommand: pip install -r requirements.txt
     startCommand: python backend/main.py
+    healthCheckPath: /
     envVars:
+      - fromGroup: indicpdf-shared
       - key: REDIS_URL
         fromService:
-          type: redis
+          type: keyvalue
           name: indicpdf-redis
           property: connectionString
 
   # RQ Background Worker
   - type: worker
     name: indicpdf-worker
-    env: python
+    runtime: python
     buildCommand: pip install -r requirements.txt
     startCommand: python backend/worker.py
     envVars:
+      - fromGroup: indicpdf-shared
       - key: REDIS_URL
         fromService:
-          type: redis
+          type: keyvalue
           name: indicpdf-redis
           property: connectionString
 
-# Redis Instance
-redis:
-  name: indicpdf-redis
-  plan: free
-  ipAllowList: [] # Only allow internal connections
+  # Key Value (Redis-compatible)
+  - type: keyvalue
+    name: indicpdf-redis
+    plan: free
+    maxmemoryPolicy: allkeys-lru
+    ipAllowList: []
+
+envVarGroups:
+  - name: indicpdf-shared
+    envVars:
+      - key: INDICPDF_API_KEY
+        generateValue: true
