@@ -1,6 +1,15 @@
 #!/bin/bash
+set -e
+
+echo "Starting IndicPDF Monolith..."
+
+# Use absolute paths or ensure working directory is correct
+export PYTHONPATH=$PYTHONPATH:$(pwd)/backend
+
 # Start the RQ worker in the background
-python backend/worker.py &
+echo "Launching RQ Worker..."
+python3 backend/worker.py &
 
 # Start the FastAPI application
-python backend/main.py
+echo "Launching FastAPI API..."
+python3 backend/main.py
