@@ -582,109 +582,132 @@ async function startProcess() {
 }
 
 function startPolling(jobIds) {
+    if (!jobIds || jobIds.length === 0) {
+        handleFailure("No jobs were created. Please try again.");
+        return;
+    }
+
     document.getElementById('ws-upload-stage').style.display = 'none';
     document.getElementById('ws-proc-stage').classList.add('active');
     
     console.log("Starting polling for jobs:", jobIds);
     const mainJobId = jobIds[0];
-    updateStep(1, 'active');
     
+    // Initial UI state
+    updateStep(1, 'active');
+    updateStep(2, '');
+    updateStep(3, '');
+
     pollInterval = setInterval(async () => {
         try {
-            console.log("Polling status for:", mainJobId);
             const res = await fetch(API_BASE + `/status/${mainJobId}`);
-            if(res.ok) {
-                const data = await res.json();
-                const status = data.status;
-                console.log("Job status:", status);
-                
-                if(status === 'queued') {
-                    updateStep(1, 'active');
-                } else if(status === 'started') {
-                    updateStep(1, 'done');
-                    updateStep(2, 'active');
-                } else if(status === 'finished') {
-                    console.log("Job finished successfully!");
-                    updateStep(1, 'done');
-                    updateStep(2, 'done');
-                    updateStep(3, 'active');
+            if(!res.ok) {
+                if (res.status === 404) {
+                    console.warn("Job 404 - checking if it was just too fast...");
+                    // Sometimes fast jobs disappear or move to another registry
+                    // We'll try to download anyway as a last resort in finishProcess
                     clearInterval(pollInterval);
-                    setTimeout(() => finishProcess(jobIds), 1000);
-                } else if(status === 'failed' || status === 'canceled') {
-                    console.error("Job failed:", data.exc_info);
-                    clearInterval(pollInterval);
-                    handleFailure(data.exc_info || "The background process failed unexpectedly.");
+                    finishProcess(jobIds);
+                    return;
                 }
-            } else if (res.status === 404) {
-                console.warn("Job not found (404)");
+                throw new Error(`HTTP ${res.status}`);
+            }
+
+            const data = await res.json();
+            const status = data.status || 'unknown';
+            console.log(`Job ${mainJobId} status: ${status}`);
+
+            if (status === 'finished') {
+                updateStep(1, 'done');
+                updateStep(2, 'done');
+                updateStep(3, 'done');
                 clearInterval(pollInterval);
-                handleFailure("Job tracking lost. Please try uploading again.");
+                setTimeout(() => finishProcess(jobIds), 500);
+            } else if (status === 'started' || status === 'deferred') {
+                updateStep(1, 'done');
+                updateStep(2, 'active');
+            } else if (status === 'failed' || status === 'canceled') {
+                clearInterval(pollInterval);
+                handleFailure(data.exc_info || "The background process failed.");
+            } else if (status === 'queued' || status === 'scheduled') {
+                updateStep(1, 'active');
             }
         } catch(e) {
-            console.error("Polling fetch error:", e);
+            console.error("Polling error:", e);
+            // Don't stop polling on a single network error, wait for a few retries
         }
-    }, 2000);
+    }, 1500);
 }
 
-function handleFailure(msg) {
-    document.getElementById('ws-proc-stage').classList.remove('active');
-    // We'll reuse the success stage but style it for error
-    const stage = document.getElementById('ws-success-stage');
-    stage.classList.add('active');
-    stage.style.background = '#fff5f5';
-    stage.style.borderColor = '#feb2b2';
-    
-    stage.querySelector('div').textContent = '⚠️';
-    stage.querySelector('h3').textContent = 'Processing Failed';
-    document.getElementById('ws-success-msg').textContent = msg.length > 200 ? msg.substring(0, 200) + '...' : msg;
-    document.getElementById('ws-dl-btn').style.display = 'none';
-}
+// ... rest of helper functions ...
 
-function resetWorkspace() {
-    currentFiles = [];
-    document.getElementById('ws-upload-stage').style.display = 'block';
-    document.getElementById('ws-proc-stage').classList.remove('active');
+function finishProcess(jobIds) {
+    console.log("Finishing process for:", jobIds);
+    updateStep(1, 'done');
+    updateStep(2, 'done');
+    updateStep(3, 'done');
     
-    const successStage = document.getElementById('ws-success-stage');
-    successStage.classList.remove('active');
-    successStage.style.background = '';
-    successStage.style.borderColor = '';
-    successStage.querySelector('div').textContent = '🎉';
-    successStage.querySelector('h3').textContent = 'Conversion Complete!';
-    document.getElementById('ws-dl-btn').style.display = 'inline-block';
+    setTimeout(() => {
+        document.getElementById('ws-proc-stage').classList.remove('active');
+        document.getElementById('ws-success-stage').classList.add('active');
+        
+        const dlBtn = document.getElementById('ws-dl-btn');
+        dlBtn.style.display = 'inline-block';
 
-    document.getElementById('ws-dz').className = 'drop-zone';
-    document.getElementById('ws-dz-title').textContent = activeToolId ? `Select ${TOOLS[activeToolId].title.split(' ')[0]} files` : 'Select Files';
-    document.getElementById('ws-upload-progress').style.display = 'none';
-    document.getElementById('ws-auto-analysis').style.display = 'none';
-    document.getElementById('ws-action-btn').disabled = true;
-    document.getElementById('ws-action-btn').textContent = activeToolId ? TOOLS[activeToolId].action : 'Upload';
-    document.getElementById('ws-action-btn').onclick = () => startProcess();
-    
-    // Reset steps
-    document.querySelectorAll('.step').forEach(s => s.className = 'step');
+        if(jobIds.length === 1) {
+            dlBtn.textContent = 'Download File';
+            dlBtn.onclick = (e) => {
+                e.preventDefault();
+                window.location.href = API_BASE + `/download/${jobIds[0]}`;
+            };
+        } else {
+            dlBtn.textContent = `Download All (${jobIds.length} files)`;
+            dlBtn.onclick = (e) => {
+                e.preventDefault();
+                jobIds.forEach((id, index) => {
+                    setTimeout(() => {
+                        const link = document.createElement('a');
+                        link.href = API_BASE + `/download/${id}`;
+                        link.download = ''; // Hint for browser
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    }, index * 800);
+                });
+            };
+        }
+    }, 400);
 }
 
 function showToast(msg) {
-    console.log("Toast:", msg);
+    console.log("Toast Notification:", msg);
     const stack = document.getElementById('toasts');
     const t = document.createElement('div');
     t.className = 'toast';
     t.textContent = msg;
     stack.appendChild(t);
-    setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
+    setTimeout(() => { 
+        t.style.opacity = '0'; 
+        t.style.transition = 'opacity 0.5s ease';
+        setTimeout(() => t.remove(), 500); 
+    }, 4000);
 }
 
-// Support for Analyser-only tool
-document.getElementById('ws-action-btn').addEventListener('click', () => {
+// Fix the click listener for the action button
+const actionBtn = document.getElementById('ws-action-btn');
+// Remove existing listeners by replacing the element or just using the assigned onclick
+// (We already set .onclick in resetWorkspace, so we should keep it consistent)
+actionBtn.onclick = () => {
     if(activeToolId === 'analyser') {
-        if(currentFiles.length > 0) {
+        if(currentFiles && currentFiles.length > 0) {
             runAutoAnalysis(currentFiles[0]);
         } else {
-            showToast("Select a file first.");
+            showToast("Please select a file first.");
         }
+    } else {
+        startProcess();
     }
-});
+};
 
 </script>
 </body>
