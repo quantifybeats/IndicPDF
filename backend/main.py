@@ -43,15 +43,19 @@ REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379")
 redis_conn = Redis.from_url(REDIS_URL)
 q = Queue("default", connection=redis_conn)
 
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+from starlette.requests import Request
+
+# Initialize Limiter
+limiter = Limiter(key_func=get_remote_address)
 app = FastAPI(title="IndicPDF Production API")
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 IS_VERCEL = "VERCEL" in os.environ
-UPLOAD_DIR = Path("/tmp/uploads") if IS_VERCEL else BASE_DIR / "data" / "uploads"
-OUTPUT_DIR = Path("/tmp/outputs") if IS_VERCEL else BASE_DIR / "data" / "outputs"
-STATIC_DIR = BACKEND_DIR / "static"
-
-UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+# ... (rest of directory setup) ...
 
 # Import tasks (must be importable by worker too)
 from tasks import convert_docx_to_pdf_task, convert_pdf_to_docx_task, convert_txt_to_pdf_task, cleanup_old_files_task
@@ -62,8 +66,24 @@ def retry_logic():
     from rq import Retry
     return Retry(max=2, interval=[10, 30])
 
+async def secure_file_upload(file: UploadFile, destination_path: Path):
+    """Helper to stream an upload to a temp file and then encrypt it in chunks."""
+    try:
+        with tempfile.NamedTemporaryFile(delete=True) as tmp:
+            while True:
+                chunk = await file.read(1024 * 1024) # 1MB chunks
+                if not chunk:
+                    break
+                tmp.write(chunk)
+            tmp.flush()
+            security_manager.encrypt_file(Path(tmp.name), destination_path)
+    except Exception as e:
+        logger.error(f"Failed to securely process upload {file.filename}: {e}")
+        raise HTTPException(status_code=500, detail=f"Secure processing failed for {file.filename}")
+
 @app.post("/upload")
-async def upload_files(files: List[UploadFile] = File(...)):
+@limiter.limit("5/minute")
+async def upload_files(request: Request, files: List[UploadFile] = File(...)):
     """Accept multiple files, encrypt, and enqueue processing jobs."""
     job_ids = []
     
@@ -84,7 +104,9 @@ async def upload_files(files: List[UploadFile] = File(...)):
         size = file.file.tell()
         file.file.seek(0)
         
-        # Route to appropriate queue
+        if size > 25 * 1024 * 1024:
+             raise HTTPException(status_code=400, detail=f"File {file.filename} exceeds 25MB limit.")
+
         queue_name = "slow" if size > 5 * 1024 * 1024 else "fast"
         q_instance = Queue(queue_name, connection=redis_conn)
         
@@ -92,17 +114,8 @@ async def upload_files(files: List[UploadFile] = File(...)):
         input_filename = f"{file_id}{file_ext}"
         input_path = UPLOAD_DIR / input_filename
         
-        # 1. Process upload into memory and encrypt to disk
-        try:
-            plaintext_bytes = await file.read()
-            # We use a temp file for security_manager compatibility or extend it
-            with tempfile.NamedTemporaryFile(delete=True) as tmp:
-                tmp.write(plaintext_bytes)
-                tmp.flush()
-                security_manager.encrypt_file(Path(tmp.name), input_path)
-        except Exception as e:
-            logger.error(f"Failed to encrypt uploaded file: {e}")
-            raise HTTPException(status_code=500, detail="Encryption failure")
+        # Stream and Encrypt
+        await secure_file_upload(file, input_path)
         
         output_ext = ".pdf" if file_ext in [".docx", ".txt"] else ".docx"
         output_filename = f"{file_id}{output_ext}"
@@ -143,7 +156,8 @@ async def upload_files(files: List[UploadFile] = File(...)):
     return {"jobs": job_ids}
 
 @app.post("/batch/upload")
-async def upload_batch(files: List[UploadFile] = File(...)):
+@limiter.limit("2/minute")
+async def upload_batch(request: Request, files: List[UploadFile] = File(...)):
     """Accept multiple files for batch processing, encrypt, and enqueue with size routing."""
     if len(files) > 10:
         raise HTTPException(status_code=400, detail="Max 10 files allowed per batch.")
@@ -152,7 +166,6 @@ async def upload_batch(files: List[UploadFile] = File(...)):
     job_ids = []
     
     for file in files:
-        # Validate file size (25MB limit)
         file.file.seek(0, 2)
         size = file.file.tell()
         file.file.seek(0)
@@ -163,7 +176,6 @@ async def upload_batch(files: List[UploadFile] = File(...)):
         if file_ext not in [".docx", ".pdf", ".txt"]:
             raise HTTPException(status_code=400, detail=f"Unsupported file type: {file_ext}")
             
-        # Magic Byte Check & Size Routing
         header = await file.read(4)
         await file.seek(0)
         if file_ext == ".pdf" and not header.startswith(b'%PDF'):
@@ -171,7 +183,6 @@ async def upload_batch(files: List[UploadFile] = File(...)):
         if file_ext == ".docx" and not header.startswith(b'PK\x03\x04'):
             raise HTTPException(status_code=400, detail=f"Invalid DOCX signature in batch: {file.filename}")
 
-        # Route to appropriate queue
         queue_name = "slow" if size > 5 * 1024 * 1024 else "fast"
         q_instance = Queue(queue_name, connection=redis_conn)
         
@@ -179,16 +190,8 @@ async def upload_batch(files: List[UploadFile] = File(...)):
         input_filename = f"{file_id}{file_ext}"
         input_path = UPLOAD_DIR / input_filename
         
-        # Encrypt upload
-        try:
-            plaintext_bytes = await file.read()
-            with tempfile.NamedTemporaryFile(delete=True) as tmp:
-                tmp.write(plaintext_bytes)
-                tmp.flush()
-                security_manager.encrypt_file(Path(tmp.name), input_path)
-        except Exception as e:
-            logger.error(f"Failed to encrypt batch file: {e}")
-            raise HTTPException(status_code=500, detail="Encryption failure")
+        # Stream and Encrypt
+        await secure_file_upload(file, input_path)
         
         output_ext = ".pdf" if file_ext in [".docx", ".txt"] else ".docx"
         output_filename = f"{file_id}{output_ext}"
@@ -221,7 +224,6 @@ async def upload_batch(files: List[UploadFile] = File(...)):
             
         job_ids.append(job.id)
         
-    # Initialize batch tracker in Redis
     redis_conn.hset(f"batch:{batch_id}", mapping={
         "total": len(files),
         "completed": 0,
@@ -233,7 +235,9 @@ async def upload_batch(files: List[UploadFile] = File(...)):
     return {"batch_id": batch_id, "jobs": job_ids}
 
 @app.post("/batch/upload/unified")
+@limiter.limit("2/minute")
 async def upload_unified(
+    request: Request,
     pdf_files: List[UploadFile] = File(None), 
     docx_files: List[UploadFile] = File(None),
     txt_files: List[UploadFile] = File(None)
@@ -243,12 +247,34 @@ async def upload_unified(
     
     # Process PDF Batch (PDF -> DOCX)
     if pdf_files:
-        # ... (keep existing pdf_files logic) ...
+        if len(pdf_files) > 10: raise HTTPException(status_code=400, detail="Max 10 PDF files allowed.")
+        pdf_batch_id = str(uuid.uuid4())
+        job_ids = []
+        for file in pdf_files:
+             file.file.seek(0, 2); size = file.file.tell(); file.file.seek(0)
+             q_instance = Queue("slow" if size > 5*1024*1024 else "fast", connection=redis_conn)
+             file_id = str(uuid.uuid4()); input_path = UPLOAD_DIR / f"{file_id}.pdf"
+             await secure_file_upload(file, input_path)
+             output_path = OUTPUT_DIR / f"{file_id}.docx"
+             job = q_instance.enqueue(convert_pdf_to_docx_task, args=(str(input_path), str(output_path), pdf_batch_id), job_id=file_id, retry=retry_logic(), job_timeout=600)
+             job_ids.append(job.id)
+        redis_conn.hset(f"batch:{pdf_batch_id}", mapping={"total": len(pdf_files), "completed": 0, "failed": 0, "status": "processing", "job_ids": ",".join(job_ids)})
         results["pdf_batch_id"] = pdf_batch_id
 
     # Process DOCX Batch (DOCX -> PDF)
     if docx_files:
-        # ... (keep existing docx_files logic) ...
+        if len(docx_files) > 10: raise HTTPException(status_code=400, detail="Max 10 DOCX files allowed.")
+        docx_batch_id = str(uuid.uuid4())
+        job_ids = []
+        for file in docx_files:
+             file.file.seek(0, 2); size = file.file.tell(); file.file.seek(0)
+             q_instance = Queue("slow" if size > 5*1024*1024 else "fast", connection=redis_conn)
+             file_id = str(uuid.uuid4()); input_path = UPLOAD_DIR / f"{file_id}.docx"
+             await secure_file_upload(file, input_path)
+             output_path = OUTPUT_DIR / f"{file_id}.pdf"
+             job = q_instance.enqueue(convert_docx_to_pdf_task, args=(str(input_path), str(output_path), docx_batch_id), job_id=file_id, retry=retry_logic(), job_timeout=300)
+             job_ids.append(job.id)
+        redis_conn.hset(f"batch:{docx_batch_id}", mapping={"total": len(docx_files), "completed": 0, "failed": 0, "status": "processing", "job_ids": ",".join(job_ids)})
         results["docx_batch_id"] = docx_batch_id
 
     # Process TXT Batch (TXT -> PDF)
@@ -268,12 +294,8 @@ async def upload_unified(
             file_id = str(uuid.uuid4())
             input_path = UPLOAD_DIR / f"{file_id}.txt"
             
-            # Encrypt
-            plaintext_bytes = await file.read()
-            with tempfile.NamedTemporaryFile(delete=True) as tmp:
-                tmp.write(plaintext_bytes)
-                tmp.flush()
-                security_manager.encrypt_file(Path(tmp.name), input_path)
+            # Encrypt (Refactored to secure_file_upload)
+            await secure_file_upload(file, input_path)
             
             output_path = OUTPUT_DIR / f"{file_id}.pdf"
             job = q_instance.enqueue(

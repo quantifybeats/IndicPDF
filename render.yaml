@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: indic-pdf
+    name: indic-pdf-api
     runtime: docker
     plan: free
     envVars:
@@ -14,8 +14,33 @@ services:
       - key: INDICPDF_MASTER_KEY
         generateValue: true
     healthCheckPath: /
+    # Command to run ONLY the FastAPI API
+    dockerCommand: "uvicorn backend.main:app --host 0.0.0.0 --port 8000"
+
+  - type: worker
+    name: indic-pdf-worker
+    runtime: docker
+    plan: free
+    envVars:
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: indic-pdf-cache
+          property: connectionString
+      - key: INDICPDF_API_KEY
+        fromService:
+          type: web
+          name: indic-pdf-api
+          envVarKey: INDICPDF_API_KEY
+      - key: INDICPDF_MASTER_KEY
+        fromService:
+          type: web
+          name: indic-pdf-api
+          envVarKey: INDICPDF_MASTER_KEY
+    # Command to run ONLY the RQ Worker
+    dockerCommand: "python backend/worker.py"
 
   - type: keyvalue
     name: indic-pdf-cache
     plan: free
-    ipAllowList: [] # Only accessible within the project
+    ipAllowList: []

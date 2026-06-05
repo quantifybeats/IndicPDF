@@ -11,3 +11,4 @@ rq
 redis
 pypdf
 cryptography
+slowapi==0.1.9
