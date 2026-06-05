@@ -19,6 +19,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 BACKEND_DIR = BASE_DIR / "backend"
 FRONTEND_DIST = BASE_DIR / "frontend" / "dist"
 
+import sys
+if str(BACKEND_DIR) not in sys.path:
+    sys.path.append(str(BACKEND_DIR))
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -55,7 +59,14 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 IS_VERCEL = "VERCEL" in os.environ
-# ... (rest of directory setup) ...
+# Ensure directories exist
+UPLOAD_DIR = BASE_DIR / "data" / "uploads"
+OUTPUT_DIR = BASE_DIR / "data" / "outputs"
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+logger.info(f"BASE_DIR: {BASE_DIR}")
+logger.info(f"FRONTEND_DIST: {FRONTEND_DIST} (Exists: {FRONTEND_DIST.exists()})")
 
 # Import tasks (must be importable by worker too)
 from tasks import convert_docx_to_pdf_task, convert_pdf_to_docx_task, convert_txt_to_pdf_task, cleanup_old_files_task
@@ -463,6 +474,17 @@ async def startup_event():
     logger.info(f"Connected to Redis at {REDIS_URL}")
     # Initialize the periodic cleanup cycle (2 hours)
     q.enqueue(cleanup_old_files_task, 2)
+
+@app.get("/", response_class=HTMLResponse)
+async def serve_index():
+    """Explicitly serve index.html for the root path."""
+    index_path = FRONTEND_DIST / "index.html"
+    if index_path.exists():
+        return FileResponse(index_path)
+    return HTMLResponse(
+        content=f"<html><body><h1>IndicPDF API</h1><p>Frontend not found at {FRONTEND_DIST}. Please check your build.</p></body></html>",
+        status_code=404
+    )
 
 # Mount frontend at the very end to avoid shadowing API routes
 if FRONTEND_DIST.exists():
