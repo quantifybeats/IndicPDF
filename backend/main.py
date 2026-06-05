@@ -12,9 +12,12 @@ from redis import Redis
 from rq import Queue
 from rq.job import Job
 
+from fastapi.staticfiles import StaticFiles
+
 # Absolute path resolution
 BASE_DIR = Path(__file__).resolve().parent.parent
 BACKEND_DIR = BASE_DIR / "backend"
+FRONTEND_DIST = BASE_DIR / "frontend" / "dist"
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -54,13 +57,6 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 from tasks import convert_docx_to_pdf_task, convert_pdf_to_docx_task, convert_txt_to_pdf_task, cleanup_old_files_task
 from security_manager import security_manager
 import io
-
-@app.get("/", response_class=HTMLResponse)
-async def root():
-    index_file = STATIC_DIR / "index.html"
-    if not index_file.exists():
-        return HTMLResponse(content="<h1>IndicPDF API is running</h1><p>Frontend assets missing.</p>")
-    return FileResponse(index_file)
 
 def retry_logic():
     from rq import Retry
@@ -445,6 +441,10 @@ async def startup_event():
     logger.info(f"Connected to Redis at {REDIS_URL}")
     # Initialize the periodic cleanup cycle (2 hours)
     q.enqueue(cleanup_old_files_task, 2)
+
+# Mount frontend at the very end to avoid shadowing API routes
+if FRONTEND_DIST.exists():
+    app.mount("/", StaticFiles(directory=FRONTEND_DIST, html=True), name="frontend")
 
 if __name__ == "__main__":
     import uvicorn

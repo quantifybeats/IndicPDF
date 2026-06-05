@@ -30,12 +30,23 @@ def process_docx_to_pdf_final(docx_path: Path, pdf_output_path: Path):
     
     registered_fonts = {}
 
-    for para in doc.paragraphs:
+    def process_element(element):
+        """Recursively process paragraphs and tables."""
+        if hasattr(element, 'paragraphs'): # It's a Document or a Table Cell
+            for para in element.paragraphs:
+                process_paragraph(para)
+        if hasattr(element, 'tables'):
+            for table in element.tables:
+                for row in table.rows:
+                    for cell in row.cells:
+                        process_element(cell)
+
+    def process_paragraph(para):
         # Strip junk from paragraph level too
         clean_para_text = encoding_manager.strip_all_junk(para.text)
         if not clean_para_text.strip():
             pdf.ln(12)
-            continue
+            return
 
         for run in para.runs:
             req_font = run.font.name or "Normal"
@@ -61,14 +72,26 @@ def process_docx_to_pdf_final(docx_path: Path, pdf_output_path: Path):
             # 3. Unicode Normalization (NFC)
             processed_text = unicodedata.normalize('NFC', processed_text)
             
+            # 3.5 Detect Script for Font Resolution
+            script = None
+            if any(0x0900 <= ord(c) <= 0x097F for c in processed_text):
+                script = "deva" # Devanagari
+            elif any(0x0C00 <= ord(c) <= 0x0C7F for c in processed_text):
+                script = "telu" # Telugu
+            elif any(0x0B80 <= ord(c) <= 0x0BFF for c in processed_text):
+                script = "taml" # Tamil
+
+            # Map to FontRegistry script names
+            script_map = {"deva": "devanagari", "telu": "telugu", "taml": "tamil"}
+            registry_script = script_map.get(script)
+            
             if input_text and not processed_text.strip() and any(c.isalnum() for c in input_text):
                 logger.error(f"DATA LOSS DETECTED: Input had alphanumeric text, output is empty. Input: {input_text[:20]}")
-                # We don't necessarily raise here to avoid total failure, but we log it.
             
             # 4. Font Resolution
-            res_path = font_registry.resolve_font(req_font, bold=run.bold, italic=run.italic)
+            res_path = font_registry.resolve_font(req_font, bold=run.bold, italic=run.italic, script=registry_script)
             if not res_path:
-                res_path = font_registry.resolve_font(req_font, ord(processed_text.strip()[0]) if processed_text.strip() else None)
+                res_path = font_registry.resolve_font(req_font, ord(processed_text.strip()[0]) if processed_text.strip() else None, script=registry_script)
 
             if res_path:
                 f_id = res_path.stem
@@ -79,15 +102,6 @@ def process_docx_to_pdf_final(docx_path: Path, pdf_output_path: Path):
                     except: continue
                 
                 pdf.set_font(f_id, size=f_size)
-                
-                # 5. Text Shaping Detection (Hindi Fix)
-                script = None
-                if any(0x0900 <= ord(c) <= 0x097F for c in processed_text):
-                    script = "deva" # Devanagari
-                elif any(0x0C00 <= ord(c) <= 0x0C7F for c in processed_text):
-                    script = "telu" # Telugu
-                elif any(0x0B80 <= ord(c) <= 0x0BFF for c in processed_text):
-                    script = "taml" # Tamil
                 
                 if script:
                     pdf.set_text_shaping(use_shaping_engine=True, script=script)
@@ -102,6 +116,36 @@ def process_docx_to_pdf_final(docx_path: Path, pdf_output_path: Path):
         
         pdf.ln(14)
 
+    def iter_block_items(parent):
+        from docx.document import Document
+        from docx.table import _Cell, Table
+        from docx.text.paragraph import Paragraph
+        
+        if isinstance(parent, Document):
+            parent_elm = parent.element.body
+        elif isinstance(parent, _Cell):
+            parent_elm = parent._tc
+        else:
+            return
+
+        for child in parent_elm.iterchildren():
+            if child.tag.endswith('p'):
+                yield Paragraph(child, parent)
+            elif child.tag.endswith('tbl'):
+                yield Table(child, parent)
+
+    # Process all elements in the document
+    for element in iter_block_items(doc):
+        from docx.table import Table
+        from docx.text.paragraph import Paragraph
+        if isinstance(element, Paragraph):
+            process_paragraph(element)
+        elif isinstance(element, Table):
+            for row in element.rows:
+                for cell in row.cells:
+                    for para in cell.paragraphs:
+                        process_paragraph(para)
+    
     pdf.output(str(pdf_output_path))
     return report
 
@@ -137,8 +181,17 @@ def process_txt_to_pdf(txt_path: Path, pdf_output_path: Path):
         processed_text = encoding_manager.strip_all_junk(para_text)
         processed_text = unicodedata.normalize('NFC', processed_text)
         
+        # 1.5 Script Detection
+        script = None
+        if any(0x0900 <= ord(c) <= 0x097F for c in processed_text): script = "deva"
+        elif any(0x0C00 <= ord(c) <= 0x0C7F for c in processed_text): script = "telu"
+        elif any(0x0B80 <= ord(c) <= 0x0BFF for c in processed_text): script = "taml"
+
+        script_map = {"deva": "devanagari", "telu": "telugu", "taml": "tamil"}
+        registry_script = script_map.get(script)
+
         # 2. Font Resolution (Using generic fallback)
-        res_path = font_registry.resolve_font("Normal", ord(processed_text.strip()[0]) if processed_text.strip() else None)
+        res_path = font_registry.resolve_font("Normal", ord(processed_text.strip()[0]) if processed_text.strip() else None, script=registry_script)
         
         if res_path:
             f_id = res_path.stem
@@ -151,11 +204,6 @@ def process_txt_to_pdf(txt_path: Path, pdf_output_path: Path):
             pdf.set_font(f_id, size=f_size)
             
             # 3. Shaping
-            script = None
-            if any(0x0900 <= ord(c) <= 0x097F for c in processed_text): script = "deva"
-            elif any(0x0C00 <= ord(c) <= 0x0C7F for c in processed_text): script = "telu"
-            elif any(0x0B80 <= ord(c) <= 0x0BFF for c in processed_text): script = "taml"
-            
             pdf.set_text_shaping(use_shaping_engine=True if script else False, script=script)
             pdf.write(h=f_size * 1.3, text=processed_text)
         else:

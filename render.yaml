@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: indic-pdf
+    runtime: docker
+    plan: free
+    envVars:
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: indic-pdf-cache
+          property: connectionString
+      - key: INDICPDF_API_KEY
+        generateValue: true
+      - key: INDICPDF_MASTER_KEY
+        generateValue: true
+    healthCheckPath: /
+
+  - type: keyvalue
+    name: indic-pdf-cache
+    plan: free
+    ipAllowList: [] # Only accessible within the project

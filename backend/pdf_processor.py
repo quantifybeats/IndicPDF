@@ -44,17 +44,41 @@ def process_pdf_to_docx(pdf_path: Path, docx_output_path: Path):
                     if not isinstance(line, LTTextLineHorizontal): continue
                     
                     line_text = line.get_text()
-                    # Use global aggressive stripper
-                    clean_text = encoding_manager.strip_all_junk(line_text)
+                    
+                    # 1. Resolve CIDs before stripping remaining junk
+                    def cid_replacer(match):
+                        cid_val = int(match.group(1))
+                        # We don't have the font name easily here for each char, 
+                        # but we can try to get it from the line
+                        resolved = encoding_manager.resolve_cid(cid_val, font_name)
+                        return resolved if resolved is not None else match.group(0)
+
+                    # Pre-extract font name for CID resolution context
+                    font_name = "Normal"
+                    for char in line:
+                        if hasattr(char, 'fontname'):
+                            font_name = normalize_font_name(char.fontname)
+                            break
+                    
+                    processed_line = re.sub(r'\(cid\s*:\s*(\d+)\s*\)', cid_replacer, line_text)
+                    processed_line = re.sub(r'cid\s*:\s*(\d+)', cid_replacer, processed_line)
+                    
+                    # 2. Junk Stripping & Normalization
+                    clean_text = encoding_manager.strip_all_junk(processed_line)
                     clean_text = unicodedata.normalize('NFC', clean_text)
                     
                     if not clean_text.strip(): continue
 
-                    font_name = "Normal"
+                    # 3. Script Detection for Font Resolution
+                    script = None
+                    if any(0x0900 <= ord(c) <= 0x097F for c in clean_text): script = "devanagari"
+                    elif any(0x0C00 <= ord(c) <= 0x0C7F for c in clean_text): script = "telugu"
+                    elif any(0x0B80 <= ord(c) <= 0x0BFF for c in clean_text): script = "tamil"
+
+                    # 4. Font Size Detection
                     font_size = 12
                     for char in line:
-                        if hasattr(char, 'fontname'):
-                            font_name = normalize_font_name(char.fontname)
+                        if hasattr(char, 'size'):
                             font_size = round(char.size, 1)
                             break
                     
@@ -64,7 +88,7 @@ def process_pdf_to_docx(pdf_path: Path, docx_output_path: Path):
                     if metadata:
                         run.font.name = metadata.family_name
                     elif clean_text.strip():
-                        fallback = font_registry.resolve_font(font_name, ord(clean_text.strip()[0]))
+                        fallback = font_registry.resolve_font(font_name, ord(clean_text.strip()[0]), script=script)
                         if fallback:
                             run.font.name = fallback.stem
                     

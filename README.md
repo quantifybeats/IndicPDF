@@ -26,12 +26,25 @@ The system relies on a **deterministic font asset layer** rather than OS-level d
 
 ## D. Module Breakdown
 
-*   **`backend/processor.py`**: The DOCX → PDF pipeline. Responsible for iterating over document runs, stripping junk, normalizing, resolving fonts, enabling shaping (`set_text_shaping`), and rendering via `pdf.write()`.
-*   **`backend/pdf_processor.py`**: The PDF → DOCX pipeline. Uses `pdfminer.six` to extract text boxes and lines, cleans the text, matches PDF subset fonts to local `FontRegistry` assets, and generates a formatted Word document.
-*   **`backend/encoding_manager.py`**: Handles text sanitization. Contains `strip_all_junk()` and infrastructure for legacy encoding conversions (e.g., APS/Anu mappings).
-*   **`backend/font_manager.py`**: Scans the `fonts/` directory using `fontTools`. Extracts Unicode coverage, weight, style, and family names. Provides a scoring-based `resolve_font()` method to find the best local match for a requested font.
+*   **`frontend/`**: The modern React + Vite + Tailwind CSS frontend. Replaced the monolithic static HTML with a component-based architecture for better performance and UX.
+*   **`backend/processor.py`**: The DOCX → PDF pipeline.
+*   **`backend/pdf_processor.py`**: The PDF → DOCX pipeline.
+*   **`backend/encoding_manager.py`**: Handles text sanitization.
+*   **`backend/font_manager.py`**: Manages the deterministic font asset layer.
 
-## E. Text Processing Pipeline (The "Golden Path")
+## E. Deployment (Render Native)
+
+The system is fully containerized and ready for Render via `render.yaml`. It uses a multi-stage Docker build to build the frontend and bundle it with the FastAPI backend.
+
+1.  **Web Service**: Runs both the FastAPI API and the RQ Worker (via `start.sh`).
+2.  **Redis (Key Value)**: Required for the task queue.
+
+**Environment Variables**:
+*   `REDIS_URL`: Auto-wired from the Redis service.
+*   `INDICPDF_API_KEY`: Auto-generated on first deploy.
+*   `INDICPDF_MASTER_KEY`: Auto-generated master key for file encryption.
+
+## F. Text Processing Pipeline (The "Golden Path")
 
 1.  **Input**: Raw text from DOCX run or PDF line.
 2.  **Sanitization**: `encoding_manager.strip_all_junk()` removes `(cid:N)` and `\x00-\x1F`.

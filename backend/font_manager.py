@@ -136,8 +136,8 @@ class FontRegistry:
                     self.script_fallback[script_name] = []
                 self.script_fallback[script_name].append(metadata)
 
-    def resolve_font(self, font_name: str, char_code: Optional[int] = None, bold: bool = False, italic: bool = False) -> Optional[Path]:
-        """Resolves a font name with weight/style preference."""
+    def resolve_font(self, font_name: str, char_code: Optional[int] = None, bold: bool = False, italic: bool = False, script: Optional[str] = None) -> Optional[Path]:
+        """Resolves a font name with weight/style preference and script awareness."""
         norm_requested = font_name.lower().replace(" ", "").replace("-", "")
         target_weight = "bold" if bold else "regular"
         target_style = "italic" if italic else "normal"
@@ -153,6 +153,11 @@ class FontRegistry:
                 score = 0
                 if metadata.weight == target_weight: score += 10
                 if metadata.style == target_style: score += 10
+                # Give a boost if it matches the detected script
+                if script and script in self.script_fallback:
+                    if metadata in self.script_fallback[script]:
+                        score += 5
+                
                 candidates.append((score, metadata))
 
         if candidates:
@@ -160,7 +165,22 @@ class FontRegistry:
             candidates.sort(key=lambda x: x[0], reverse=True)
             return candidates[0][1].path
 
-        # 2. Fallback by character/script
+        # 2. Fallback by script (High Priority)
+        if script and script in self.script_fallback:
+            script_fonts = self.script_fallback[script]
+            # Prioritize matching weight/style even in fallback
+            script_candidates = []
+            for metadata in script_fonts:
+                score = 0
+                if metadata.weight == target_weight: score += 10
+                if metadata.style == target_style: score += 10
+                script_candidates.append((score, metadata))
+            
+            if script_candidates:
+                script_candidates.sort(key=lambda x: x[0], reverse=True)
+                return script_candidates[0][1].path
+
+        # 3. Last Resort: Fallback by character
         if char_code:
             for script_name, fonts in self.script_fallback.items():
                 for font in fonts:
