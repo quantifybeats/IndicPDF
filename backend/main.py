@@ -477,12 +477,43 @@ async def startup_event():
 
 @app.get("/", response_class=HTMLResponse)
 async def serve_index():
-    """Explicitly serve index.html for the root path."""
+    """Explicitly serve index.html for the root path with enhanced diagnostics."""
     index_path = FRONTEND_DIST / "index.html"
+    
     if index_path.exists():
         return FileResponse(index_path)
+    
+    # Diagnostics for troubleshooting
+    try:
+        files_in_base = [f.name for f in BASE_DIR.iterdir()]
+        frontend_exists = (BASE_DIR / "frontend").exists()
+        dist_exists = FRONTEND_DIST.exists()
+    except Exception as e:
+        files_in_base = [f"Error: {e}"]
+        frontend_exists = dist_exists = False
+
     return HTMLResponse(
-        content=f"<html><body><h1>IndicPDF API</h1><p>Frontend not found at {FRONTEND_DIST}. Please check your build.</p></body></html>",
+        content=f"""
+        <html>
+            <body style="font-family: sans-serif; padding: 20px; line-height: 1.6;">
+                <h1 style="color: #d32f2f;">IndicPDF API - Frontend Not Found</h1>
+                <p>The application is running, but the static frontend files were not found.</p>
+                <div style="background: #f5f5f5; padding: 15px; border-radius: 5px; border: 1px solid #ddd;">
+                    <p><strong>Looked at:</strong> <code>{FRONTEND_DIST}</code></p>
+                    <p><strong>BASE_DIR:</strong> <code>{BASE_DIR}</code> (Exists: {BASE_DIR.exists()})</p>
+                    <p><strong>Frontend folder:</strong> <code>{BASE_DIR / "frontend"}</code> (Exists: {frontend_exists})</p>
+                    <p><strong>Dist folder:</strong> <code>{FRONTEND_DIST}</code> (Exists: {dist_exists})</p>
+                    <p><strong>Files in BASE_DIR:</strong> <code>{", ".join(files_in_base)}</code></p>
+                </div>
+                <p><strong>Possible Solutions:</strong></p>
+                <ul>
+                    <li>If using <b>Native Python</b>: Ensure your Build Command includes <code>cd frontend && npm install && npm run build</code>.</li>
+                    <li>If using <b>Docker</b>: Ensure your service is set to "Docker" in the Render Dashboard.</li>
+                    <li>Verify that <code>frontend/dist</code> is being generated correctly.</li>
+                </ul>
+            </body>
+        </html>
+        """,
         status_code=404
     )
 

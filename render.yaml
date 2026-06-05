@@ -14,7 +14,10 @@ services:
       - key: INDICPDF_MASTER_KEY
         generateValue: true
     healthCheckPath: /
-    # Command to run ONLY the FastAPI API
+    # For Native Python (if Render defaults to it)
+    buildCommand: "cd frontend && npm install && npm run build && cd .. && pip install -r requirements.txt"
+    startCommand: "python backend/main.py"
+    # For Docker
     dockerCommand: "uvicorn backend.main:app --host 0.0.0.0 --port 8000"
 
   - type: worker
