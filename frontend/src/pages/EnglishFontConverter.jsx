@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Copy, Check, Type } from 'lucide-react';
+import { Copy, Check, Type, ArrowLeft, ShieldCheck, Clock } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const MAPS = {
   serif_bold: {
@@ -8,7 +9,7 @@ const MAPS = {
     A:'𝐀',B:'𝐁',C:'𝐂',D:'𝐃',E:'𝐄',F:'𝐅',G:'𝐆',H:'𝐇',I:'𝐈',J:'𝐉',K:'𝐊',L:'𝐋',M:'𝐌',N:'𝐍',O:'𝐎',P:'𝐏',Q:'𝐐',R:'𝐑',S:'𝐒',T:'𝐓',U:'𝐔',V:'𝐕',W:'𝐖',X:'𝐗',Y:'𝐘',Z:'𝐙'
   },
   sans_bold: {
-    a:'𝗮',b:'𝗯',c:'𝗰',d:'𝗱',e:'𝗲',f:'𝗳',g:'𝗴',h:'𝗵',i:'𝗶',j:'𝗷',k:'𝗸',l:'𝗹',m:'𝗺',n:'𝗻',o:'𝗼',p:'𝗽',q:'𝗾',r:'𝗿',s:'𝘀',t:'𝘁',u:'𝘂',v:'𝘃',w:'𝘄',x:'𝘅',y:'𝘆',z:'𝘇',
+    a:'𝗮',b:'𝗯',c:'𝗰',d:'𝗱',e:'𝗲',f:'𝗳',g:'𝗴',h:'𝗵',i:'𝗶',j:'𝗷',k:'𝗸',l:'𝗹',m:'𝗺',n:'𝗻',o:'𝗼',p:'𝗽',q:'𝗾',r:'𝗿',s:'𝘀',t:'𝘁',u:'𝘂',v:'𝘃',w:'𝘄',x:'𝗅',y:'𝘆',z:'𝘇',
     A:'𝗔',B:'𝗕',C:'𝗖',D:'𝗗',E:'𝗘',F:'𝗙',G:'𝗚',H:'𝗛',I:'𝗜',J:'𝗝',K:'𝗞',L:'𝗟',M:'𝗠',N:'𝗡',O:'𝗢',P:'𝗣',Q:'𝗤',R:'𝗥',S:'𝗦',T:'𝗧',U:'𝗨',V:'𝗩',W:'𝗪',X:'𝗫',Y:'𝗬',Z:'𝗭'
   },
   cursive: {
@@ -40,51 +41,80 @@ const EnglishFontConverter = () => {
   };
 
   return (
-    <div className="container mx-auto px-6 py-12 max-w-[900px]">
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-surface rounded-radius shadow-shadow-lg overflow-hidden border border-border"
-      >
-        <div className="px-8 py-6 border-b border-border bg-bg/50">
-          <h1 className="text-2xl font-extrabold flex items-center gap-3">
-            <Type className="text-primary" /> English Font Converter
-          </h1>
-          <p className="text-text-muted text-sm mt-1">Transform your English text into stylish Unicode fonts for social media and documents.</p>
+    <div className="container mx-auto px-6 py-12 max-w-[1200px]">
+      <div className="mb-10">
+        <Link to="/" className="inline-flex items-center gap-2 text-text-muted hover:text-primary transition-colors text-sm font-bold uppercase tracking-wider mb-6">
+          <ArrowLeft size={16} /> Back to Tools
+        </Link>
+        <div className="flex items-start gap-6">
+          <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center text-3xl text-primary border border-primary/20 shrink-0">
+            𝔄
+          </div>
+          <div>
+            <h1 className="text-3xl font-black mb-2 tracking-tight">English Font Converter</h1>
+            <p className="text-text-muted leading-relaxed max-w-[600px]">Transform your English text into stylish Unicode fonts for social media and professional documents instantly.</p>
+          </div>
         </div>
+      </div>
 
-        <div className="p-8 space-y-8">
-          <div className="space-y-2">
-            <label className="text-sm font-bold text-text-muted uppercase tracking-wider">Your Text</label>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        {/* Left: Input */}
+        <div className="lg:col-span-5">
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="workspace-card p-8 sticky top-24"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <label className="text-[11px] font-black text-text-muted uppercase tracking-widest">Your Text</label>
+              <span className="text-[10px] text-primary font-bold">LIVE PREVIEW</span>
+            </div>
             <textarea
-              className="w-full h-32 p-4 bg-bg border border-border rounded-radius focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-none text-lg"
+              className="w-full h-[400px] p-5 bg-bg/50 border border-border rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-none text-xl leading-relaxed"
               placeholder="Type or paste your English text here..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
             />
-          </div>
+            <div className="mt-6 pt-6 border-t border-border flex flex-col gap-4 opacity-60">
+              <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest">
+                <ShieldCheck size={14} className="text-green-500" /> Client-side mapping
+              </div>
+              <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest">
+                <Clock size={14} className="text-primary" /> Instant transformation
+              </div>
+            </div>
+          </motion.div>
+        </div>
 
-          <div className="grid grid-cols-1 gap-4">
+        {/* Right: Previews */}
+        <div className="lg:col-span-7">
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="space-y-4"
+          >
             {Object.entries(MAPS).map(([id, map]) => {
-              const convertedText = convert(input || 'Sample Text', map);
+              const convertedText = convert(input || 'Style Preview', map);
               return (
-                <div key={id} className="group relative bg-bg border border-border rounded-radius p-5 hover:border-primary transition-colors">
-                  <div className="flex justify-between items-start">
+                <div key={id} className="group relative bg-surface border border-border rounded-radius p-6 hover:border-primary/50 transition-all shadow-shadow hover:shadow-shadow-lg flex items-center justify-between gap-6">
+                  <div className="flex-grow min-w-0">
                     <span className="text-[10px] font-black uppercase text-text-muted mb-2 block tracking-widest">{id.replace('_', ' ')}</span>
-                    <button 
-                      onClick={() => handleCopy(convertedText, id)}
-                      className="p-2 rounded-md hover:bg-surface text-text-muted hover:text-primary transition-all"
-                    >
-                      {copiedId === id ? <Check size={18} className="text-green-500" /> : <Copy size={18} />}
-                    </button>
+                    <p className="text-2xl break-words pr-4 text-text">{convertedText}</p>
                   </div>
-                  <p className="text-xl break-words pr-10">{convertedText}</p>
+                  <button 
+                    onClick={() => handleCopy(convertedText, id)}
+                    className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
+                      copiedId === id ? 'bg-green-500/10 text-green-500' : 'bg-bg border border-border text-text-muted hover:text-primary hover:border-primary'
+                    }`}
+                  >
+                    {copiedId === id ? <Check size={20} /> : <Copy size={20} />}
+                  </button>
                 </div>
               );
             })}
-          </div>
+          </motion.div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };

@@ -11,6 +11,10 @@
   html {
     scroll-behavior: smooth;
   }
+
+  ::selection {
+    @apply bg-primary/30 text-white;
+  }
 }
 
 @layer components {
@@ -18,52 +22,52 @@
     @apply font-extrabold text-xl text-text no-underline flex items-center gap-2;
   }
 
-  .nav-links a {
-    @apply no-underline text-text text-[0.9rem] font-semibold uppercase;
-  }
-
   .tool-card {
-    @apply bg-surface rounded-radius p-8 text-inherit transition-all duration-200 shadow-shadow flex flex-col items-start border border-transparent;
+    @apply bg-surface rounded-radius p-8 text-inherit transition-all duration-300 shadow-shadow flex flex-col items-start border border-border/50;
   }
 
   .tool-card:hover {
-    @apply -translate-y-[5px] shadow-shadow-lg border-primary;
+    @apply -translate-y-[8px] shadow-shadow-lg border-primary/50 bg-surface/80;
   }
 
   .tool-icon {
-    @apply w-12 h-12 bg-[#fdf2f2] rounded-lg flex items-center justify-center text-2xl mb-5;
+    @apply w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center text-2xl mb-5 text-primary border border-primary/20;
   }
 
   .drop-zone {
-    @apply bg-surface border-2 border-dashed border-border rounded-radius p-16 text-center cursor-pointer transition-all duration-200;
+    @apply bg-surface/50 border-2 border-dashed border-border rounded-radius p-16 text-center cursor-pointer transition-all duration-300;
   }
 
   .drop-zone:hover, .drop-zone.dragover {
-    @apply border-primary bg-[#fffafa];
+    @apply border-primary bg-primary/5;
   }
 
   .drop-zone.has-file {
-    @apply border-solid border-[#48bb78];
+    @apply border-solid border-green-500/50 bg-green-500/5;
   }
 
   .action-btn {
-    @apply w-full bg-primary text-white border-none p-4 rounded-lg text-lg font-bold cursor-pointer mt-6 transition-colors duration-200;
+    @apply w-full bg-primary text-white border-none p-4 rounded-lg text-lg font-bold cursor-pointer mt-6 transition-all duration-300 shadow-glow hover:shadow-primary/40;
   }
 
   .action-btn:hover:not(:disabled) {
-    @apply bg-primary-hover;
+    @apply bg-primary-hover -translate-y-[2px];
+  }
+
+  .action-btn:active:not(:disabled) {
+    @apply translate-y-[0px];
   }
 
   .action-btn:disabled {
-    @apply bg-[#ccc] cursor-not-allowed;
+    @apply bg-border text-text-muted cursor-not-allowed shadow-none;
   }
 
   .spinner {
-    @apply w-12 h-12 border-4 border-[#eee] border-t-primary rounded-full animate-spin mx-auto mb-6;
+    @apply w-12 h-12 border-4 border-surface border-t-primary rounded-full animate-spin mx-auto mb-6;
   }
 
   .step {
-    @apply flex items-center gap-3 mb-3 text-text-muted;
+    @apply flex items-center gap-3 mb-3 text-text-muted transition-colors duration-300;
   }
 
   .step.active {
@@ -71,18 +75,22 @@
   }
 
   .step-dot {
-    @apply w-[10px] h-[10px] rounded-full bg-[#eee];
+    @apply w-[10px] h-[10px] rounded-full bg-border;
   }
 
   .step.active .step-dot {
-    @apply bg-primary shadow-[0_0_0_4px_#fee2e2];
+    @apply bg-primary shadow-[0_0_0_4px_rgba(109,40,217,0.2)];
   }
 
   .step.done .step-dot {
-    @apply bg-[#48bb78];
+    @apply bg-green-500;
   }
 
   .dl-btn {
-    @apply bg-[#2d3748] text-white py-3 px-6 rounded-md no-underline font-bold inline-block mt-4;
+    @apply bg-primary text-white py-3 px-6 rounded-md no-underline font-bold inline-block mt-4 transition-all hover:bg-primary-hover hover:shadow-glow;
+  }
+
+  .workspace-card {
+    @apply bg-surface border border-border shadow-shadow-lg rounded-radius overflow-hidden;
   }
 }

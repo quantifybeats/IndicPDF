@@ -1,11 +1,12 @@
-import React, { useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useStore } from '../store';
 import axios from 'axios';
-import { FileText, Upload } from 'lucide-react';
+import { FileText, Upload, Loader2 } from 'lucide-react';
 
 const Dropzone = ({ tool }) => {
   const { currentFiles, setFiles, setUploadProgress, setProcessingStep, setJobIds, setActiveStep, setError, error, activeToolId, setAnalysisResult } = useStore();
+  const [loading, setLoading] = useState(false);
 
   const onDrop = useCallback((acceptedFiles) => {
     setFiles(acceptedFiles);
@@ -53,13 +54,17 @@ const Dropzone = ({ tool }) => {
   };
 
   const runAnalysis = async (file) => {
+    setLoading(true);
+    setError(null);
     const formData = new FormData();
     formData.append('file', file);
     try {
       const res = await axios.post('/analyse-pdf-quality', formData);
       setAnalysisResult(res.data);
     } catch (e) {
-      setError('Analysis failed.');
+      setError(e.response?.data?.detail || 'Analysis failed. The PDF might be corrupted or too large.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -79,7 +84,6 @@ const Dropzone = ({ tool }) => {
           setProcessingStep(0);
         } else {
           attempts++;
-          // Basic exponential backoff-ish
           const delay = Math.min(1000 + attempts * 500, 5000);
           setTimeout(poll, delay);
         }
@@ -99,7 +103,7 @@ const Dropzone = ({ tool }) => {
       >
         <input {...getInputProps()} />
         <div className="dz-icon mb-4">
-          {currentFiles.length > 0 ? <FileText size={48} className="text-green-500 mx-auto" /> : <Upload size={48} className="mx-auto" />}
+          {currentFiles.length > 0 ? <FileText size={48} className="text-primary mx-auto" /> : <Upload size={48} className="mx-auto" />}
         </div>
         <div className="dz-title text-lg font-bold mb-2">
           {currentFiles.length === 1 ? currentFiles[0].name : currentFiles.length > 1 ? `${currentFiles.length} files selected` : `Select ${tool.title.split(' ')[0]} files`}
@@ -111,14 +115,15 @@ const Dropzone = ({ tool }) => {
         </p>
       </div>
 
-      {error && <div className="mt-4 text-red-500 text-center font-semibold">{error}</div>}
+      {error && <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 text-red-500 text-center rounded-lg text-sm font-bold">{error}</div>}
 
       <button 
-        className="action-btn" 
-        disabled={currentFiles.length === 0}
+        className="action-btn flex items-center justify-center gap-2" 
+        disabled={currentFiles.length === 0 || loading}
         onClick={handleUpload}
       >
-        {currentFiles.length > 0 ? tool.action : 'Upload a file to start'}
+        {loading && <Loader2 size={20} className="animate-spin" />}
+        {loading ? 'Analysing...' : (currentFiles.length > 0 ? tool.action : 'Upload a file to start')}
       </button>
     </div>
   );
