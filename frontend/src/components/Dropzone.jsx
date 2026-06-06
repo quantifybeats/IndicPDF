@@ -14,13 +14,13 @@ const Dropzone = ({ tool }) => {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: tool.accept,
-    multiple: activeToolId !== 'analyser'
+    multiple: activeToolId !== 'pdf-analyser'
   });
 
   const handleUpload = async () => {
     if (currentFiles.length === 0) return;
 
-    if (activeToolId === 'analyser') {
+    if (activeToolId === 'pdf-analyser') {
       await runAnalysis(currentFiles[0]);
       return;
     }

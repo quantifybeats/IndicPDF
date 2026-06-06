@@ -13,7 +13,7 @@ services:
         generateValue: true
       - key: INDICPDF_MASTER_KEY
         generateValue: true
-    healthCheckPath: /
+    healthCheckPath: /health
     # For Native Python (if Render defaults to it)
     buildCommand: "cd frontend && npm install && npm run build && cd .. && pip install -r requirements.txt"
     startCommand: "python backend/main.py"

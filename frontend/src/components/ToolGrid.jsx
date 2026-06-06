@@ -21,10 +21,16 @@ const tools = [
     description: 'Convert plain text files to professional PDFs with automated font shaping and layout.',
   },
   {
-    id: 'analyser',
+    id: 'pdf-analyser',
     icon: '🔍',
     title: 'PDF Analyser',
     description: 'Check PDF health, font embedding, and searchability. Get a quality score for your documents.',
+  },
+  {
+    id: 'english-font-converter',
+    icon: '𝔄',
+    title: 'English Font Converter',
+    description: 'Create stylish English text for social media and documents using unique Unicode characters.',
   },
 ];
 

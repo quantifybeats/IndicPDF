@@ -92,6 +92,11 @@ async def secure_file_upload(file: UploadFile, destination_path: Path):
         logger.error(f"Failed to securely process upload {file.filename}: {e}")
         raise HTTPException(status_code=500, detail=f"Secure processing failed for {file.filename}")
 
+@app.get("/health")
+async def health_check():
+    """Lightweight health check for keep-alive pings."""
+    return {"status": "ok"}
+
 @app.post("/upload")
 @limiter.limit("5/minute")
 async def upload_files(request: Request, files: List[UploadFile] = File(...)):
@@ -475,51 +480,22 @@ async def startup_event():
     # Initialize the periodic cleanup cycle (2 hours)
     q.enqueue(cleanup_old_files_task, 2)
 
-@app.get("/", response_class=HTMLResponse)
-async def serve_index():
-    """Explicitly serve index.html for the root path with enhanced diagnostics."""
-    index_path = FRONTEND_DIST / "index.html"
+@app.get("/{full_path:path}")
+async def serve_frontend(full_path: str):
+    """Serve the frontend SPA, allowing React Router to handle sub-paths."""
+    # 1. Try to serve exact file from dist (e.g., assets/index-hash.js)
+    file_path = FRONTEND_DIST / full_path
+    if file_path.exists() and file_path.is_file():
+        return FileResponse(file_path)
     
+    # 2. Fallback to index.html for any other path (SPA routing)
+    index_path = FRONTEND_DIST / "index.html"
     if index_path.exists():
         return FileResponse(index_path)
     
-    # Diagnostics for troubleshooting
-    try:
-        files_in_base = [f.name for f in BASE_DIR.iterdir()]
-        frontend_exists = (BASE_DIR / "frontend").exists()
-        dist_exists = FRONTEND_DIST.exists()
-    except Exception as e:
-        files_in_base = [f"Error: {e}"]
-        frontend_exists = dist_exists = False
+    # 3. Diagnostics if frontend is missing
+    return HTMLResponse(content="Frontend not found. Please build the frontend first.", status_code=404)
 
-    return HTMLResponse(
-        content=f"""
-        <html>
-            <body style="font-family: sans-serif; padding: 20px; line-height: 1.6;">
-                <h1 style="color: #d32f2f;">IndicPDF API - Frontend Not Found</h1>
-                <p>The application is running, but the static frontend files were not found.</p>
-                <div style="background: #f5f5f5; padding: 15px; border-radius: 5px; border: 1px solid #ddd;">
-                    <p><strong>Looked at:</strong> <code>{FRONTEND_DIST}</code></p>
-                    <p><strong>BASE_DIR:</strong> <code>{BASE_DIR}</code> (Exists: {BASE_DIR.exists()})</p>
-                    <p><strong>Frontend folder:</strong> <code>{BASE_DIR / "frontend"}</code> (Exists: {frontend_exists})</p>
-                    <p><strong>Dist folder:</strong> <code>{FRONTEND_DIST}</code> (Exists: {dist_exists})</p>
-                    <p><strong>Files in BASE_DIR:</strong> <code>{", ".join(files_in_base)}</code></p>
-                </div>
-                <p><strong>Possible Solutions:</strong></p>
-                <ul>
-                    <li>If using <b>Native Python</b>: Ensure your Build Command includes <code>cd frontend && npm install && npm run build</code>.</li>
-                    <li>If using <b>Docker</b>: Ensure your service is set to "Docker" in the Render Dashboard.</li>
-                    <li>Verify that <code>frontend/dist</code> is being generated correctly.</li>
-                </ul>
-            </body>
-        </html>
-        """,
-        status_code=404
-    )
-
-# Mount frontend at the very end to avoid shadowing API routes
-if FRONTEND_DIST.exists():
-    app.mount("/", StaticFiles(directory=FRONTEND_DIST, html=True), name="frontend")
 
 if __name__ == "__main__":
     import uvicorn
