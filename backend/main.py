@@ -67,6 +67,8 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 logger.info(f"BASE_DIR: {BASE_DIR}")
 logger.info(f"FRONTEND_DIST: {FRONTEND_DIST} (Exists: {FRONTEND_DIST.exists()})")
+if FRONTEND_DIST.exists():
+    logger.info(f"Contents of FRONTEND_DIST: {[f.name for f in FRONTEND_DIST.iterdir()]}")
 
 # Import tasks (must be importable by worker too)
 from tasks import convert_docx_to_pdf_task, convert_pdf_to_docx_task, convert_txt_to_pdf_task, cleanup_old_files_task
@@ -491,7 +493,11 @@ async def serve_frontend(full_path: str):
     # 2. Fallback to index.html for any other path (SPA routing)
     index_path = FRONTEND_DIST / "index.html"
     if index_path.exists():
-        return FileResponse(index_path)
+        # Set no-cache for index.html to ensure users always get the latest build pointers
+        return FileResponse(
+            index_path, 
+            headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"}
+        )
     
     # 3. Diagnostics if frontend is missing
     return HTMLResponse(content="Frontend not found. Please build the frontend first.", status_code=404)
