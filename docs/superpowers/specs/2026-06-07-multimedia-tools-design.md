@@ -162,22 +162,41 @@ A one-time Python script (not run at server startup). Run locally, commit the fo
 - Primary: Google Fonts CSS API (no API key needed)
 - Secondary: Noto fonts from `https://github.com/notofonts` releases (for scripts with limited Google Fonts coverage)
 
-### Language → Script → Google Font Families
+### Font Priority Tiers
 
-| Language | Script | HarfBuzz tag | Key Google Fonts |
+**Tier 1 — Pan-India Core (auto-downloaded, OFL)**
+| Font | Scripts | Source |
+|---|---|---|
+| Noto Sans Indic | All 10 scripts | Google Fonts / github.com/notofonts |
+| Noto Serif Indic | All 10 scripts | Google Fonts / github.com/notofonts |
+| Lohit Series | Devanagari, Tamil, Telugu, Bengali, Gujarati, Kannada, Odia, Malayalam | github.com/nicowillis/lohit-fonts |
+
+**Tier 2 — Regional Priority (auto-downloaded, OFL)**
+| Language | Script | HarfBuzz tag | Fonts |
 |---|---|---|---|
-| Hindi | Devanagari | `deva` | already covered |
-| Bengali | Bengali | `beng` | Noto Sans Bengali, Hind Siliguri, Baloo Da 2, Tiro Bangla, Kalam, Mukta Mahee |
-| Marathi | Devanagari | `deva` | Noto Sans Devanagari, Tiro Devanagari Marathi, Baloo 2 |
-| Telugu | Telugu | `telu` | already covered |
-| Tamil | Tamil | `taml` | Noto Sans Tamil, Hind Madurai, Baloo Thambi 2, Tiro Tamil, Arima |
-| Gujarati | Gujarati | `gujr` | Noto Sans Gujarati, Hind Vadodara, Rasa, Baloo Bhai 2, Tiro Devanagari Gujarati |
-| Urdu | Arabic | `arab` | Noto Nastaliq Urdu, Noto Sans Arabic — **RTL, note below** |
-| Kannada | Kannada | `knda` | Noto Sans Kannada, Hind Mysuru, Baloo Tamma 2, Tiro Kannada |
-| Odia | Oriya | `orya` | Noto Sans Oriya, Baloo Bhaina 2, Subhadra |
-| Malayalam | Malayalam | `mlym` | Noto Sans Malayalam, Baloo Chettan 2, Chilanka, Gayathri, Manjari |
+| Hindi/Marathi | Devanagari | `deva` | Noto Sans/Serif Devanagari, Lohit Devanagari, Tiro Devanagari Hindi/Marathi, Baloo 2, Mukta |
+| Tamil | Tamil | `taml` | Noto Sans/Serif Tamil, Lohit Tamil, Hind Madurai, Baloo Thambi 2, Tiro Tamil |
+| Telugu | Telugu | `telu` | Noto Sans/Serif Telugu, Lohit Telugu, Mandali, Baloo Tammudu 2 |
+| Bengali | Bengali | `beng` | Noto Sans/Serif Bengali, Lohit Bengali, SolaimanLipi, Hind Siliguri, Tiro Bangla |
+| Kannada | Kannada | `knda` | Noto Sans/Serif Kannada, Lohit Kannada, Hind Mysuru, Baloo Tamma 2, Tiro Kannada |
+| Gujarati | Gujarati | `gujr` | Noto Sans/Serif Gujarati, Lohit Gujarati, Hind Vadodara, Rasa |
+| Malayalam | Malayalam | `mlym` | Noto Sans/Serif Malayalam, Lohit Malayalam, Chilanka, Gayathri, Manjari |
+| Odia | Oriya | `orya` | Noto Sans/Serif Oriya, Lohit Odia, Baloo Bhaina 2 |
+| Urdu | Arabic | `arab` | Noto Nastaliq Urdu, Noto Sans Arabic — **RTL flagged, see note** |
 
-**Urdu/RTL note:** Urdu uses right-to-left Arabic Nastaliq script. The existing fpdf2+HarfBuzz pipeline supports RTL via the `arab` script tag, but the PDF processor's line reconstruction logic assumes LTR. Urdu font download is included; full RTL pipeline support is a known future constraint (flagged, not blocked).
+**Tier 3 — Proprietary / Manual Drop-in (NOT auto-downloaded)**
+
+These require a license. Drop files manually into the correct `fonts/system/LANGUAGE/` folder — FontRegistry picks them up automatically.
+
+| Font | Script | Why needed |
+|---|---|---|
+| Kruti Dev | Devanagari | ~75% North India DTP print legacy |
+| Nirmala UI | Multi-script | Windows default UI font |
+| Latha / Gautami / Tunga / Vrinda | Tamil/Telugu/Kannada/Bengali | Windows legacy system fonts |
+| Bamini / TSCII | Tamil | Legacy print media |
+| Nudi / Baraha | Kannada | Legacy DTP |
+
+**Urdu/RTL note:** fpdf2+HarfBuzz supports RTL via `arab` tag, but the line reconstruction logic in `pdf_processor.py` assumes LTR. Urdu fonts are downloaded; full RTL pipeline is a future constraint.
 
 ### FontRegistry Update
 `backend/font_manager.py` already recursively scans `fonts/system/`. No code change needed — new folders are picked up automatically on next server start.
