@@ -31,6 +31,30 @@ The system relies on a **deterministic font asset layer** rather than OS-level d
 *   **`backend/pdf_processor.py`**: The PDF → DOCX pipeline.
 *   **`backend/encoding_manager.py`**: Handles text sanitization.
 *   **`backend/font_manager.py`**: Manages the deterministic font asset layer.
+*   **`scripts/download_indic_fonts.py`**: One-time CLI script to download OFL-licensed Google Fonts + Lohit fonts for 8 new Indic language scripts into `fonts/system/`. Re-runnable — skips already-present files. Run with `python3 scripts/download_indic_fonts.py` or `--lang Bengali` for a single language.
+
+<!-- AUTO-GENERATED: font-registry -->
+## G. Font Registry (Track B)
+
+`fonts/system/` contains TTF/OTF fonts organized by script folder. FontRegistry auto-scans all subfolders on startup — dropping a font file in is sufficient.
+
+| Folder | Script | Bundled Fonts |
+|--------|--------|--------------|
+| `Hindi/` | Devanagari | Noto Sans/Serif Devanagari |
+| `telugu/` | Telugu | Noto Sans/Serif Telugu |
+| `devanagari/` | Devanagari | (legacy alias) |
+| `latin/` | Latin | Inter, Roboto |
+| `Bengali/` | Bengali | Noto Sans/Serif Bengali, Hind Siliguri, Baloo Da 2, Tiro Bangla, Kalam, Mukta Mahee, Lohit-Bengali |
+| `Tamil/` | Tamil | Noto Sans/Serif Tamil, Hind Madurai, Baloo Thambi 2, Tiro Tamil, Arima, Lohit-Tamil |
+| `Marathi/` | Devanagari | Noto Sans/Serif Devanagari, Tiro Devanagari Marathi, Baloo 2, Lohit-Devanagari |
+| `Gujarati/` | Gujarati | Noto Sans/Serif Gujarati, Hind Vadodara, Rasa, Baloo Bhai 2, Lohit-Gujarati |
+| `Kannada/` | Kannada | Noto Sans/Serif Kannada, Hind Mysuru, Baloo Tamma 2, Tiro Kannada, Lohit-Kannada |
+| `Malayalam/` | Malayalam | Noto Sans/Serif Malayalam, Baloo Chettan 2, Chilanka, Gayathri, Manjari, Lohit-Malayalam |
+| `Odia/` | Odia | Noto Sans/Serif Oriya, Baloo Bhaina 2, Lohit-Odia |
+| `Urdu/` | Arabic/Nastaliq | Noto Nastaliq Urdu, Noto Sans Arabic |
+
+All fonts are OFL-licensed. Proprietary fonts (Kruti Dev, Nirmala UI, Latha, Gautami, Tunga, Vrinda) can be dropped in manually if you hold a license.
+<!-- END AUTO-GENERATED: font-registry -->
 
 ## E. Deployment (Render Native)
 

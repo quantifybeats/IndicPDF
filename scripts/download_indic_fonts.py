@@ -8,6 +8,7 @@ Usage:
 
 Fonts are saved to fonts/system/LANGUAGE/. Existing files are skipped.
 """
+import hashlib
 import io
 import re
 import sys
@@ -118,19 +119,21 @@ LANGUAGE_FONTS = {
 }
 
 # Lohit fonts — official pagure.io tarball releases (OFL-licensed)
-# Each value is (tarball_url, ttf_filename_inside_tarball)
-LOHIT_FONTS = {
-    "Bengali":   ("https://releases.pagure.org/lohit/lohit-bengali-ttf-2.91.5.tar.gz",   "Lohit-Bengali.ttf"),
-    "Tamil":     ("https://releases.pagure.org/lohit/lohit-tamil-ttf-2.91.3.tar.gz",     "Lohit-Tamil.ttf"),
-    "Marathi":   ("https://releases.pagure.org/lohit/lohit-devanagari-ttf-2.95.4.tar.gz","Lohit-Devanagari.ttf"),
-    "Gujarati":  ("https://releases.pagure.org/lohit/lohit-gujarati-ttf-2.92.4.tar.gz",  "Lohit-Gujarati.ttf"),
-    "Kannada":   ("https://releases.pagure.org/lohit/lohit-kannada-ttf-2.5.4.tar.gz",    "Lohit-Kannada.ttf"),
-    "Malayalam": ("https://releases.pagure.org/lohit/lohit-malayalam-ttf-2.92.2.tar.gz", "Lohit-Malayalam.ttf"),
-    "Odia":      ("https://releases.pagure.org/lohit/lohit-odia-ttf-2.91.2.tar.gz",      "Lohit-Odia.ttf"),
+# Each value is (tarball_url, ttf_filename_inside_tarball, expected_sha256_of_tarball)
+# SHA-256 digests must be verified before deploying; replace TODO sentinels after
+# computing: sha256sum <downloaded_tarball>
+LOHIT_FONTS: dict[str, tuple[str, str, str]] = {
+    "Bengali":   ("https://releases.pagure.org/lohit/lohit-bengali-ttf-2.91.5.tar.gz",   "Lohit-Bengali.ttf",    "4067fde137504b673dfb04920cae0c927c39b9b0864eebe0d31a0d689762ac17"),
+    "Tamil":     ("https://releases.pagure.org/lohit/lohit-tamil-ttf-2.91.3.tar.gz",     "Lohit-Tamil.ttf",      "f2570dc3cee8f65850b0ac02ab00527f1eeb85cac7fde12a69cec4b00f7fc3f1"),
+    "Marathi":   ("https://releases.pagure.org/lohit/lohit-devanagari-ttf-2.95.4.tar.gz","Lohit-Devanagari.ttf", "e826ce0aa39e8b978ed73c0d419bc1f9f14392ac6f2672bcdb3fb39829614401"),
+    "Gujarati":  ("https://releases.pagure.org/lohit/lohit-gujarati-ttf-2.92.4.tar.gz",  "Lohit-Gujarati.ttf",   "069c226c5d3f1d70ef5e90c47a4d1f8fbddcc68d900b58527d0e3d43f64e660f"),
+    "Kannada":   ("https://releases.pagure.org/lohit/lohit-kannada-ttf-2.5.4.tar.gz",    "Lohit-Kannada.ttf",    "ef2daed2d05d35809e63b63e6aa8715cfed0bfa1a09497953b5c2f33d0b3c884"),
+    "Malayalam": ("https://releases.pagure.org/lohit/lohit-malayalam-ttf-2.92.2.tar.gz", "Lohit-Malayalam.ttf",  "4b3337f2fb8094ff4e302f2452e1d0ca5987f1352309e835cbf65cbb62366e30"),
+    "Odia":      ("https://releases.pagure.org/lohit/lohit-odia-ttf-2.91.2.tar.gz",      "Lohit-Odia.ttf",       "dff79ccc1186663e103ececa6346acf739391da05f860cfa620534aa6c2955c0"),
 }
 
 
-def get_font_urls(family: str) -> list:
+def get_font_urls(family: str) -> list[str]:
     """Fetch all TTF download URLs for a Google Fonts family via the CSS API."""
     # Use css v1 API with legacy UA to get TTF (not WOFF2) URLs
     url = f"https://fonts.googleapis.com/css?family={family.replace(' ', '+')}"
@@ -170,8 +173,8 @@ def download_language_fonts(lang: str, config: dict) -> None:
             print(f"    ✗ SKIP {family}: {exc}")
 
 
-def download_lohit_font(lang: str, tarball_url: str, ttf_name: str) -> None:
-    """Download a Lohit font tarball and extract the TTF file."""
+def download_lohit_font(lang: str, tarball_url: str, ttf_name: str, expected_sha256: str) -> None:
+    """Download a Lohit font tarball, verify its SHA-256 digest, and extract the TTF file."""
     folder = FONTS_BASE / lang
     folder.mkdir(parents=True, exist_ok=True)
     dest = folder / ttf_name
@@ -180,9 +183,26 @@ def download_lohit_font(lang: str, tarball_url: str, ttf_name: str) -> None:
     try:
         resp = requests.get(tarball_url, headers=HEADERS, timeout=60)
         resp.raise_for_status()
+        # --- Supply-chain integrity check ---
+        if expected_sha256.startswith("TODO:"):
+            sys.exit(
+                f"ABORT: SHA-256 digest not configured for {ttf_name}. "
+                "Compute it with: sha256sum <tarball> and update LOHIT_FONTS."
+            )
+        actual_sha256 = hashlib.sha256(resp.content).hexdigest()
+        if actual_sha256 != expected_sha256:
+            sys.exit(
+                f"ABORT: SHA-256 mismatch for {ttf_name}. "
+                f"Expected {expected_sha256}, got {actual_sha256}. "
+                "The tarball may have been tampered with."
+            )
         with tarfile.open(fileobj=io.BytesIO(resp.content), mode="r:gz") as tar:
             for member in tar.getmembers():
-                if member.name.endswith(ttf_name):
+                # Guard 1: only extract regular files, never symlinks/hardlinks/devices
+                if not member.isfile():
+                    continue
+                # Guard 2: match on basename only to prevent path-traversal via crafted names
+                if Path(member.name).name == ttf_name:
                     f = tar.extractfile(member)
                     if f:
                         dest.write_bytes(f.read())
@@ -208,8 +228,8 @@ def main(langs: list[str] | None = None) -> None:
     for lang in target_langs:
         if lang in LOHIT_FONTS:
             print(f"\n[{lang} — Lohit]")
-            tarball_url, ttf_name = LOHIT_FONTS[lang]
-            download_lohit_font(lang, tarball_url, ttf_name)
+            tarball_url, ttf_name, expected_sha256 = LOHIT_FONTS[lang]
+            download_lohit_font(lang, tarball_url, ttf_name, expected_sha256)
 
     print("\n✓ Done. Drop proprietary fonts (Kruti Dev, Nirmala UI etc.) manually.")
 
