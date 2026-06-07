@@ -5,7 +5,7 @@ import shutil
 import tempfile
 from pathlib import Path
 from typing import List
-from fastapi import FastAPI, UploadFile, File, HTTPException, BackgroundTasks, Depends, Security
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, BackgroundTasks, Depends, Security
 from fastapi.responses import FileResponse, HTMLResponse, Response
 from fastapi.security.api_key import APIKeyHeader
 from redis import Redis
@@ -72,6 +72,7 @@ if FRONTEND_DIST.exists():
 
 # Import tasks (must be importable by worker too)
 from tasks import convert_docx_to_pdf_task, convert_pdf_to_docx_task, convert_txt_to_pdf_task, cleanup_old_files_task
+from ocr_processor import LANG_MAP as OCR_LANG_MAP
 from security_manager import security_manager
 import io
 
@@ -172,6 +173,24 @@ async def upload_files(request: Request, files: List[UploadFile] = File(...)):
         })
         
     return {"jobs": job_ids}
+
+@app.post("/ocr")
+async def ocr_upload(
+    file: UploadFile = File(...),
+    lang: str = Form(default="auto"),
+):
+    allowed_exts = {".pdf", ".jpg", ".jpeg", ".png", ".tiff", ".tif"}
+    ext = Path(file.filename).suffix.lower()
+    if ext not in allowed_exts:
+        raise HTTPException(status_code=400, detail=f"Unsupported file type: {ext}. Allowed: {', '.join(allowed_exts)}")
+    if lang not in OCR_LANG_MAP:
+        raise HTTPException(status_code=400, detail=f"Unknown language: {lang}. Valid: {', '.join(OCR_LANG_MAP.keys())}")
+    job_id = str(uuid.uuid4())
+    input_path = UPLOAD_DIR / f"{job_id}_input{ext}"
+    contents = await file.read()
+    input_path.write_bytes(contents)
+    q.enqueue("backend.worker.process_ocr", job_id=job_id, file_path=str(input_path), lang=lang, job_timeout=300)
+    return {"job_id": job_id}
 
 @app.post("/batch/upload")
 @limiter.limit("2/minute")
