@@ -1,12 +1,16 @@
-# IndicPDF — Multimedia Tools Addition
+# IndicPDF — Phase 1: Multimedia Tools + Indic Font Expansion
 **Date:** 2026-06-07  
-**Phase:** 1 of 3 (Multimedia tools + UI placeholders)
+**Phase:** 1 of 3
 
 ---
 
 ## Overview
 
-Add browser-side image, video, and audio conversion to IndicPDF using FFmpeg.wasm. Conversions run entirely in the user's browser — zero server load. Two minor backend header changes required for FFmpeg.wasm compatibility.
+Two parallel tracks in Phase 1:
+
+**Track A — Multimedia Tools**: Add browser-side image, video, and audio conversion via FFmpeg.wasm. Zero server load.
+
+**Track B — Indic Font Expansion**: Write a one-time download script that pulls all available Google Fonts (and Noto fonts from GitHub) for the top 10 most spoken Indian languages, supplementing existing bundled fonts.
 
 Deferred to later phases:
 - Full UI redesign (warm light theme, grid launcher layout)
@@ -118,9 +122,72 @@ Navbar gets a **"Media"** dropdown group alongside existing tool links. On mobil
 
 ---
 
+---
+
+## Track B — Indic Font Expansion
+
+### Goal
+Supplement existing bundled fonts with all available Google Fonts for the top 10 most spoken Indian languages. Keep existing fonts untouched; only add new ones.
+
+### Font Folder Structure
+
+```
+fonts/system/
+├── Hindi/          ✅ existing (extensive)
+├── Telugu/         ✅ existing (extensive)
+├── devanagari/     ✅ existing (keep as-is)
+├── latin/          ✅ existing
+├── Tamil/          🆕 dedicated folder (currently scattered in devanagari/)
+├── Bengali/        🆕
+├── Marathi/        🆕 (Devanagari script — different font families from Hindi)
+├── Gujarati/       🆕
+├── Kannada/        🆕
+├── Malayalam/      🆕
+├── Odia/           🆕
+└── Urdu/           🆕 (Nastaliq/Arabic script — RTL)
+```
+
+### Download Script: `scripts/download_indic_fonts.py`
+
+A one-time Python script (not run at server startup). Run locally, commit the fonts.
+
+**Approach:**
+1. For each language, define a list of Google Font family names
+2. Fetch `https://fonts.googleapis.com/css2?family=FAMILY&subset=SCRIPT` with a desktop User-Agent
+3. Parse the CSS response to extract `.ttf` URLs from `fonts.gstatic.com`
+4. Download and save to the correct `fonts/system/LANGUAGE/` folder
+5. Skip files that already exist (idempotent)
+
+**Font sources:**
+- Primary: Google Fonts CSS API (no API key needed)
+- Secondary: Noto fonts from `https://github.com/notofonts` releases (for scripts with limited Google Fonts coverage)
+
+### Language → Script → Google Font Families
+
+| Language | Script | HarfBuzz tag | Key Google Fonts |
+|---|---|---|---|
+| Hindi | Devanagari | `deva` | already covered |
+| Bengali | Bengali | `beng` | Noto Sans Bengali, Hind Siliguri, Baloo Da 2, Tiro Bangla, Kalam, Mukta Mahee |
+| Marathi | Devanagari | `deva` | Noto Sans Devanagari, Tiro Devanagari Marathi, Baloo 2 |
+| Telugu | Telugu | `telu` | already covered |
+| Tamil | Tamil | `taml` | Noto Sans Tamil, Hind Madurai, Baloo Thambi 2, Tiro Tamil, Arima |
+| Gujarati | Gujarati | `gujr` | Noto Sans Gujarati, Hind Vadodara, Rasa, Baloo Bhai 2, Tiro Devanagari Gujarati |
+| Urdu | Arabic | `arab` | Noto Nastaliq Urdu, Noto Sans Arabic — **RTL, note below** |
+| Kannada | Kannada | `knda` | Noto Sans Kannada, Hind Mysuru, Baloo Tamma 2, Tiro Kannada |
+| Odia | Oriya | `orya` | Noto Sans Oriya, Baloo Bhaina 2, Subhadra |
+| Malayalam | Malayalam | `mlym` | Noto Sans Malayalam, Baloo Chettan 2, Chilanka, Gayathri, Manjari |
+
+**Urdu/RTL note:** Urdu uses right-to-left Arabic Nastaliq script. The existing fpdf2+HarfBuzz pipeline supports RTL via the `arab` script tag, but the PDF processor's line reconstruction logic assumes LTR. Urdu font download is included; full RTL pipeline support is a known future constraint (flagged, not blocked).
+
+### FontRegistry Update
+`backend/font_manager.py` already recursively scans `fonts/system/`. No code change needed — new folders are picked up automatically on next server start.
+
+---
+
 ## What This Does NOT Change
 
 - Existing Indic PDF pipeline (DOCX↔PDF, TXT→PDF, Analyser, Font Converter)
 - Backend job queue, Redis, RQ worker
 - Existing UI design/theme (redesign is Phase 2)
 - Routing structure for existing pages
+- FontRegistry scan logic (already handles new folders automatically)
