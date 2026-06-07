@@ -203,10 +203,83 @@ These require a license. Drop files manually into the correct `fonts/system/LANG
 
 ---
 
+---
+
+## Track C — OCR (Scanned PDF / Image → Searchable Text)
+
+### Goal
+Allow users to upload scanned PDFs or images and get back searchable text or a searchable PDF, with full support for all 10 Indic scripts.
+
+### Approach: Server-side pytesseract
+
+Tesseract has production-quality Indic language packs (hin, tel, tam, ben, guj, kan, mal, ori). Running server-side gives better accuracy than browser-side Tesseract.js, especially for complex Indic conjuncts.
+
+**Render Starter impact:** Tesseract + language packs add ~200MB to Docker image. Still within limits. Memory usage per job is ~80–120MB — manageable with the existing RQ worker queue.
+
+### New Backend Dependencies
+```
+pytesseract       # Python wrapper for Tesseract
+pdf2image         # PDF page → PIL image (uses Poppler)
+Pillow            # Image processing
+```
+
+Dockerfile additions:
+```dockerfile
+RUN apt-get install -y tesseract-ocr poppler-utils \
+    tesseract-ocr-hin tesseract-ocr-tel tesseract-ocr-tam \
+    tesseract-ocr-ben tesseract-ocr-guj tesseract-ocr-kan \
+    tesseract-ocr-mal tesseract-ocr-ori tesseract-ocr-pan
+```
+
+### New Backend Module: `backend/ocr_processor.py`
+- `detect_language(image)` — auto-detects script using Unicode range sampling (optional, user can override)
+- `ocr_pdf(file_path, lang)` → extracted text string
+- `ocr_to_searchable_pdf(file_path, lang)` → PDF with invisible text layer (using `pytesseract.Output.PDF`)
+- Queued via RQ worker like existing jobs
+
+### New Frontend Page: `/ocr`
+- Accepts: PDF, JPG, PNG, TIFF (scanned documents)
+- Language selector: Auto-detect + manual override (Hindi, Telugu, Tamil, Bengali, Gujarati, Kannada, Malayalam, Odia, Punjabi, English)
+- Output options: **Extracted Text** or **Searchable PDF**
+- Uses existing `Dropzone`, `ProcessingSteps`, `SuccessView` components
+
+### OCR Flow
+1. User uploads scanned PDF/image + selects language
+2. Job enqueued to RQ worker
+3. `pdf2image` converts PDF pages to PIL images
+4. `pytesseract` runs OCR with selected language pack
+5. Output: plain text download OR searchable PDF with text layer
+
+---
+
+## ECC Skills Integration
+
+ECC skills to use at each phase of implementation:
+
+| Phase | Skill | Trigger |
+|---|---|---|
+| After every backend change | `ecc:fastapi-review` | Review routes, async, error handling |
+| After pipeline/OCR changes | `ecc:python-review` | Review processor modules |
+| After every React change | `ecc:react-review` | Review components, hooks |
+| Vite config / build issues | `ecc:vite-patterns` | Build optimisation |
+| Before each Render deploy | `ecc:security-scan` | Check for vulnerabilities |
+| Dockerfile improvements | `ecc:docker-patterns` | Optimise multi-stage build |
+| UI testing | `ecc:e2e-testing` | Playwright tests on live pages |
+| New features | `ecc:tdd-workflow` | Write tests first |
+| End of each phase | `ecc:pr` | Create polished GitHub PR |
+| After spec changes | `ecc:update-docs` | Keep docs in sync |
+
+**ECC MCP tools in use:**
+- **Memory MCP** — persist architecture decisions across sessions
+- **Context7 MCP** — live docs for fpdf2, FFmpeg.wasm, pytesseract, FastAPI
+- **Playwright MCP** — browser-based UI verification after each phase
+- **GitHub MCP** — branch/PR management per phase
+
+---
+
 ## What This Does NOT Change
 
 - Existing Indic PDF pipeline (DOCX↔PDF, TXT→PDF, Analyser, Font Converter)
-- Backend job queue, Redis, RQ worker
 - Existing UI design/theme (redesign is Phase 2)
 - Routing structure for existing pages
 - FontRegistry scan logic (already handles new folders automatically)
