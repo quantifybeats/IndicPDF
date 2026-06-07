@@ -8,8 +8,10 @@ Usage:
 
 Fonts are saved to fonts/system/LANGUAGE/. Existing files are skipped.
 """
+import io
 import re
 import sys
+import tarfile
 import argparse
 from pathlib import Path
 
@@ -26,6 +28,11 @@ HEADERS = {
         "AppleWebKit/537.36 (KHTML, like Gecko) "
         "Chrome/120.0.0.0 Safari/537.36"
     )
+}
+
+# Legacy User-Agent to get TTF (not WOFF2) from Google Fonts CSS API
+FONTS_CSS_HEADERS = {
+    "User-Agent": "Mozilla/4.0 (compatible)"
 }
 
 # Google Fonts families per language (all OFL-licensed)
@@ -110,23 +117,24 @@ LANGUAGE_FONTS = {
     },
 }
 
-# Lohit fonts — GitHub release direct TTF URLs (OFL)
+# Lohit fonts — official pagure.io tarball releases (OFL-licensed)
+# Each value is (tarball_url, ttf_filename_inside_tarball)
 LOHIT_FONTS = {
-    "Bengali":   "https://github.com/nicowillis/lohit-fonts/raw/main/lohit-bengali/Lohit-Bengali.ttf",
-    "Tamil":     "https://github.com/nicowillis/lohit-fonts/raw/main/lohit-tamil/Lohit-Tamil.ttf",
-    "Telugu":    "https://github.com/nicowillis/lohit-fonts/raw/main/lohit-telugu/Lohit-Telugu.ttf",
-    "Gujarati":  "https://github.com/nicowillis/lohit-fonts/raw/main/lohit-gujarati/Lohit-Gujarati.ttf",
-    "Kannada":   "https://github.com/nicowillis/lohit-fonts/raw/main/lohit-kannada/Lohit-Kannada.ttf",
-    "Malayalam": "https://github.com/nicowillis/lohit-fonts/raw/main/lohit-malayalam/Lohit-Malayalam.ttf",
-    "Odia":      "https://github.com/nicowillis/lohit-fonts/raw/main/lohit-odia/Lohit-Odia.ttf",
-    "Marathi":   "https://github.com/nicowillis/lohit-fonts/raw/main/lohit-devanagari/Lohit-Devanagari.ttf",
+    "Bengali":   ("https://releases.pagure.org/lohit/lohit-bengali-ttf-2.91.5.tar.gz",   "Lohit-Bengali.ttf"),
+    "Tamil":     ("https://releases.pagure.org/lohit/lohit-tamil-ttf-2.91.3.tar.gz",     "Lohit-Tamil.ttf"),
+    "Marathi":   ("https://releases.pagure.org/lohit/lohit-devanagari-ttf-2.95.4.tar.gz","Lohit-Devanagari.ttf"),
+    "Gujarati":  ("https://releases.pagure.org/lohit/lohit-gujarati-ttf-2.92.4.tar.gz",  "Lohit-Gujarati.ttf"),
+    "Kannada":   ("https://releases.pagure.org/lohit/lohit-kannada-ttf-2.5.4.tar.gz",    "Lohit-Kannada.ttf"),
+    "Malayalam": ("https://releases.pagure.org/lohit/lohit-malayalam-ttf-2.92.2.tar.gz", "Lohit-Malayalam.ttf"),
+    "Odia":      ("https://releases.pagure.org/lohit/lohit-odia-ttf-2.91.2.tar.gz",      "Lohit-Odia.ttf"),
 }
 
 
 def get_font_urls(family: str) -> list:
     """Fetch all TTF download URLs for a Google Fonts family via the CSS API."""
-    url = f"https://fonts.googleapis.com/css2?family={family.replace(' ', '+')}"
-    resp = requests.get(url, headers=HEADERS, timeout=15)
+    # Use css v1 API with legacy UA to get TTF (not WOFF2) URLs
+    url = f"https://fonts.googleapis.com/css?family={family.replace(' ', '+')}"
+    resp = requests.get(url, headers=FONTS_CSS_HEADERS, timeout=15)
     resp.raise_for_status()
     return re.findall(
         r'url\((https://fonts\.gstatic\.com/[^)]+\.ttf)\)', resp.text
@@ -162,13 +170,25 @@ def download_language_fonts(lang: str, config: dict) -> None:
             print(f"    ✗ SKIP {family}: {exc}")
 
 
-def download_lohit_font(lang: str, url: str) -> None:
-    """Download a single Lohit font file."""
+def download_lohit_font(lang: str, tarball_url: str, ttf_name: str) -> None:
+    """Download a Lohit font tarball and extract the TTF file."""
     folder = FONTS_BASE / lang
     folder.mkdir(parents=True, exist_ok=True)
-    filename = url.split("/")[-1]
+    dest = folder / ttf_name
+    if dest.exists():
+        return
     try:
-        download_font(url, folder / filename)
+        resp = requests.get(tarball_url, headers=HEADERS, timeout=60)
+        resp.raise_for_status()
+        with tarfile.open(fileobj=io.BytesIO(resp.content), mode="r:gz") as tar:
+            for member in tar.getmembers():
+                if member.name.endswith(ttf_name):
+                    f = tar.extractfile(member)
+                    if f:
+                        dest.write_bytes(f.read())
+                        print(f"    ✓ {ttf_name}")
+                        return
+        print(f"    ⚠ {ttf_name} not found in tarball")
     except requests.exceptions.RequestException as exc:
         print(f"    ✗ SKIP Lohit-{lang}: {exc}")
 
@@ -188,7 +208,8 @@ def main(langs: list[str] | None = None) -> None:
     for lang in target_langs:
         if lang in LOHIT_FONTS:
             print(f"\n[{lang} — Lohit]")
-            download_lohit_font(lang, LOHIT_FONTS[lang])
+            tarball_url, ttf_name = LOHIT_FONTS[lang]
+            download_lohit_font(lang, tarball_url, ttf_name)
 
     print("\n✓ Done. Drop proprietary fonts (Kruti Dev, Nirmala UI etc.) manually.")
 
