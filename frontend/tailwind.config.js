@@ -4,31 +4,35 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#6D28D9', // Electric Violet
-          hover: '#5B21B6',
+          DEFAULT: 'rgb(var(--primary-rgb) / <alpha-value>)',
+          hover: 'var(--primary-hover)',
         },
-        bg: '#0B0B0B',
-        surface: '#161616',
-        border: '#2A2A2A',
+        bg: 'var(--bg)',
+        surface: 'var(--surface)',
+        'surface-overlay': 'var(--surface-overlay)',
+        border: 'rgb(var(--border-rgb) / <alpha-value>)',
         text: {
-          DEFAULT: '#E5E5E5',
-          muted: '#A3A3A3',
+          DEFAULT: 'var(--text)',
+          muted: 'var(--text-muted)',
         },
       },
       borderRadius: {
         'radius': '12px',
+        'radius-xl': '16px',
       },
       boxShadow: {
-        'shadow': '0 4px 6px -1px rgba(0,0,0,0.5)',
-        'shadow-lg': '0 10px 15px -3px rgba(0,0,0,0.7)',
+        'shadow': 'var(--shadow)',
+        'shadow-lg': 'var(--shadow-lg)',
         'glow': '0 0 15px rgba(109, 40, 217, 0.3)',
       },
       fontFamily: {
-        sans: ['Inter', 'Poppins', 'sans-serif'],
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        display: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
         mono: ['DM Mono', 'monospace'],
       },
     },
