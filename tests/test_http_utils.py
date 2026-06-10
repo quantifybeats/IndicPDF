@@ -35,3 +35,15 @@ def test_empty_and_hostile_names_get_default():
         fallback = header.split('filename="')[1].split('"')[0]
         assert fallback  # never empty
         assert "/" not in fallback and "\\" not in fallback
+
+
+def test_quote_and_length_are_neutralized():
+    # '"' must never survive into the quoted filename token
+    header = content_disposition('తెలుగు.p"df')
+    fallback = header.split('filename="')[1].split('"')[0]
+    assert '"' not in fallback
+    header.encode("latin-1")
+
+    # very long Indic names stay bounded
+    header = content_disposition("అ" * 5000 + ".pdf")
+    assert len(header) < 1500

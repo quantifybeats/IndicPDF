@@ -28,7 +28,7 @@ def content_disposition(filename: str, default: str = "download") -> str:
 
     # Preserve the file extension separately so it isn't swallowed by strip
     suffix = PurePosixPath(name).suffix
-    ascii_suffix = "".join(c for c in suffix if c.isascii() and c.isprintable() and c not in "/\\")
+    ascii_suffix = _SAFE_CHARS.sub("", suffix)
 
     ascii_stem = _SAFE_CHARS.sub("-", PurePosixPath(ascii_raw).stem).strip("-.")
 
@@ -39,5 +39,5 @@ def content_disposition(filename: str, default: str = "download") -> str:
     else:
         ascii_name = default
 
-    utf8_name = quote(name or ascii_name, safe="")
+    utf8_name = quote((name or ascii_name)[:120], safe="")
     return f"attachment; filename=\"{ascii_name[:120]}\"; filename*=UTF-8''{utf8_name}"
