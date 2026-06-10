@@ -8,7 +8,8 @@
       "full_name": "Baloo Da 2 Regular",
       "family_name": "Baloo Da 2",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Bengali/HindSiliguri-Regular.ttf",
@@ -16,7 +17,8 @@
       "full_name": "Hind Siliguri Regular",
       "family_name": "Hind Siliguri",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Bengali/Lohit-Bengali.ttf",
@@ -24,7 +26,10 @@
       "full_name": "Lohit Bengali",
       "family_name": "Lohit Bengali",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Bengali/MuktaMahee-Regular.ttf",
@@ -32,7 +37,8 @@
       "full_name": "Mukta Mahee Regular",
       "family_name": "Mukta Mahee",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Bengali/NotoSansBengali-Regular.ttf",
@@ -40,7 +46,8 @@
       "full_name": "Noto Sans Bengali Regular",
       "family_name": "Noto Sans Bengali",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Bengali/NotoSerifBengali-Regular.ttf",
@@ -48,7 +55,8 @@
       "full_name": "Noto Serif Bengali Regular",
       "family_name": "Noto Serif Bengali",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Bengali/TiroBangla-Regular.ttf",
@@ -56,7 +64,8 @@
       "full_name": "Tiro Bangla Regular",
       "family_name": "Tiro Bangla",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Bengali/YA9dr0Wd4kDdMthROCI.ttf",
@@ -64,7 +73,8 @@
       "full_name": "Kalam",
       "family_name": "Kalam",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Gujarati/HindVadodara-Regular.ttf",
@@ -72,7 +82,8 @@
       "full_name": "Hind Vadodara Regular",
       "family_name": "Hind Vadodara",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Gujarati/Lohit-Gujarati.ttf",
@@ -80,7 +91,10 @@
       "full_name": "Lohit Gujarati",
       "family_name": "Lohit Gujarati",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Gujarati/NotoSansGujarati-Regular.ttf",
@@ -88,7 +102,8 @@
       "full_name": "Noto Sans Gujarati Regular",
       "family_name": "Noto Sans Gujarati",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Gujarati/NotoSerifGujarati-Regular.ttf",
@@ -96,7 +111,8 @@
       "full_name": "Noto Serif Gujarati Regular",
       "family_name": "Noto Serif Gujarati",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Gujarati/Rasa-Regular.ttf",
@@ -104,7 +120,8 @@
       "full_name": "Rasa Regular",
       "family_name": "Rasa",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Gujarati/sZlWdRSL-z1VEWZ4YNA7Y5ItevYWUOHDE8FvNighAXCIpw.ttf",
@@ -112,7 +129,8 @@
       "full_name": "Baloo Bhai 2 Regular",
       "family_name": "Baloo Bhai 2",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Hindi/3surendra Normal.ttf",
@@ -120,7 +138,8 @@
       "full_name": "3surendra         Normal",
       "family_name": "3surendra",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Hindi/Aparajita Regular.ttf",
@@ -128,7 +147,10 @@
       "full_name": "Aparajita",
       "family_name": "Aparajita",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Chanakya Regular.ttf",
@@ -136,7 +158,8 @@
       "full_name": "Chanakya",
       "family_name": "Chanakya",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Hindi/Devanagari New Normal.ttf",
@@ -144,7 +167,8 @@
       "full_name": "Devanagari New Normal",
       "family_name": "Devanagari New",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Hindi/Hind-Bold.ttf",
@@ -152,7 +176,10 @@
       "full_name": "Hind Bold",
       "family_name": "Hind",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Hind-Light.ttf",
@@ -160,7 +187,10 @@
       "full_name": "Hind Light",
       "family_name": "Hind Light",
       "weight": "light",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Hind-Medium.ttf",
@@ -168,7 +198,10 @@
       "full_name": "Hind Medium",
       "family_name": "Hind Medium",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Hind-Regular.ttf",
@@ -176,7 +209,10 @@
       "full_name": "Hind Regular",
       "family_name": "Hind",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Hind-SemiBold.ttf",
@@ -184,7 +220,10 @@
       "full_name": "Hind SemiBold",
       "family_name": "Hind SemiBold",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Karma-Bold.ttf",
@@ -192,7 +231,10 @@
       "full_name": "Karma Bold",
       "family_name": "Karma",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Karma-Light.ttf",
@@ -200,7 +242,10 @@
       "full_name": "Karma Light",
       "family_name": "Karma Light",
       "weight": "light",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Karma-Medium.ttf",
@@ -208,7 +253,10 @@
       "full_name": "Karma Medium",
       "family_name": "Karma Medium",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Karma-Regular.ttf",
@@ -216,7 +264,10 @@
       "full_name": "Karma Regular",
       "family_name": "Karma",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Karma-SemiBold.ttf",
@@ -224,7 +275,10 @@
       "full_name": "Karma SemiBold",
       "family_name": "Karma SemiBold",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Kokila Regular.ttf",
@@ -232,7 +286,10 @@
       "full_name": "Kokila",
       "family_name": "Kokila",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Kruti Dev 010 Regular.ttf",
@@ -240,7 +297,8 @@
       "full_name": "Kruti Dev 010",
       "family_name": "Kruti Dev 010",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Hindi/Lohit-Devanagari.ttf",
@@ -248,7 +306,10 @@
       "full_name": "Lohit Devanagari",
       "family_name": "Lohit Devanagari",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/MANGAL.TTF",
@@ -256,7 +317,10 @@
       "full_name": "Mangal",
       "family_name": "Mangal",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Mukta-Bold.ttf",
@@ -264,7 +328,10 @@
       "full_name": "Mukta Bold",
       "family_name": "Mukta",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Mukta-ExtraBold.ttf",
@@ -272,7 +339,10 @@
       "full_name": "Mukta ExtraBold",
       "family_name": "Mukta ExtraBold",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Mukta-ExtraLight.ttf",
@@ -280,7 +350,10 @@
       "full_name": "Mukta ExtraLight",
       "family_name": "Mukta ExtraLight",
       "weight": "light",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Mukta-Light.ttf",
@@ -288,7 +361,10 @@
       "full_name": "Mukta Light",
       "family_name": "Mukta Light",
       "weight": "light",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Mukta-Medium.ttf",
@@ -296,7 +372,10 @@
       "full_name": "Mukta Medium",
       "family_name": "Mukta Medium",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Mukta-Regular.ttf",
@@ -304,7 +383,10 @@
       "full_name": "Mukta Regular",
       "family_name": "Mukta",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Mukta-SemiBold.ttf",
@@ -312,7 +394,10 @@
       "full_name": "Mukta SemiBold",
       "family_name": "Mukta SemiBold",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSansDevanagari-Black.ttf",
@@ -320,7 +405,10 @@
       "full_name": "Noto Sans Devanagari Black",
       "family_name": "Noto Sans Devanagari Black",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSansDevanagari-Bold.ttf",
@@ -328,7 +416,10 @@
       "full_name": "Noto Sans Devanagari Bold",
       "family_name": "Noto Sans Devanagari",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSansDevanagari-ExtraBold.ttf",
@@ -336,7 +427,10 @@
       "full_name": "Noto Sans Devanagari ExtraBold",
       "family_name": "Noto Sans Devanagari ExtraBold",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSansDevanagari-ExtraLight.ttf",
@@ -344,7 +438,10 @@
       "full_name": "Noto Sans Devanagari ExtraLight",
       "family_name": "Noto Sans Devanagari ExtraLight",
       "weight": "light",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSansDevanagari-Light.ttf",
@@ -352,7 +449,10 @@
       "full_name": "Noto Sans Devanagari Light",
       "family_name": "Noto Sans Devanagari Light",
       "weight": "light",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSansDevanagari-Medium.ttf",
@@ -360,7 +460,10 @@
       "full_name": "Noto Sans Devanagari Medium",
       "family_name": "Noto Sans Devanagari Medium",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSansDevanagari-Regular.ttf",
@@ -368,7 +471,10 @@
       "full_name": "Noto Sans Devanagari Regular",
       "family_name": "Noto Sans Devanagari",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSansDevanagari-SemiBold.ttf",
@@ -376,7 +482,10 @@
       "full_name": "Noto Sans Devanagari SemiBold",
       "family_name": "Noto Sans Devanagari SemiBold",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSansDevanagari-Thin.ttf",
@@ -384,7 +493,10 @@
       "full_name": "Noto Sans Devanagari Thin",
       "family_name": "Noto Sans Devanagari Thin",
       "weight": "light",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSansDevanagariCondensed-Black.ttf",
@@ -392,7 +504,10 @@
       "full_name": "Noto Sans Devanagari Condensed Black",
       "family_name": "Noto Sans Devanagari Condensed Black",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSansDevanagariCondensed-Bold.ttf",
@@ -400,7 +515,10 @@
       "full_name": "Noto Sans Devanagari Condensed Bold",
       "family_name": "Noto Sans Devanagari Condensed",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSansDevanagariCondensed-ExtraBold.ttf",
@@ -408,7 +526,10 @@
       "full_name": "Noto Sans Devanagari Condensed ExtraBold",
       "family_name": "Noto Sans Devanagari Condensed ExtraBold",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSansDevanagariCondensed-ExtraLight.ttf",
@@ -416,7 +537,10 @@
       "full_name": "Noto Sans Devanagari Condensed ExtraLight",
       "family_name": "Noto Sans Devanagari Condensed ExtraLight",
       "weight": "light",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSansDevanagariCondensed-Light.ttf",
@@ -424,7 +548,10 @@
       "full_name": "Noto Sans Devanagari Condensed Light",
       "family_name": "Noto Sans Devanagari Condensed Light",
       "weight": "light",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSansDevanagariCondensed-Medium.ttf",
@@ -432,7 +559,10 @@
       "full_name": "Noto Sans Devanagari Condensed Medium",
       "family_name": "Noto Sans Devanagari Condensed Medium",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSansDevanagariCondensed-Regular.ttf",
@@ -440,7 +570,10 @@
       "full_name": "Noto Sans Devanagari Condensed Regular",
       "family_name": "Noto Sans Devanagari Condensed",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSansDevanagariCondensed-SemiBold.ttf",
@@ -448,7 +581,10 @@
       "full_name": "Noto Sans Devanagari Condensed SemiBold",
       "family_name": "Noto Sans Devanagari Condensed SemiBold",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSansDevanagariCondensed-Thin.ttf",
@@ -456,7 +592,10 @@
       "full_name": "Noto Sans Devanagari Condensed Thin",
       "family_name": "Noto Sans Devanagari Condensed Thin",
       "weight": "light",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSansDevanagariExtraCondensed-Black.ttf",
@@ -464,7 +603,10 @@
       "full_name": "Noto Sans Devanagari ExtraCondensed Black",
       "family_name": "Noto Sans Devanagari ExtraCondensed Black",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSansDevanagariExtraCondensed-Bold.ttf",
@@ -472,7 +614,10 @@
       "full_name": "Noto Sans Devanagari ExtraCondensed Bold",
       "family_name": "Noto Sans Devanagari ExtraCondensed",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSansDevanagariExtraCondensed-ExtraBold.ttf",
@@ -480,7 +625,10 @@
       "full_name": "Noto Sans Devanagari ExtraCondensed ExtraBold",
       "family_name": "Noto Sans Devanagari ExtraCondensed ExtraBold",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSansDevanagariExtraCondensed-ExtraLight.ttf",
@@ -488,7 +636,10 @@
       "full_name": "Noto Sans Devanagari ExtraCondensed ExtraLight",
       "family_name": "Noto Sans Devanagari ExtraCondensed ExtraLight",
       "weight": "light",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSansDevanagariExtraCondensed-Light.ttf",
@@ -496,7 +647,10 @@
       "full_name": "Noto Sans Devanagari ExtraCondensed Light",
       "family_name": "Noto Sans Devanagari ExtraCondensed Light",
       "weight": "light",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSansDevanagariExtraCondensed-Medium.ttf",
@@ -504,7 +658,10 @@
       "full_name": "Noto Sans Devanagari ExtraCondensed Medium",
       "family_name": "Noto Sans Devanagari ExtraCondensed Medium",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSansDevanagariExtraCondensed-Regular.ttf",
@@ -512,7 +669,10 @@
       "full_name": "Noto Sans Devanagari ExtraCondensed Regular",
       "family_name": "Noto Sans Devanagari ExtraCondensed",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSansDevanagariExtraCondensed-SemiBold.ttf",
@@ -520,7 +680,10 @@
       "full_name": "Noto Sans Devanagari ExtraCondensed SemiBold",
       "family_name": "Noto Sans Devanagari ExtraCondensed SemiBold",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSansDevanagariExtraCondensed-Thin.ttf",
@@ -528,7 +691,10 @@
       "full_name": "Noto Sans Devanagari ExtraCondensed Thin",
       "family_name": "Noto Sans Devanagari ExtraCondensed Thin",
       "weight": "light",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSansDevanagariSemiCondensed-Black.ttf",
@@ -536,7 +702,10 @@
       "full_name": "Noto Sans Devanagari SemiCondensed Black",
       "family_name": "Noto Sans Devanagari SemiCondensed Black",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSansDevanagariSemiCondensed-Bold.ttf",
@@ -544,7 +713,10 @@
       "full_name": "Noto Sans Devanagari SemiCondensed Bold",
       "family_name": "Noto Sans Devanagari SemiCondensed",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSansDevanagariSemiCondensed-ExtraBold.ttf",
@@ -552,7 +724,10 @@
       "full_name": "Noto Sans Devanagari SemiCondensed ExtraBold",
       "family_name": "Noto Sans Devanagari SemiCondensed ExtraBold",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSansDevanagariSemiCondensed-ExtraLight.ttf",
@@ -560,7 +735,10 @@
       "full_name": "Noto Sans Devanagari SemiCondensed ExtraLight",
       "family_name": "Noto Sans Devanagari SemiCondensed ExtraLight",
       "weight": "light",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSansDevanagariSemiCondensed-Light.ttf",
@@ -568,7 +746,10 @@
       "full_name": "Noto Sans Devanagari SemiCondensed Light",
       "family_name": "Noto Sans Devanagari SemiCondensed Light",
       "weight": "light",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSansDevanagariSemiCondensed-Medium.ttf",
@@ -576,7 +757,10 @@
       "full_name": "Noto Sans Devanagari SemiCondensed Medium",
       "family_name": "Noto Sans Devanagari SemiCondensed Medium",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSansDevanagariSemiCondensed-Regular.ttf",
@@ -584,7 +768,10 @@
       "full_name": "Noto Sans Devanagari SemiCondensed Regular",
       "family_name": "Noto Sans Devanagari SemiCondensed",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSansDevanagariSemiCondensed-SemiBold.ttf",
@@ -592,7 +779,10 @@
       "full_name": "Noto Sans Devanagari SemiCondensed SemiBold",
       "family_name": "Noto Sans Devanagari SemiCondensed SemiBold",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSansDevanagariSemiCondensed-Thin.ttf",
@@ -600,7 +790,10 @@
       "full_name": "Noto Sans Devanagari SemiCondensed Thin",
       "family_name": "Noto Sans Devanagari SemiCondensed Thin",
       "weight": "light",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSerifDevanagari-Black.ttf",
@@ -608,7 +801,10 @@
       "full_name": "Noto Serif Devanagari Black",
       "family_name": "Noto Serif Devanagari Black",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSerifDevanagari-Bold.ttf",
@@ -616,7 +812,10 @@
       "full_name": "Noto Serif Devanagari Bold",
       "family_name": "Noto Serif Devanagari",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSerifDevanagari-ExtraBold.ttf",
@@ -624,7 +823,10 @@
       "full_name": "Noto Serif Devanagari ExtraBold",
       "family_name": "Noto Serif Devanagari ExtraBold",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSerifDevanagari-ExtraLight.ttf",
@@ -632,7 +834,10 @@
       "full_name": "Noto Serif Devanagari ExtraLight",
       "family_name": "Noto Serif Devanagari ExtraLight",
       "weight": "light",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSerifDevanagari-Light.ttf",
@@ -640,7 +845,10 @@
       "full_name": "Noto Serif Devanagari Light",
       "family_name": "Noto Serif Devanagari Light",
       "weight": "light",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSerifDevanagari-Medium.ttf",
@@ -648,7 +856,10 @@
       "full_name": "Noto Serif Devanagari Medium",
       "family_name": "Noto Serif Devanagari Medium",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSerifDevanagari-Regular.ttf",
@@ -656,7 +867,10 @@
       "full_name": "Noto Serif Devanagari Regular",
       "family_name": "Noto Serif Devanagari",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSerifDevanagari-SemiBold.ttf",
@@ -664,7 +878,10 @@
       "full_name": "Noto Serif Devanagari SemiBold",
       "family_name": "Noto Serif Devanagari SemiBold",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSerifDevanagari-Thin.ttf",
@@ -672,7 +889,10 @@
       "full_name": "Noto Serif Devanagari Thin",
       "family_name": "Noto Serif Devanagari Thin",
       "weight": "light",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSerifDevanagariCondensed-Black.ttf",
@@ -680,7 +900,10 @@
       "full_name": "Noto Serif Devanagari Condensed Black",
       "family_name": "Noto Serif Devanagari Condensed Black",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSerifDevanagariCondensed-Bold.ttf",
@@ -688,7 +911,10 @@
       "full_name": "Noto Serif Devanagari Condensed Bold",
       "family_name": "Noto Serif Devanagari Condensed",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSerifDevanagariCondensed-ExtraBold.ttf",
@@ -696,7 +922,10 @@
       "full_name": "Noto Serif Devanagari Condensed ExtraBold",
       "family_name": "Noto Serif Devanagari Condensed ExtraBold",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSerifDevanagariCondensed-ExtraLight.ttf",
@@ -704,7 +933,10 @@
       "full_name": "Noto Serif Devanagari Condensed ExtraLight",
       "family_name": "Noto Serif Devanagari Condensed ExtraLight",
       "weight": "light",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSerifDevanagariCondensed-Light.ttf",
@@ -712,7 +944,10 @@
       "full_name": "Noto Serif Devanagari Condensed Light",
       "family_name": "Noto Serif Devanagari Condensed Light",
       "weight": "light",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSerifDevanagariCondensed-Medium.ttf",
@@ -720,7 +955,10 @@
       "full_name": "Noto Serif Devanagari Condensed Medium",
       "family_name": "Noto Serif Devanagari Condensed Medium",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSerifDevanagariCondensed-Regular.ttf",
@@ -728,7 +966,10 @@
       "full_name": "Noto Serif Devanagari Condensed Regular",
       "family_name": "Noto Serif Devanagari Condensed",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSerifDevanagariCondensed-SemiBold.ttf",
@@ -736,7 +977,10 @@
       "full_name": "Noto Serif Devanagari Condensed SemiBold",
       "family_name": "Noto Serif Devanagari Condensed SemiBold",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSerifDevanagariCondensed-Thin.ttf",
@@ -744,7 +988,10 @@
       "full_name": "Noto Serif Devanagari Condensed Thin",
       "family_name": "Noto Serif Devanagari Condensed Thin",
       "weight": "light",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSerifDevanagariExtraCondensed-Black.ttf",
@@ -752,7 +999,10 @@
       "full_name": "Noto Serif Devanagari ExtraCondensed Black",
       "family_name": "Noto Serif Devanagari ExtraCondensed Black",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSerifDevanagariExtraCondensed-Bold.ttf",
@@ -760,7 +1010,10 @@
       "full_name": "Noto Serif Devanagari ExtraCondensed Bold",
       "family_name": "Noto Serif Devanagari ExtraCondensed",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSerifDevanagariExtraCondensed-ExtraBold.ttf",
@@ -768,7 +1021,10 @@
       "full_name": "Noto Serif Devanagari ExtraCondensed ExtraBold",
       "family_name": "Noto Serif Devanagari ExtraCondensed ExtraBold",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSerifDevanagariExtraCondensed-ExtraLight.ttf",
@@ -776,7 +1032,10 @@
       "full_name": "Noto Serif Devanagari ExtraCondensed ExtraLight",
       "family_name": "Noto Serif Devanagari ExtraCondensed ExtraLight",
       "weight": "light",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSerifDevanagariExtraCondensed-Light.ttf",
@@ -784,7 +1043,10 @@
       "full_name": "Noto Serif Devanagari ExtraCondensed Light",
       "family_name": "Noto Serif Devanagari ExtraCondensed Light",
       "weight": "light",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSerifDevanagariExtraCondensed-Medium.ttf",
@@ -792,7 +1054,10 @@
       "full_name": "Noto Serif Devanagari ExtraCondensed Medium",
       "family_name": "Noto Serif Devanagari ExtraCondensed Medium",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSerifDevanagariExtraCondensed-Regular.ttf",
@@ -800,7 +1065,10 @@
       "full_name": "Noto Serif Devanagari ExtraCondensed Regular",
       "family_name": "Noto Serif Devanagari ExtraCondensed",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSerifDevanagariExtraCondensed-SemiBold.ttf",
@@ -808,7 +1076,10 @@
       "full_name": "Noto Serif Devanagari ExtraCondensed SemiBold",
       "family_name": "Noto Serif Devanagari ExtraCondensed SemiBold",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSerifDevanagariExtraCondensed-Thin.ttf",
@@ -816,7 +1087,10 @@
       "full_name": "Noto Serif Devanagari ExtraCondensed Thin",
       "family_name": "Noto Serif Devanagari ExtraCondensed Thin",
       "weight": "light",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSerifDevanagariSemiCondensed-Black.ttf",
@@ -824,7 +1098,10 @@
       "full_name": "Noto Serif Devanagari SemiCondensed Black",
       "family_name": "Noto Serif Devanagari SemiCondensed Black",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSerifDevanagariSemiCondensed-Bold.ttf",
@@ -832,7 +1109,10 @@
       "full_name": "Noto Serif Devanagari SemiCondensed Bold",
       "family_name": "Noto Serif Devanagari SemiCondensed",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSerifDevanagariSemiCondensed-ExtraBold.ttf",
@@ -840,7 +1120,10 @@
       "full_name": "Noto Serif Devanagari SemiCondensed ExtraBold",
       "family_name": "Noto Serif Devanagari SemiCondensed ExtraBold",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSerifDevanagariSemiCondensed-ExtraLight.ttf",
@@ -848,7 +1131,10 @@
       "full_name": "Noto Serif Devanagari SemiCondensed ExtraLight",
       "family_name": "Noto Serif Devanagari SemiCondensed ExtraLight",
       "weight": "light",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSerifDevanagariSemiCondensed-Light.ttf",
@@ -856,7 +1142,10 @@
       "full_name": "Noto Serif Devanagari SemiCondensed Light",
       "family_name": "Noto Serif Devanagari SemiCondensed Light",
       "weight": "light",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSerifDevanagariSemiCondensed-Medium.ttf",
@@ -864,7 +1153,10 @@
       "full_name": "Noto Serif Devanagari SemiCondensed Medium",
       "family_name": "Noto Serif Devanagari SemiCondensed Medium",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSerifDevanagariSemiCondensed-Regular.ttf",
@@ -872,7 +1164,10 @@
       "full_name": "Noto Serif Devanagari SemiCondensed Regular",
       "family_name": "Noto Serif Devanagari SemiCondensed",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSerifDevanagariSemiCondensed-SemiBold.ttf",
@@ -880,7 +1175,10 @@
       "full_name": "Noto Serif Devanagari SemiCondensed SemiBold",
       "family_name": "Noto Serif Devanagari SemiCondensed SemiBold",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/NotoSerifDevanagariSemiCondensed-Thin.ttf",
@@ -888,7 +1186,10 @@
       "full_name": "Noto Serif Devanagari SemiCondensed Thin",
       "family_name": "Noto Serif Devanagari SemiCondensed Thin",
       "weight": "light",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Poppins-Black.ttf",
@@ -896,7 +1197,10 @@
       "full_name": "Poppins Black",
       "family_name": "Poppins Black",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Poppins-BlackItalic.ttf",
@@ -904,7 +1208,10 @@
       "full_name": "Poppins Black Italic",
       "family_name": "Poppins Black",
       "weight": "bold",
-      "style": "italic"
+      "style": "italic",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Poppins-Bold.ttf",
@@ -912,7 +1219,10 @@
       "full_name": "Poppins Bold",
       "family_name": "Poppins",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Poppins-BoldItalic.ttf",
@@ -920,7 +1230,10 @@
       "full_name": "Poppins Bold Italic",
       "family_name": "Poppins",
       "weight": "bold",
-      "style": "italic"
+      "style": "italic",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Poppins-ExtraBold.ttf",
@@ -928,7 +1241,10 @@
       "full_name": "Poppins ExtraBold",
       "family_name": "Poppins ExtraBold",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Poppins-ExtraBoldItalic.ttf",
@@ -936,7 +1252,10 @@
       "full_name": "Poppins ExtraBold Italic",
       "family_name": "Poppins ExtraBold",
       "weight": "bold",
-      "style": "italic"
+      "style": "italic",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Poppins-ExtraLight.ttf",
@@ -944,7 +1263,10 @@
       "full_name": "Poppins ExtraLight",
       "family_name": "Poppins ExtraLight",
       "weight": "light",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Poppins-ExtraLightItalic.ttf",
@@ -952,7 +1274,10 @@
       "full_name": "Poppins ExtraLight Italic",
       "family_name": "Poppins ExtraLight",
       "weight": "light",
-      "style": "italic"
+      "style": "italic",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Poppins-Italic.ttf",
@@ -960,7 +1285,10 @@
       "full_name": "Poppins Italic",
       "family_name": "Poppins",
       "weight": "regular",
-      "style": "italic"
+      "style": "italic",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Poppins-Light.ttf",
@@ -968,7 +1296,10 @@
       "full_name": "Poppins Light",
       "family_name": "Poppins Light",
       "weight": "light",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Poppins-LightItalic.ttf",
@@ -976,7 +1307,10 @@
       "full_name": "Poppins Light Italic",
       "family_name": "Poppins Light",
       "weight": "light",
-      "style": "italic"
+      "style": "italic",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Poppins-Medium.ttf",
@@ -984,7 +1318,10 @@
       "full_name": "Poppins Medium",
       "family_name": "Poppins Medium",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Poppins-MediumItalic.ttf",
@@ -992,7 +1329,10 @@
       "full_name": "Poppins Medium Italic",
       "family_name": "Poppins Medium",
       "weight": "regular",
-      "style": "italic"
+      "style": "italic",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Poppins-Regular.ttf",
@@ -1000,7 +1340,10 @@
       "full_name": "Poppins Regular",
       "family_name": "Poppins",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Poppins-SemiBold.ttf",
@@ -1008,7 +1351,10 @@
       "full_name": "Poppins SemiBold",
       "family_name": "Poppins SemiBold",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Poppins-SemiBoldItalic.ttf",
@@ -1016,7 +1362,10 @@
       "full_name": "Poppins SemiBold Italic",
       "family_name": "Poppins SemiBold",
       "weight": "regular",
-      "style": "italic"
+      "style": "italic",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Poppins-Thin.ttf",
@@ -1024,7 +1373,10 @@
       "full_name": "Poppins Thin",
       "family_name": "Poppins Thin",
       "weight": "light",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Poppins-ThinItalic.ttf",
@@ -1032,7 +1384,10 @@
       "full_name": "Poppins Thin Italic",
       "family_name": "Poppins Thin",
       "weight": "light",
-      "style": "italic"
+      "style": "italic",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Rajdhani-Bold.ttf",
@@ -1040,7 +1395,10 @@
       "full_name": "Rajdhani Bold",
       "family_name": "Rajdhani",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Rajdhani-Light.ttf",
@@ -1048,7 +1406,10 @@
       "full_name": "Rajdhani Light",
       "family_name": "Rajdhani Light",
       "weight": "light",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Rajdhani-Medium.ttf",
@@ -1056,7 +1417,10 @@
       "full_name": "Rajdhani Medium",
       "family_name": "Rajdhani Medium",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Rajdhani-Regular.ttf",
@@ -1064,7 +1428,10 @@
       "full_name": "Rajdhani Regular",
       "family_name": "Rajdhani",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Rajdhani-SemiBold.ttf",
@@ -1072,7 +1439,10 @@
       "full_name": "Rajdhani SemiBold",
       "family_name": "Rajdhani SemiBold",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Sahadeva Regular.ttf",
@@ -1080,7 +1450,10 @@
       "full_name": "Sahadeva",
       "family_name": "Sahadeva",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Samyak Devanagari.ttf",
@@ -1088,7 +1461,10 @@
       "full_name": "Samyak Devanagari",
       "family_name": "Samyak Devanagari",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/Shusha Normal.ttf",
@@ -1096,7 +1472,8 @@
       "full_name": "Shusha",
       "family_name": "Shusha",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Hindi/TiroDevaHindi-Italic.ttf",
@@ -1104,7 +1481,10 @@
       "full_name": "Tiro Devanagari Hindi Italic",
       "family_name": "Tiro Devanagari Hindi",
       "weight": "regular",
-      "style": "italic"
+      "style": "italic",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/TiroDevaHindi-Regular.ttf",
@@ -1112,7 +1492,10 @@
       "full_name": "Tiro Devanagari Hindi Regular",
       "family_name": "Tiro Devanagari Hindi",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/utsaah.ttf",
@@ -1120,7 +1503,10 @@
       "full_name": "Utsaah",
       "family_name": "Utsaah",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/utsaahb.ttf",
@@ -1128,7 +1514,10 @@
       "full_name": "Utsaah Bold",
       "family_name": "Utsaah",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/utsaahbi.ttf",
@@ -1136,7 +1525,10 @@
       "full_name": "Utsaah Bold Italic",
       "family_name": "Utsaah",
       "weight": "bold",
-      "style": "italic"
+      "style": "italic",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Hindi/utsaahi.ttf",
@@ -1144,7 +1536,10 @@
       "full_name": "Utsaah Italic",
       "family_name": "Utsaah",
       "weight": "regular",
-      "style": "italic"
+      "style": "italic",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Kannada/HindMysuru-Regular.ttf",
@@ -1152,7 +1547,8 @@
       "full_name": "Hind Mysuru",
       "family_name": "Hind Mysuru",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Kannada/Lohit-Kannada.ttf",
@@ -1160,7 +1556,10 @@
       "full_name": "Lohit Kannada",
       "family_name": "Lohit Kannada",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Kannada/NotoSansKannada-Regular.ttf",
@@ -1168,7 +1567,8 @@
       "full_name": "Noto Sans Kannada Regular",
       "family_name": "Noto Sans Kannada",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Kannada/NotoSerifKannada-Regular.ttf",
@@ -1176,7 +1576,8 @@
       "full_name": "Noto Serif Kannada Regular",
       "family_name": "Noto Serif Kannada",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Kannada/TiroKannada-Regular.ttf",
@@ -1184,7 +1585,8 @@
       "full_name": "Tiro Kannada Regular",
       "family_name": "Tiro Kannada",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Kannada/vEFE2_hCAgcR46PaajtrYlBbVUMUJgIC5LHTrMscPq-zKlo.ttf",
@@ -1192,7 +1594,8 @@
       "full_name": "Baloo Tamma 2 Regular",
       "family_name": "Baloo Tamma 2",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Malayalam/BalooChettan2-Regular.ttf",
@@ -1200,7 +1603,8 @@
       "full_name": "Baloo Chettan 2 Regular",
       "family_name": "Baloo Chettan 2",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Malayalam/JIAZUU5sdmdP_HMcVcZFcH7DeVBeGVgSMEk2cmVDq1ihUXL1t-xvmlYD.ttf",
@@ -1208,7 +1612,8 @@
       "full_name": "Noto Serif Malayalam Regular",
       "family_name": "Noto Serif Malayalam",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Malayalam/Lohit-Malayalam.ttf",
@@ -1216,7 +1621,10 @@
       "full_name": "Lohit Malayalam",
       "family_name": "Lohit Malayalam",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Malayalam/MCoQzAb429DbBilWLLA_-ps.ttf",
@@ -1224,7 +1632,8 @@
       "full_name": "Gayathri Regular",
       "family_name": "Gayathri",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Malayalam/NotoSansMalayalam-Regular.ttf",
@@ -1232,7 +1641,8 @@
       "full_name": "Noto Sans Malayalam Regular",
       "family_name": "Noto Sans Malayalam",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Malayalam/WWXRlj2DZQiMJYaYRoJXKdU.ttf",
@@ -1240,7 +1650,8 @@
       "full_name": "Chilanka Regular",
       "family_name": "Chilanka",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Malayalam/k3kQo8UPMOBO2w1UfdnoKw.ttf",
@@ -1248,7 +1659,8 @@
       "full_name": "Manjari Regular",
       "family_name": "Manjari",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Marathi/Baloo2-Regular.ttf",
@@ -1256,7 +1668,8 @@
       "full_name": "Baloo 2 Regular",
       "family_name": "Baloo 2",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Marathi/TiroDevaMarathi-Regular.ttf",
@@ -1264,7 +1677,8 @@
       "full_name": "Tiro Devanagari Marathi Regular",
       "family_name": "Tiro Devanagari Marathi",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Odia/BalooBhaina2-Regular.ttf",
@@ -1272,7 +1686,8 @@
       "full_name": "Baloo Bhaina 2 Regular",
       "family_name": "Baloo Bhaina 2",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Odia/Lohit-Odia.ttf",
@@ -1280,7 +1695,10 @@
       "full_name": "Lohit Odia",
       "family_name": "Lohit Odia",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/Odia/MjQQmj56u-r69izk_LDqWN7w0cYByutv9qeWYrvLaxrc_Ey5tUk.ttf",
@@ -1288,7 +1706,8 @@
       "full_name": "Noto Serif Oriya Regular",
       "family_name": "Noto Serif Oriya",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Odia/NotoSansOriya-Regular.ttf",
@@ -1296,7 +1715,8 @@
       "full_name": "Noto Sans Oriya Regular",
       "family_name": "Noto Sans Oriya",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Sanskrit/AlZy_zVFtYP12Zncg2kRcn38.ttf",
@@ -1304,7 +1724,8 @@
       "full_name": "Rozha One Regular",
       "family_name": "Rozha One",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Sanskrit/BXR2vF3Pi-DLmxcpJB-qbNTyTMDXHd6mrjgR.ttf",
@@ -1312,7 +1733,8 @@
       "full_name": "Eczar Regular",
       "family_name": "Eczar",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Sanskrit/C8ch4copsHzj8p7NaF0BxFmF.ttf",
@@ -1320,7 +1742,8 @@
       "full_name": "Yatra One Regular",
       "family_name": "Yatra One",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Sanskrit/PN_xRfK9oXHga0XdZsg6.ttf",
@@ -1328,7 +1751,8 @@
       "full_name": "Martel",
       "family_name": "Martel",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Sanskrit/TiroDevaSanskrit-Regular.ttf",
@@ -1336,7 +1760,8 @@
       "full_name": "Tiro Devanagari Sanskrit Regular",
       "family_name": "Tiro Devanagari Sanskrit",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Sanskrit/bx6CNxyWnf-uxPdXDHUD_RdICEWJ.ttf",
@@ -1344,7 +1769,8 @@
       "full_name": "Vesper Libre",
       "family_name": "Vesper Libre",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Tamil/ArimaThin-Regular.ttf",
@@ -1352,7 +1778,8 @@
       "full_name": "Arima Thin Regular",
       "family_name": "Arima Thin",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Tamil/BalooThambi2-Regular.ttf",
@@ -1360,7 +1787,8 @@
       "full_name": "Baloo Thambi 2 Regular",
       "family_name": "Baloo Thambi 2",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Tamil/HindMadurai-Regular.ttf",
@@ -1368,7 +1796,8 @@
       "full_name": "Hind Madurai Regular",
       "family_name": "Hind Madurai",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Tamil/LYjndHr-klIgTfc40komjQ5OObazYp-6H94dBF-RX6nNRJfi-Gf55IgAecattN-h9_bz.ttf",
@@ -1376,7 +1805,10 @@
       "full_name": "Noto Serif Tamil Regular",
       "family_name": "Noto Serif Tamil",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "tamil"
+      ]
     },
     {
       "rel_path": "system/Tamil/Lohit-Tamil.ttf",
@@ -1384,7 +1816,11 @@
       "full_name": "Lohit Tamil",
       "family_name": "Lohit Tamil",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "tamil"
+      ]
     },
     {
       "rel_path": "system/Tamil/NotoSansTamil-Regular.ttf",
@@ -1392,7 +1828,8 @@
       "full_name": "Noto Sans Tamil Regular",
       "family_name": "Noto Sans Tamil",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Tamil/TiroTamil-Regular.ttf",
@@ -1400,7 +1837,8 @@
       "full_name": "Tiro Tamil Regular",
       "family_name": "Tiro Tamil",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Urdu/LhWNMUPbN-oZdNFcBy1-DJYsEoTq5pudQ9L940pGPkB3Qt_-PKqV3w.ttf",
@@ -1408,7 +1846,8 @@
       "full_name": "Noto Nastaliq Urdu Regular",
       "family_name": "Noto Nastaliq Urdu",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/Urdu/NotoSansArabic-Regular.ttf",
@@ -1416,7 +1855,8 @@
       "full_name": "Noto Sans Arabic Regular",
       "family_name": "Noto Sans Arabic",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/devanagari/_Devanagari Sangam MN_extracted/DevanagariSangamMN.ttf",
@@ -1424,7 +1864,10 @@
       "full_name": "Devanagari Sangam MN",
       "family_name": "Devanagari Sangam MN",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/devanagari/_Devanagari Sangam MN_extracted/DevanagariSangamMN-Bold.ttf",
@@ -1432,7 +1875,10 @@
       "full_name": "Devanagari Sangam MN Bold",
       "family_name": "Devanagari Sangam MN",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/devanagari/GranthaSangamMN-Bold.ttf",
@@ -1440,7 +1886,11 @@
       "full_name": "Grantha Sangam MN Bold",
       "family_name": "Grantha Sangam MN",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "tamil"
+      ]
     },
     {
       "rel_path": "system/devanagari/GranthaSangamMN-Regular.ttf",
@@ -1448,7 +1898,11 @@
       "full_name": "Grantha Sangam MN Regular",
       "family_name": "Grantha Sangam MN",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "tamil"
+      ]
     },
     {
       "rel_path": "system/devanagari/Gurmukhi.ttf",
@@ -1456,7 +1910,10 @@
       "full_name": "Gurmukhi MT",
       "family_name": "Gurmukhi MT",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/devanagari/_Kohinoor_extracted/KohinoorDevanagari-Regular.ttf",
@@ -1464,7 +1921,10 @@
       "full_name": "Kohinoor Devanagari Regular",
       "family_name": "Kohinoor Devanagari",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/devanagari/_Kohinoor_extracted/KohinoorDevanagari-Medium.ttf",
@@ -1472,7 +1932,10 @@
       "full_name": "Kohinoor Devanagari Medium",
       "family_name": "Kohinoor Devanagari",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/devanagari/_Kohinoor_extracted/KohinoorDevanagari-Semibold.ttf",
@@ -1480,7 +1943,10 @@
       "full_name": "Kohinoor Devanagari Semibold",
       "family_name": "Kohinoor Devanagari",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/devanagari/_Kohinoor_extracted/KohinoorDevanagari-Bold.ttf",
@@ -1488,7 +1954,10 @@
       "full_name": "Kohinoor Devanagari Bold",
       "family_name": "Kohinoor Devanagari",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/devanagari/_Kohinoor_extracted/KohinoorDevanagari-Light.ttf",
@@ -1496,7 +1965,10 @@
       "full_name": "Kohinoor Devanagari Light",
       "family_name": "Kohinoor Devanagari",
       "weight": "light",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari"
+      ]
     },
     {
       "rel_path": "system/devanagari/_Tamil Sangam MN_extracted/TamilSangamMN.ttf",
@@ -1504,7 +1976,11 @@
       "full_name": "Tamil Sangam MN",
       "family_name": "Tamil Sangam MN",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "tamil"
+      ]
     },
     {
       "rel_path": "system/devanagari/_Tamil Sangam MN_extracted/TamilSangamMN-Bold.ttf",
@@ -1512,7 +1988,11 @@
       "full_name": "Tamil Sangam MN Bold",
       "family_name": "Tamil Sangam MN",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "tamil"
+      ]
     },
     {
       "rel_path": "system/latin/Aller-Bold.ttf",
@@ -1520,7 +2000,8 @@
       "full_name": "Aller Bold",
       "family_name": "Aller",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": []
     },
     {
       "rel_path": "system/telugu/Akshar.ttf",
@@ -1528,7 +2009,12 @@
       "full_name": "Akshar Unicode",
       "family_name": "Akshar Unicode",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu",
+        "tamil"
+      ]
     },
     {
       "rel_path": "system/telugu/Amruta-Bold.ttf",
@@ -1536,7 +2022,10 @@
       "full_name": "GIST-TLOTAmruta Bold",
       "family_name": "GIST-TLOTAmruta",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Annamayya.otf",
@@ -1544,7 +2033,11 @@
       "full_name": "Annamayya",
       "family_name": "Annamayya",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/AnnamayyaBold.otf",
@@ -1552,7 +2045,11 @@
       "full_name": "Annamayya Bold",
       "family_name": "Annamayya",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/AnnamayyaBoldItalic.otf",
@@ -1560,7 +2057,11 @@
       "full_name": "Annamayya Bold Italic",
       "family_name": "Annamayya",
       "weight": "bold",
-      "style": "italic"
+      "style": "italic",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/AnnamayyaItalic.otf",
@@ -1568,7 +2069,11 @@
       "full_name": "Annamayya Italic",
       "family_name": "Annamayya",
       "weight": "regular",
-      "style": "italic"
+      "style": "italic",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/BVSatyamurty.otf",
@@ -1576,7 +2081,11 @@
       "full_name": "BVSatyamurty",
       "family_name": "BVSatyamurty",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/BalooTammudu-Medium.ttf",
@@ -1584,7 +2093,10 @@
       "full_name": "Baloo Tammudu 2 Medium",
       "family_name": "Baloo Tammudu 2 Medium",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/BalooTammudu-Regular.ttf",
@@ -1592,7 +2104,10 @@
       "full_name": "Baloo Tammudu Regular",
       "family_name": "Baloo Tammudu",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Chandana-Bold-Italic.ttf",
@@ -1600,7 +2115,10 @@
       "full_name": "GIST-TLOTChandana BoldItalic",
       "family_name": "GIST-TLOTChandana",
       "weight": "bold",
-      "style": "italic"
+      "style": "italic",
+      "scripts": [
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Chathura-Bold.ttf",
@@ -1608,7 +2126,11 @@
       "full_name": "Chathura Bold",
       "family_name": "Chathura",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Chathura-ExtraBold.ttf",
@@ -1616,7 +2138,11 @@
       "full_name": "Chathura ExtraBold",
       "family_name": "Chathura",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Chathura-Light.ttf",
@@ -1624,7 +2150,11 @@
       "full_name": "Chathura Light",
       "family_name": "Chathura",
       "weight": "light",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Chathura-Regular.ttf",
@@ -1632,7 +2162,11 @@
       "full_name": "Chathura Regular",
       "family_name": "Chathura",
       "weight": "light",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Chathura-Thin.ttf",
@@ -1640,7 +2174,11 @@
       "full_name": "Chathura Thin",
       "family_name": "Chathura",
       "weight": "light",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Deva_Normal.ttf",
@@ -1648,7 +2186,10 @@
       "full_name": "GIST-TLOTDeva Normal",
       "family_name": "GIST-TLOTDeva",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Dhurjati-Italic.otf",
@@ -1656,7 +2197,11 @@
       "full_name": "Dhurjati Italic",
       "family_name": "Dhurjati",
       "weight": "regular",
-      "style": "italic"
+      "style": "italic",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Dhurjati-Regular.ttf",
@@ -1664,7 +2209,11 @@
       "full_name": "Dhurjati",
       "family_name": "Dhurjati",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Draupadi-Bold-Italic.ttf",
@@ -1672,7 +2221,10 @@
       "full_name": "GIST-TLOTDraupadi BoldItalic",
       "family_name": "GIST-TLOTDraupadi",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Gautami-Bold.ttf",
@@ -1680,7 +2232,11 @@
       "full_name": "Gautami Bold",
       "family_name": "Gautami",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Gautami.ttf",
@@ -1688,7 +2244,11 @@
       "full_name": "Gautami",
       "family_name": "Gautami",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Gidugu-Italic.otf",
@@ -1696,7 +2256,11 @@
       "full_name": "Gidugu Italic",
       "family_name": "Gidugu",
       "weight": "regular",
-      "style": "italic"
+      "style": "italic",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Gidugu-Regular.ttf",
@@ -1704,7 +2268,11 @@
       "full_name": "Gidugu",
       "family_name": "Gidugu",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Gurajada-Italic.otf",
@@ -1712,7 +2280,11 @@
       "full_name": "Gurajada Italic",
       "family_name": "Gurajada",
       "weight": "regular",
-      "style": "italic"
+      "style": "italic",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Gurajada-Regular.ttf",
@@ -1720,7 +2292,11 @@
       "full_name": "Gurajada",
       "family_name": "Gurajada",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/HindGuntur-Medium.ttf",
@@ -1728,7 +2304,10 @@
       "full_name": "Hind Guntur Medium",
       "family_name": "Hind Guntur Medium",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/HindGuntur-Regular.ttf",
@@ -1736,7 +2315,10 @@
       "full_name": "Hind Guntur",
       "family_name": "Hind Guntur",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/HindGuntur-SemiBold.ttf",
@@ -1744,7 +2326,10 @@
       "full_name": "Hind Guntur SemiBold",
       "family_name": "Hind Guntur SemiBold",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/JIMS-Italic.otf",
@@ -1752,7 +2337,11 @@
       "full_name": "JIMS Italic",
       "family_name": "JIMS",
       "weight": "regular",
-      "style": "italic"
+      "style": "italic",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/JIMS.otf",
@@ -1760,7 +2349,11 @@
       "full_name": "JIMS Regular",
       "family_name": "JIMS",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/KanakaDurga-Italic.otf",
@@ -1768,7 +2361,11 @@
       "full_name": "Kanaka Durga Italic",
       "family_name": "Kanaka Durga",
       "weight": "regular",
-      "style": "italic"
+      "style": "italic",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/KanakaDurga.otf",
@@ -1776,7 +2373,11 @@
       "full_name": "Kanaka Durga Regular",
       "family_name": "Kanaka Durga",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Kohinoor_Telugu-Bold.ttf",
@@ -1784,7 +2385,11 @@
       "full_name": "Kohinoor Telugu Bold",
       "family_name": "Kohinoor Telugu",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Krishna-Italic.ttf",
@@ -1792,7 +2397,10 @@
       "full_name": "GIST-TLOTKrishna Italic",
       "family_name": "GIST-TLOTKrishna",
       "weight": "regular",
-      "style": "italic"
+      "style": "italic",
+      "scripts": [
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Krishna-Normal.ttf",
@@ -1800,7 +2408,10 @@
       "full_name": "GIST-TLOTKrishna Normal",
       "family_name": "GIST-TLOTKrishna",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/LakkiReddy.ttf",
@@ -1808,7 +2419,11 @@
       "full_name": "LakkiReddy",
       "family_name": "LakkiReddy",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Lohit_Telugu.ttf",
@@ -1816,7 +2431,11 @@
       "full_name": "Lohit Telugu",
       "family_name": "Lohit Telugu",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Mallanna-Italic.otf",
@@ -1824,7 +2443,11 @@
       "full_name": "Mallanna Italic",
       "family_name": "Mallanna",
       "weight": "regular",
-      "style": "italic"
+      "style": "italic",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Mallanna-Regular.ttf",
@@ -1832,7 +2455,11 @@
       "full_name": "Mallanna",
       "family_name": "Mallanna",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Mandali-Bold Italic.otf",
@@ -1840,7 +2467,11 @@
       "full_name": "Mandali Bold Italic",
       "family_name": "Mandali",
       "weight": "bold",
-      "style": "italic"
+      "style": "italic",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Mandali-Bold.otf",
@@ -1848,7 +2479,11 @@
       "full_name": "Mandali Bold",
       "family_name": "Mandali",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Mandali-Italic.otf",
@@ -1856,7 +2491,11 @@
       "full_name": "Mandali Italic",
       "family_name": "Mandali",
       "weight": "regular",
-      "style": "italic"
+      "style": "italic",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Mandali-Regular.otf",
@@ -1864,7 +2503,11 @@
       "full_name": "Mandali",
       "family_name": "Mandali",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Mandali-Regular.ttf",
@@ -1872,7 +2515,11 @@
       "full_name": "Mandali Regular",
       "family_name": "Mandali",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Manu_Bold.ttf",
@@ -1880,7 +2527,10 @@
       "full_name": "GIST-TLOTManu Bold",
       "family_name": "GIST-TLOTManu",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Menaka-Bold.ttf",
@@ -1888,7 +2538,10 @@
       "full_name": "GIST-TLOTMenaka Bold",
       "family_name": "GIST-TLOTMenaka",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Menaka-Italic.ttf",
@@ -1896,7 +2549,10 @@
       "full_name": "GIST-TLOTMenaka Italic",
       "family_name": "GIST-TLOTMenaka",
       "weight": "regular",
-      "style": "italic"
+      "style": "italic",
+      "scripts": [
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Menaka-Normal.ttf",
@@ -1904,7 +2560,10 @@
       "full_name": "GIST-TLOTMenaka Normal",
       "family_name": "GIST-TLOTMenaka",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/NATS-Italic.otf",
@@ -1912,7 +2571,11 @@
       "full_name": "NATS Italic",
       "family_name": "NATS",
       "weight": "regular",
-      "style": "italic"
+      "style": "italic",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/NATS.otf",
@@ -1920,7 +2583,11 @@
       "full_name": "NATS",
       "family_name": "NATS",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/NTR-Italic.otf",
@@ -1928,7 +2595,11 @@
       "full_name": "NTR Italic",
       "family_name": "NTR",
       "weight": "regular",
-      "style": "italic"
+      "style": "italic",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/NTR-Regular.ttf",
@@ -1936,7 +2607,11 @@
       "full_name": "NTR",
       "family_name": "NTR",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Nandakam-Italic.otf",
@@ -1944,7 +2619,11 @@
       "full_name": "Nandakam Italic",
       "family_name": "Nandakam",
       "weight": "regular",
-      "style": "italic"
+      "style": "italic",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Nandakam.otf",
@@ -1952,7 +2631,11 @@
       "full_name": "Nandakam",
       "family_name": "Nandakam",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/NotoSansTelugu-Regular.ttf",
@@ -1960,7 +2643,11 @@
       "full_name": "Noto Sans Telugu Regular",
       "family_name": "Noto Sans Telugu",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/PVNR.otf",
@@ -1968,7 +2655,11 @@
       "full_name": "PV Narasimha Rao Regular",
       "family_name": "PV Narasimha Rao",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Pavani-Bold.ttf",
@@ -1976,7 +2667,10 @@
       "full_name": "GIST-TLOTPavani Bold",
       "family_name": "GIST-TLOTPavani",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Peddana-Regular.ttf",
@@ -1984,7 +2678,11 @@
       "full_name": "Peddana Regular",
       "family_name": "Peddana",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Ponnala.ttf",
@@ -1992,7 +2690,11 @@
       "full_name": "Ponnala",
       "family_name": "Ponnala",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Pothana2000.ttf",
@@ -2000,7 +2702,10 @@
       "full_name": "Pothana2000",
       "family_name": "Pothana2000",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Potti Sreeramulu.otf",
@@ -2008,7 +2713,11 @@
       "full_name": "Potti Sreeramulu",
       "family_name": "Potti Sreeramulu",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Priya_Bold.ttf",
@@ -2016,7 +2725,10 @@
       "full_name": "GIST-TLOTPriya Bold",
       "family_name": "GIST-TLOTPriya",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Purushothamaa-Italic.otf",
@@ -2024,7 +2736,11 @@
       "full_name": "Purushothamaa Italic",
       "family_name": "Purushothamaa",
       "weight": "regular",
-      "style": "italic"
+      "style": "italic",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Purushothamaa.otf",
@@ -2032,7 +2748,11 @@
       "full_name": "Purushothamaa",
       "family_name": "Purushothamaa",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Rajani-Bold-Italic.ttf",
@@ -2040,7 +2760,10 @@
       "full_name": "GIST-TLOTRajani BoldItalic",
       "family_name": "GIST-TLOTRajani",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Ramabhadra-Italic.otf",
@@ -2048,7 +2771,11 @@
       "full_name": "Ramabhadra Italic",
       "family_name": "Ramabhadra",
       "weight": "regular",
-      "style": "italic"
+      "style": "italic",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Ramabhadra-Regular.otf",
@@ -2056,7 +2783,11 @@
       "full_name": "Ramabhadra",
       "family_name": "Ramabhadra",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/RamaneeyaWin.ttf",
@@ -2064,7 +2795,11 @@
       "full_name": "RamaneeyaWin",
       "family_name": "RamaneeyaWin",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Ramaraja-Regular.ttf",
@@ -2072,7 +2807,11 @@
       "full_name": "Ramaraja Regular",
       "family_name": "Ramaraja",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/RaviPrakash-Regular.ttf",
@@ -2080,7 +2819,11 @@
       "full_name": "Ravi Prakash",
       "family_name": "Ravi Prakash",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/RaviPrakash.ttf",
@@ -2088,7 +2831,11 @@
       "full_name": "RaviPrakash",
       "family_name": "RaviPrakash",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/SPBalasubrahmanyam.otf",
@@ -2096,7 +2843,11 @@
       "full_name": "SP Balasubrahmanyam",
       "family_name": "SP Balasubrahmanyam",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Sanjana_Bold-Italic.ttf",
@@ -2104,7 +2855,10 @@
       "full_name": "GIST-TLOTSanjana BoldItalic",
       "family_name": "GIST-TLOTSanjana",
       "weight": "bold",
-      "style": "italic"
+      "style": "italic",
+      "scripts": [
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/SeelaVeerraju.otf",
@@ -2112,7 +2866,11 @@
       "full_name": "Seela Veerraju",
       "family_name": "Seela Veerraju",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Sitara-Bold-Italic.ttf",
@@ -2120,7 +2878,10 @@
       "full_name": "GIST-TLOTSitara BoldItalic",
       "family_name": "GIST-TLOTSitara",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Sree Krushnadevaraya-Italic.otf",
@@ -2128,7 +2889,11 @@
       "full_name": "Sree Krushnadevaraya Italic",
       "family_name": "Sree Krushnadevaraya",
       "weight": "regular",
-      "style": "italic"
+      "style": "italic",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Sree Krushnadevaraya.otf",
@@ -2136,7 +2901,11 @@
       "full_name": "Sree Krushnadevaraya",
       "family_name": "Sree Krushnadevaraya",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Subhadra_Regular.ttf",
@@ -2144,7 +2913,11 @@
       "full_name": "Subhadra",
       "family_name": "Subhadra",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Suguna.ttf",
@@ -2152,7 +2925,11 @@
       "full_name": "Suguna",
       "family_name": "Suguna",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Suranna Bold Italic.otf",
@@ -2160,7 +2937,11 @@
       "full_name": "Suranna Bold Italic",
       "family_name": "Suranna",
       "weight": "bold",
-      "style": "italic"
+      "style": "italic",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Suranna Bold.otf",
@@ -2168,7 +2949,11 @@
       "full_name": "Suranna Bold",
       "family_name": "Suranna",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Suranna Regular.otf",
@@ -2176,7 +2961,11 @@
       "full_name": "Suranna",
       "family_name": "Suranna",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Suranna-Italic.otf",
@@ -2184,7 +2973,11 @@
       "full_name": "Suranna Italic",
       "family_name": "Suranna",
       "weight": "regular",
-      "style": "italic"
+      "style": "italic",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Suravaram-Italic.otf",
@@ -2192,7 +2985,11 @@
       "full_name": "Suravaram Italic",
       "family_name": "Suravaram",
       "weight": "regular",
-      "style": "italic"
+      "style": "italic",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Suravaram-Regular.ttf",
@@ -2200,7 +2997,11 @@
       "full_name": "Suravaram",
       "family_name": "Suravaram",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Swami-Bold-Italic.ttf",
@@ -2208,7 +3009,10 @@
       "full_name": "GIST-TLOTSwami BoldItalic",
       "family_name": "GIST-TLOTSwami",
       "weight": "bold",
-      "style": "italic"
+      "style": "italic",
+      "scripts": [
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Syamala Ramana.otf",
@@ -2216,7 +3020,11 @@
       "full_name": "Syamala Ramana",
       "family_name": "Syamala Ramana",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/_Telugu Sangam MN_extracted/TeluguSangamMN.ttf",
@@ -2224,7 +3032,10 @@
       "full_name": "Telugu Sangam MN",
       "family_name": "Telugu Sangam MN",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/_Telugu Sangam MN_extracted/TeluguSangamMN-Bold.ttf",
@@ -2232,7 +3043,10 @@
       "full_name": "Telugu Sangam MN Bold",
       "family_name": "Telugu Sangam MN",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/TenaliRamakrishna-Regular.ttf",
@@ -2240,7 +3054,11 @@
       "full_name": "TenaliRamakrishna Regular",
       "family_name": "TenaliRamakrishna",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Timmana-Regular.ttf",
@@ -2248,7 +3066,11 @@
       "full_name": "Timmana",
       "family_name": "Timmana",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/TimmanaRegular.ttf",
@@ -2256,7 +3078,11 @@
       "full_name": "Timmana Regular",
       "family_name": "Timmana",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Vajram.ttf",
@@ -2264,7 +3090,11 @@
       "full_name": "Vajram",
       "family_name": "Vajram",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Vani.ttf",
@@ -2272,7 +3102,11 @@
       "full_name": "Vani",
       "family_name": "Vani",
       "weight": "regular",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "devanagari",
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Vennela-Bold-Italic.ttf",
@@ -2280,7 +3114,10 @@
       "full_name": "GIST-TLOTVennela BoldItalic",
       "family_name": "GIST-TLOTVennela",
       "weight": "bold",
-      "style": "normal"
+      "style": "normal",
+      "scripts": [
+        "telugu"
+      ]
     },
     {
       "rel_path": "system/telugu/Vennela-Italic.ttf",
@@ -2288,7 +3125,10 @@
       "full_name": "GIST-TLOTVennela Italic",
       "family_name": "GIST-TLOTVennela",
       "weight": "regular",
-      "style": "italic"
+      "style": "italic",
+      "scripts": [
+        "telugu"
+      ]
     }
   ]
 }
