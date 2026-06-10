@@ -1,5 +1,5 @@
 // frontend/src/pages/ReconstructionTool.jsx
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import axios from 'axios';
 
 const MAX_FILE_BYTES = 25 * 1024 * 1024;
@@ -40,6 +40,7 @@ export function validateFiles(fileList) {
 }
 
 const POLL_MS = 2000;
+const MAX_POLLS = 150;
 
 function ConfidenceBar({ value }) {
   const pct = Math.round((value || 0) * 100);
@@ -86,6 +87,7 @@ function ResultCard({ item, onExport }) {
         <p className="font-semibold text-green-700">✓ {item.name}</p>
         <button
           onClick={() => onExport(item)}
+          disabled={!!item.exporting}
           className="px-3 py-1.5 rounded bg-orange-700 text-white text-sm hover:bg-orange-800"
         >
           {item.exporting ? 'Preparing PDF…' : 'Download PDF'}
@@ -117,17 +119,33 @@ export default function ReconstructionTool() {
   const [rejectedLocal, setRejectedLocal] = useState([]);
   const [lang, setLang] = useState('auto');
   const [dragOver, setDragOver] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const inputRef = useRef();
+
+  const intervalsRef = useRef(new Set());
+  useEffect(() => () => {
+    intervalsRef.current.forEach(clearInterval);
+    intervalsRef.current.clear();
+  }, []);
 
   const updateItem = (jobId, patch) =>
     setItems((prev) => prev.map((it) => (it.jobId === jobId ? { ...it, ...patch } : it)));
 
   const pollJob = useCallback((jobId) => {
+    let polls = 0;
     const poll = setInterval(async () => {
+      polls += 1;
+      if (polls > MAX_POLLS) {
+        clearInterval(poll);
+        intervalsRef.current.delete(poll);
+        updateItem(jobId, { status: 'failed', error: 'Timed out waiting for the server.' });
+        return;
+      }
       try {
         const { data: s } = await axios.get(`/status/${jobId}`);
         if (s.status === 'finished') {
           clearInterval(poll);
+          intervalsRef.current.delete(poll);
           try {
             const { data: payload } = await axios.get(`/api/process/result/${jobId}`);
             updateItem(jobId, { status: payload.success ? 'done' : 'failed', payload });
@@ -141,19 +159,24 @@ export default function ReconstructionTool() {
           }
         } else if (s.status === 'failed') {
           clearInterval(poll);
+          intervalsRef.current.delete(poll);
           updateItem(jobId, { status: 'failed', error: 'Processing job failed.' });
         }
       } catch {
         clearInterval(poll);
+        intervalsRef.current.delete(poll);
         updateItem(jobId, { status: 'failed', error: 'Lost contact with server.' });
       }
     }, POLL_MS);
+    intervalsRef.current.add(poll);
   }, []);
 
   const handleFiles = async (fileList) => {
     const { accepted, rejected } = validateFiles(Array.from(fileList));
     setRejectedLocal(rejected);
     if (!accepted.length) return;
+    if (uploading) return;
+    setUploading(true);
 
     const formData = new FormData();
     accepted.forEach((f) => formData.append('files', f));
@@ -172,27 +195,41 @@ export default function ReconstructionTool() {
       setRejectedLocal([
         { file: { name: 'upload' }, reason: e.response?.data?.detail || 'Upload failed.' },
       ]);
+    } finally {
+      setUploading(false);
     }
   };
 
   const handleExport = async (item) => {
+    if (item.exporting) return;
     updateItem(item.jobId, { exporting: true });
     try {
       const { data } = await axios.post('/api/export/pdf', {
         clean_text: item.payload.clean_text,
         filename: item.name,
       });
+      let polls = 0;
       const poll = setInterval(async () => {
+        polls += 1;
+        if (polls > MAX_POLLS) {
+          clearInterval(poll);
+          intervalsRef.current.delete(poll);
+          updateItem(item.jobId, { exporting: false, error: 'PDF export timed out.' });
+          return;
+        }
         const { data: s } = await axios.get(`/status/${data.job_id}`);
         if (s.status === 'finished') {
           clearInterval(poll);
+          intervalsRef.current.delete(poll);
           updateItem(item.jobId, { exporting: false });
           window.location.href = `/download/${data.job_id}`;
         } else if (s.status === 'failed') {
           clearInterval(poll);
+          intervalsRef.current.delete(poll);
           updateItem(item.jobId, { exporting: false, error: 'PDF export failed.' });
         }
       }, POLL_MS);
+      intervalsRef.current.add(poll);
     } catch (e) {
       updateItem(item.jobId, {
         exporting: false,
@@ -229,7 +266,7 @@ export default function ReconstructionTool() {
         className={`border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition
           ${dragOver ? 'border-orange-600 bg-orange-50' : 'border-gray-300'}`}
       >
-        <p>Drop files here or click to browse</p>
+        <p>{uploading ? 'Uploading…' : 'Drop files here or click to browse'}</p>
         <p className="text-sm text-gray-500">{SUPPORTED.join(' ')}</p>
         <input
           ref={inputRef}
