@@ -51,6 +51,12 @@ EXPECTED_FONTS = {
     "Sanskrit": ["Sanskrit2003", "Tiro Devanagari Sanskrit", "Shobhika", "Noto Sans Devanagari", "Noto Serif Devanagari"],
 }
 
+SCRIPT_RANGES = {
+    "devanagari": range(0x0900, 0x0980),
+    "telugu": range(0x0C00, 0x0C80),
+    "tamil": range(0x0B80, 0x0C00),
+}
+
 # Regex that matches typical Google Fonts hash filenames (no human-readable stem)
 _HASH_RE = re.compile(r'^[A-Za-z0-9_\-]{25,}$')
 
@@ -161,12 +167,22 @@ def _extract_metadata(path: Path) -> dict | None:
                 weight = "bold"
             elif wc <= 300:
                 weight = "light"
+        codepoints = set()
+        if "cmap" in font:
+            for table in font["cmap"].tables:
+                try:
+                    codepoints.update(table.cmap.keys())
+                except Exception:
+                    pass
+        scripts = [name for name, r in SCRIPT_RANGES.items()
+                   if any(cp in codepoints for cp in r)]
         return {
             "postscript_name": ps_name,
             "full_name": full_name or ps_name,
             "family_name": family_name or ps_name,
             "weight": weight,
             "style": style,
+            "scripts": scripts,
         }
     except Exception as e:
         print(f"  [warn] metadata failed for {path.name}: {e}")
@@ -211,6 +227,15 @@ def _extract_ttc(path: Path) -> list[dict]:
                     weight = "bold"
                 elif wc <= 300:
                     weight = "light"
+            codepoints = set()
+            if "cmap" in font:
+                for table in font["cmap"].tables:
+                    try:
+                        codepoints.update(table.cmap.keys())
+                    except Exception:
+                        pass
+            scripts = [name for name, r in SCRIPT_RANGES.items()
+                       if any(cp in codepoints for cp in r)]
             results.append({
                 "rel_path": str(face_path.relative_to(FONTS_BASE.parent)),
                 "postscript_name": ps_name,
@@ -218,6 +243,7 @@ def _extract_ttc(path: Path) -> list[dict]:
                 "family_name": family_name or ps_name,
                 "weight": weight,
                 "style": style,
+                "scripts": scripts,
             })
     except Exception as e:
         print(f"  [warn] TTC extraction failed for {path.name}: {e}")
