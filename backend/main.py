@@ -13,6 +13,10 @@ from rq import Queue
 from rq.job import Job
 
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse
+
+def err(status: int, detail: str, code: str):
+    return JSONResponse(status_code=status, content={"detail": detail, "code": code})
 
 # Absolute path resolution
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -71,12 +75,16 @@ if FRONTEND_DIST.exists():
     logger.info(f"Contents of FRONTEND_DIST: {[f.name for f in FRONTEND_DIST.iterdir()]}")
 
 # Import tasks (must be importable by worker too)
-from tasks import convert_docx_to_pdf_task, convert_pdf_to_docx_task, convert_txt_to_pdf_task, cleanup_old_files_task
+from tasks import convert_docx_to_pdf_task, convert_pdf_to_docx_task, convert_txt_to_pdf_task, cleanup_old_files_task, convert_document_task
+from processor import LIBREOFFICE_INPUT_FORMATS, LIBREOFFICE_OUTPUT_MAP
 from ocr_processor import LANG_MAP as OCR_LANG_MAP
 from security_manager import security_manager
 import io
 
 def retry_logic():
+    # Only retry in production (e.g. if not default development key)
+    if os.environ.get("INDICPDF_API_KEY", "dev-key-placeholder") == "dev-key-placeholder":
+        return None
     from rq import Retry
     return Retry(max=2, interval=[10, 30])
 
@@ -115,16 +123,16 @@ async def upload_files(request: Request, files: List[UploadFile] = File(...)):
         header = await file.read(4)
         await file.seek(0)
         if file_ext == ".pdf" and not header.startswith(b'%PDF'):
-            raise HTTPException(status_code=400, detail="Invalid PDF signature.")
+            return err(400, "Invalid PDF signature.", "INVALID_SIGNATURE")
         if file_ext == ".docx" and not header.startswith(b'PK\x03\x04'):
-            raise HTTPException(status_code=400, detail="Invalid DOCX signature.")
-            
+            return err(400, "Invalid DOCX signature.", "INVALID_SIGNATURE")
+
         file.file.seek(0, 2)
         size = file.file.tell()
         file.file.seek(0)
-        
+
         if size > 25 * 1024 * 1024:
-             raise HTTPException(status_code=400, detail=f"File {file.filename} exceeds 25MB limit.")
+            return err(400, f"File {file.filename} exceeds 25 MB limit.", "TOO_LARGE")
 
         queue_name = "slow" if size > 5 * 1024 * 1024 else "fast"
         q_instance = Queue(queue_name, connection=redis_conn)
@@ -141,27 +149,31 @@ async def upload_files(request: Request, files: List[UploadFile] = File(...)):
         output_path = OUTPUT_DIR / output_filename
         
         # Enqueue with strict timeout
+        original_stem = Path(file.filename).stem
         if file_ext == ".docx":
             job = q_instance.enqueue(
-                convert_docx_to_pdf_task, 
+                convert_docx_to_pdf_task,
                 args=(str(input_path), str(output_path)),
                 job_id=file_id,
+                meta={"original_stem": original_stem},
                 retry=retry_logic(),
                 job_timeout=300
             )
         elif file_ext == ".txt":
             job = q_instance.enqueue(
-                convert_txt_to_pdf_task, 
+                convert_txt_to_pdf_task,
                 args=(str(input_path), str(output_path)),
                 job_id=file_id,
+                meta={"original_stem": original_stem},
                 retry=retry_logic(),
                 job_timeout=300
             )
         else:
             job = q_instance.enqueue(
-                convert_pdf_to_docx_task, 
+                convert_pdf_to_docx_task,
                 args=(str(input_path), str(output_path)),
                 job_id=file_id,
+                meta={"original_stem": original_stem},
                 retry=retry_logic(),
                 job_timeout=600
             )
@@ -182,14 +194,20 @@ async def ocr_upload(
     allowed_exts = {".pdf", ".jpg", ".jpeg", ".png", ".tiff", ".tif"}
     ext = Path(file.filename).suffix.lower()
     if ext not in allowed_exts:
-        raise HTTPException(status_code=400, detail=f"Unsupported file type: {ext}. Allowed: {', '.join(allowed_exts)}")
+        return err(400, f"Unsupported file type: {ext}. Allowed: {', '.join(allowed_exts)}", "UNSUPPORTED_TYPE")
     if lang not in OCR_LANG_MAP:
-        raise HTTPException(status_code=400, detail=f"Unknown language: {lang}. Valid: {', '.join(OCR_LANG_MAP.keys())}")
+        return err(400, f"Unknown language: {lang}.", "INVALID_PARAM")
     job_id = str(uuid.uuid4())
     input_path = UPLOAD_DIR / f"{job_id}_input{ext}"
     contents = await file.read()
     input_path.write_bytes(contents)
-    q.enqueue("backend.worker.process_ocr", job_id=job_id, file_path=str(input_path), lang=lang, job_timeout=300)
+    q.enqueue(
+        "backend.worker.process_ocr",
+        job_id=job_id,
+        kwargs={"file_path": str(input_path), "lang": lang, "ocr_job_id": job_id},
+        meta={"original_stem": Path(file.filename).stem},
+        job_timeout=300,
+    )
     return {"job_id": job_id}
 
 @app.post("/batch/upload")
@@ -197,7 +215,7 @@ async def ocr_upload(
 async def upload_batch(request: Request, files: List[UploadFile] = File(...)):
     """Accept multiple files for batch processing, encrypt, and enqueue with size routing."""
     if len(files) > 10:
-        raise HTTPException(status_code=400, detail="Max 10 files allowed per batch.")
+        return err(400, "Max 10 files allowed per batch.", "BATCH_LIMIT")
     
     batch_id = str(uuid.uuid4())
     job_ids = []
@@ -207,18 +225,18 @@ async def upload_batch(request: Request, files: List[UploadFile] = File(...)):
         size = file.file.tell()
         file.file.seek(0)
         if size > 25 * 1024 * 1024:
-            raise HTTPException(status_code=400, detail=f"File {file.filename} exceeds 25MB limit.")
-            
+            return err(400, f"File {file.filename} exceeds 25 MB limit.", "TOO_LARGE")
+
         file_ext = Path(file.filename).suffix.lower()
         if file_ext not in [".docx", ".pdf", ".txt"]:
-            raise HTTPException(status_code=400, detail=f"Unsupported file type: {file_ext}")
-            
+            return err(400, f"Unsupported file type: {file_ext}", "UNSUPPORTED_TYPE")
+
         header = await file.read(4)
         await file.seek(0)
         if file_ext == ".pdf" and not header.startswith(b'%PDF'):
-            raise HTTPException(status_code=400, detail=f"Invalid PDF signature in batch: {file.filename}")
+            return err(400, f"Invalid PDF signature: {file.filename}", "INVALID_SIGNATURE")
         if file_ext == ".docx" and not header.startswith(b'PK\x03\x04'):
-            raise HTTPException(status_code=400, detail=f"Invalid DOCX signature in batch: {file.filename}")
+            return err(400, f"Invalid DOCX signature: {file.filename}", "INVALID_SIGNATURE")
 
         queue_name = "slow" if size > 5 * 1024 * 1024 else "fast"
         q_instance = Queue(queue_name, connection=redis_conn)
@@ -406,14 +424,24 @@ async def download_result(job_id: str):
         raise HTTPException(status_code=404, detail="Output file missing on server")
     
     output_path = Path(output_path_str)
-    
+    original_stem = job.meta.get("original_stem", "file")
+    download_name = f"IndicPDF_{original_stem}{output_path.suffix}"
+
+    # OCR jobs write plaintext directly — skip decryption
+    if job.result.get("ocr"):
+        return Response(
+            content=output_path.read_bytes(),
+            media_type="text/plain; charset=utf-8",
+            headers={"Content-Disposition": f'attachment; filename="{download_name}"'}
+        )
+
     # Decrypt in memory and stream
     try:
         decrypted_bytes = security_manager.decrypt_to_memory(output_path)
         return Response(
             content=decrypted_bytes,
             media_type="application/octet-stream",
-            headers={"Content-Disposition": f"attachment; filename=processed_{job_id}{output_path.suffix}"}
+            headers={"Content-Disposition": f'attachment; filename="{download_name}"'}
         )
     except Exception as e:
         logger.error(f"Decryption failed during download: {e}")
@@ -438,11 +466,64 @@ async def download_batch_result(batch_id: str):
         return Response(
             content=decrypted_bytes,
             media_type="application/octet-stream",
-            headers={"Content-Disposition": f"attachment; filename=batch_{batch_id}{final_path.suffix}"}
+            headers={"Content-Disposition": f'attachment; filename="IndicPDF_batch{final_path.suffix}"'}
         )
     except Exception as e:
         logger.error(f"Batch decryption failed during download: {e}")
         raise HTTPException(status_code=500, detail="Decryption error")
+
+@app.post("/convert")
+@limiter.limit("5/minute")
+async def convert_document(
+    request: Request,
+    file: UploadFile = File(...),
+    target_format: str = Form(...),
+):
+    """Convert any LibreOffice-compatible document to a target format."""
+    ext = Path(file.filename).suffix.lower().lstrip('.')
+    fmt = target_format.lower().lstrip('.')
+
+    if ext not in LIBREOFFICE_INPUT_FORMATS:
+        return err(400, f"Unsupported input format: {ext}", "UNSUPPORTED_TYPE")
+    if fmt not in LIBREOFFICE_OUTPUT_MAP:
+        return err(400, f"Unsupported target format: {fmt}. Supported: {list(LIBREOFFICE_OUTPUT_MAP.keys())}", "UNSUPPORTED_TARGET")
+
+    # Magic byte validation (same as /upload and /batch/upload)
+    header = await file.read(4)
+    await file.seek(0)
+    if ext == "pdf" and not header.startswith(b'%PDF'):
+        return err(400, "Invalid PDF signature.", "INVALID_SIGNATURE")
+    if ext in ("docx", "doc", "docm", "dotx") and not header.startswith(b'PK\x03\x04'):
+        return err(400, "Invalid DOCX/ZIP signature.", "INVALID_SIGNATURE")
+
+    # Size check
+    file.file.seek(0, 2)
+    size = file.file.tell()
+    file.file.seek(0)
+    if size > 25 * 1024 * 1024:
+        return err(400, "File exceeds 25 MB limit.", "TOO_LARGE")
+
+    file_id = str(uuid.uuid4())
+    input_path = UPLOAD_DIR / f"{file_id}.{ext}"
+    output_path = OUTPUT_DIR / f"{file_id}.{fmt}"
+
+    await secure_file_upload(file, input_path)
+
+    queue_name = "slow" if size > 5 * 1024 * 1024 else "fast"
+    q_instance = Queue(queue_name, connection=redis_conn)
+    original_stem = Path(file.filename).stem
+
+    job = q_instance.enqueue(
+        convert_document_task,
+        args=(str(input_path), str(output_path), fmt),
+        job_id=file_id,
+        meta={"original_stem": original_stem},
+        retry=retry_logic(),
+        job_timeout=300,
+    )
+
+    return {"job_id": job.id, "status": "queued", "target_format": fmt}
+
 
 @app.post("/analyse-pdf-quality")
 async def analyse_pdf_quality(file: UploadFile = File(...)):

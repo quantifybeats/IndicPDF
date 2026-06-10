@@ -7,9 +7,9 @@ from pathlib import Path
 LANG_MAP = {
     "hindi": "hin", "telugu": "tel", "tamil": "tam", "bengali": "ben",
     "gujarati": "guj", "kannada": "kan", "malayalam": "mal", "odia": "ori",
-    "punjabi": "pan", "english": "eng", "auto": None,
+    "punjabi": "pan", "sanskrit": "san", "english": "eng", "auto": None,
 }
-AUTO_LANG = "hin+tel+tam+ben+guj+kan+mal+ori+eng"
+AUTO_LANG = "hin+tel+tam+ben+guj+kan+mal+ori+san+eng"
 
 def _resolve_lang(lang: str) -> str:
     tess_code = LANG_MAP.get(lang.lower())

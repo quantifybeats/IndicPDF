@@ -28,7 +28,7 @@ export default {
       boxShadow: {
         'shadow': 'var(--shadow)',
         'shadow-lg': 'var(--shadow-lg)',
-        'glow': '0 0 15px rgba(109, 40, 217, 0.3)',
+        'glow': '0 0 15px rgba(255, 75, 75, 0.3)',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],

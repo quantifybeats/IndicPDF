@@ -1,8 +1,20 @@
 import logging
 import unicodedata
-from docx import Document
-from fpdf import FPDF
+import subprocess
+import zipfile
+import shutil
+import os
+import xml.etree.ElementTree as ET
 from pathlib import Path
+from pypdf import PdfReader
+from fpdf import FPDF
+from docx import Document
+
+class IndicPDF(FPDF):
+    def header(self):
+        pass
+    def footer(self):
+        pass
 
 logger = logging.getLogger(__name__)
 
@@ -13,141 +25,333 @@ except (ImportError, ValueError):
     from font_manager import font_registry
     from encoding_manager import encoding_manager
 
-class IndicPDF(FPDF):
-    def header(self): pass
-    def footer(self): pass
+def extract_docx_fonts(docx_path: Path):
+    """Extract required font names from DOCX fontTable.xml."""
+    fonts = set()
+    try:
+        with zipfile.ZipFile(docx_path, 'r') as z:
+            if 'word/fontTable.xml' in z.namelist():
+                xml_content = z.read('word/fontTable.xml')
+                root = ET.fromstring(xml_content)
+                ns = {'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'}
+                for font in root.findall('.//w:font', ns):
+                    name = font.get('{http://schemas.openxmlformats.org/wordprocessingml/2006/main}name')
+                    if name:
+                        fonts.add(name)
+    except Exception as e:
+        logger.warning(f"Failed to extract fonts from DOCX: {e}")
+    return fonts
+
+_INDIC_KEYWORDS = {
+    "devanagari", "hindi", "bengali", "gujarati", "telugu", "tamil",
+    "kannada", "malayalam", "punjabi", "odia", "oriya", "sanskrit",
+    "mangal", "kokila", "utsaah", "aparajita", "lohit", "noto sans dev",
+    "noto serif dev", "noto sans ben", "noto sans guj", "noto sans tel",
+    "noto sans tam", "noto sans kan", "noto sans mal",
+}
+
+def _is_indic_font(font_name: str) -> bool:
+    n = font_name.lower()
+    return any(kw in n for kw in _INDIC_KEYWORDS)
+
+def check_fonts_availability(requested_fonts):
+    """Check only Indic fonts — LibreOffice handles standard Western fonts natively."""
+    missing = []
+    for font_name in requested_fonts:
+        if not font_name or any(x in font_name.lower() for x in ["minor", "major", "theme"]):
+            continue
+        if not _is_indic_font(font_name):
+            continue
+        if not font_registry.get_font_metadata(font_name):
+            missing.append(font_name)
+    return missing
+
+def setup_libreoffice_fonts():
+    """Ensure all registry fonts are visible to fontconfig/LibreOffice."""
+    fonts_dir = Path.home() / ".fonts"
+    fonts_dir.mkdir(exist_ok=True)
+    
+    updated = False
+    for name, metadata in font_registry.registry.items():
+        dest = fonts_dir / metadata.path.name
+        if not dest.exists():
+            try:
+                os.symlink(metadata.path, dest)
+                updated = True
+            except:
+                try:
+                    shutil.copy(metadata.path, dest)
+                    updated = True
+                except: pass
+    
+    if updated:
+        try:
+            subprocess.run(["fc-cache", "-f", "-v"], capture_output=True, check=False)
+        except: pass
+
+def extract_pdf_fonts(pdf_path: Path):
+    """Extract font names from a generated PDF for validation."""
+    fonts = set()
+    try:
+        reader = PdfReader(str(pdf_path))
+        for page in reader.pages:
+            if '/Resources' in page and '/Font' in page['/Resources']:
+                font_resources = page['/Resources']['/Font']
+                for font_key in font_resources:
+                    font_obj = font_resources[font_key].get_object()
+                    base_font = font_obj.get('/BaseFont', '')
+                    if base_font:
+                        # Strip subset prefix (e.g., 'ABCDEF+Arial' -> 'Arial')
+                        name = str(base_font).split('+')[-1] if '+' in str(base_font) else str(base_font)
+                        fonts.add(name.replace('/', ''))
+    except Exception as e:
+        logger.warning(f"Failed to extract PDF fonts: {e}")
+    return fonts
+
+def process_docx_to_pdf_fpdf_fallback(docx_path: Path, pdf_output_path: Path):
+    """Fallback docx to pdf conversion using fpdf2 directly."""
+    logger.warning("LibreOffice headless not found. Falling back to native FPDF rendering.")
+    report = {
+        "font_substitutions": [],
+        "legacy_conversions": [],
+        "status": "success",
+        "engine": "FPDF-Native-Fallback"
+    }
+    doc = Document(docx_path)
+    pdf = IndicPDF()
+    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.add_page()
+
+    registered_fonts = set()
+
+    def _render_paragraph(para):
+        for run in para.runs:
+            if run.text != " " and not run.text.strip():
+                continue
+
+            requested_font = run.font.name or "Normal"
+
+            encoding_type = encoding_manager.detect_legacy_encoding(requested_font)
+            processed_text = run.text
+            if encoding_type:
+                processed_text = encoding_manager.convert_to_unicode(run.text, encoding_type)
+                report["legacy_conversions"].append({"font": requested_font, "type": encoding_type})
+
+            resolved_path = font_registry.resolve_font(requested_font)
+            if not resolved_path and processed_text:
+                resolved_path = font_registry.resolve_font(requested_font, ord(processed_text[0]))
+
+            if resolved_path:
+                res_name = resolved_path.stem
+                req_norm = requested_font.lower().replace(" ", "").replace("-", "")
+                res_norm = res_name.lower().replace(" ", "").replace("-", "")
+                if req_norm not in res_norm and res_norm not in req_norm and requested_font != "Normal":
+                    report["font_substitutions"].append({"requested": requested_font, "resolved": res_name})
+
+                font_id = resolved_path.stem
+                if font_id not in registered_fonts:
+                    try:
+                        pdf.add_font(font_id, "", str(resolved_path))
+                        registered_fonts.add(font_id)
+                    except Exception as e:
+                        logger.error(f"Failed to add font {font_id}: {e}")
+
+                pdf.set_font(font_id, size=12)
+                script = None
+                if any(0x0900 <= ord(c) <= 0x097F for c in processed_text):
+                    script = "deva"
+                elif any(0x0C00 <= ord(c) <= 0x0C7F for c in processed_text):
+                    script = "telu"
+                elif any(0x0B80 <= ord(c) <= 0x0BFF for c in processed_text):
+                    script = "taml"
+                pdf.set_text_shaping(use_shaping_engine=bool(script), script=script, direction="ltr")
+                pdf.write(h=10, text=processed_text)
+            else:
+                pdf.set_font("helvetica", size=12)
+                pdf.write(h=10, text=processed_text)
+
+        pdf.ln(10)
+
+    # Render paragraphs and tables in document order
+    from docx.oxml.ns import qn
+    from docx.text.paragraph import Paragraph
+    from docx.table import Table
+    for block in doc.element.body:
+        if block.tag == qn("w:p"):
+            _render_paragraph(Paragraph(block, doc))
+        elif block.tag == qn("w:tbl"):
+            tbl = Table(block, doc)
+            for row in tbl.rows:
+                for cell in row.cells:
+                    for para in cell.paragraphs:
+                        _render_paragraph(para)
+
+    pdf.output(str(pdf_output_path))
+    return report
 
 def process_docx_to_pdf_final(docx_path: Path, pdf_output_path: Path):
     """
-    Scorched-earth simplified pipeline. 
-    Strips ALL junk and uses standard fpdf2 write() for perfect spacing.
+    LibreOffice Headless Pipeline with FPDF fallback.
+    Strictly preserves fonts, layout, and styling.
     """
-    report = {"status": "success"}
-    doc = Document(docx_path)
-    pdf = IndicPDF(unit="pt", format="A4")
-    pdf.set_auto_page_break(auto=True, margin=36)
-    pdf.add_page()
-    
-    registered_fonts = {}
-
-    def process_element(element):
-        """Recursively process paragraphs and tables."""
-        if hasattr(element, 'paragraphs'): # It's a Document or a Table Cell
-            for para in element.paragraphs:
-                process_paragraph(para)
-        if hasattr(element, 'tables'):
-            for table in element.tables:
-                for row in table.rows:
-                    for cell in row.cells:
-                        process_element(cell)
-
-    def process_paragraph(para):
-        # Strip junk from paragraph level too
-        clean_para_text = encoding_manager.strip_all_junk(para.text)
-        if not clean_para_text.strip():
-            pdf.ln(12)
-            return
-
-        for run in para.runs:
-            req_font = run.font.name or "Normal"
-            f_size = run.font.size.pt if (run.font and run.font.size) else 12
-            
-            input_text = run.text
-            if not input_text: continue
-            
-            # Stage Logging
-            logger.info(f"Processing Run: Font={req_font}, Chars={len(input_text)}")
-            
-            # 1. Detect and Intercept Legacy Encodings (Mantra Fix)
-            legacy_encoding = encoding_manager.detect_legacy_encoding(req_font)
-            if legacy_encoding:
-                processed_text = encoding_manager.convert_to_unicode(input_text, legacy_encoding)
-                logger.info(f"Legacy Conversion ({legacy_encoding}): {len(input_text)} -> {len(processed_text)}")
-            else:
-                processed_text = input_text
-            
-            # 2. Aggressive Junk Stripping
-            processed_text = encoding_manager.strip_all_junk(processed_text)
-            
-            # 3. Unicode Normalization (NFC)
-            processed_text = unicodedata.normalize('NFC', processed_text)
-            
-            # 3.5 Detect Script for Font Resolution
-            script = None
-            if any(0x0900 <= ord(c) <= 0x097F for c in processed_text):
-                script = "deva" # Devanagari
-            elif any(0x0C00 <= ord(c) <= 0x0C7F for c in processed_text):
-                script = "telu" # Telugu
-            elif any(0x0B80 <= ord(c) <= 0x0BFF for c in processed_text):
-                script = "taml" # Tamil
-
-            # Map to FontRegistry script names
-            script_map = {"deva": "devanagari", "telu": "telugu", "taml": "tamil"}
-            registry_script = script_map.get(script)
-            
-            if input_text and not processed_text.strip() and any(c.isalnum() for c in input_text):
-                logger.error(f"DATA LOSS DETECTED: Input had alphanumeric text, output is empty. Input: {input_text[:20]}")
-            
-            # 4. Font Resolution
-            res_path = font_registry.resolve_font(req_font, bold=run.bold, italic=run.italic, script=registry_script)
-            if not res_path:
-                res_path = font_registry.resolve_font(req_font, ord(processed_text.strip()[0]) if processed_text.strip() else None, script=registry_script)
-
-            if res_path:
-                f_id = res_path.stem
-                if f_id not in registered_fonts:
-                    try:
-                        pdf.add_font(f_id, "", str(res_path))
-                        registered_fonts[f_id] = f_id
-                    except: continue
-                
-                pdf.set_font(f_id, size=f_size)
-                
-                if script:
-                    pdf.set_text_shaping(use_shaping_engine=True, script=script)
-                else:
-                    pdf.set_text_shaping(False)
-                
-                # 6. Rendering (Layout Stability)
-                pdf.write(h=f_size * 1.3, text=processed_text)
-            else:
-                pdf.set_font("helvetica", size=f_size)
-                pdf.write(h=f_size * 1.2, text=processed_text)
-        
-        pdf.ln(14)
-
-    def iter_block_items(parent):
-        from docx.document import Document
-        from docx.table import _Cell, Table
-        from docx.text.paragraph import Paragraph
-        
-        if isinstance(parent, Document):
-            parent_elm = parent.element.body
-        elif isinstance(parent, _Cell):
-            parent_elm = parent._tc
+    # Check if soffice is available
+    soffice_path = "soffice"
+    if shutil.which("soffice") is None:
+        mac_soffice = Path("/Applications/LibreOffice.app/Contents/MacOS/soffice")
+        if mac_soffice.exists():
+            soffice_path = str(mac_soffice)
         else:
-            return
+            soffice_path = None
 
-        for child in parent_elm.iterchildren():
-            if child.tag.endswith('p'):
-                yield Paragraph(child, parent)
-            elif child.tag.endswith('tbl'):
-                yield Table(child, parent)
+    if soffice_path is None:
+        return process_docx_to_pdf_fpdf_fallback(docx_path, pdf_output_path)
 
-    # Process all elements in the document
-    for element in iter_block_items(doc):
-        from docx.table import Table
-        from docx.text.paragraph import Paragraph
-        if isinstance(element, Paragraph):
-            process_paragraph(element)
-        elif isinstance(element, Table):
-            for row in element.rows:
-                for cell in row.cells:
-                    for para in cell.paragraphs:
-                        process_paragraph(para)
+    report = {"status": "success", "engine": "LibreOffice-Headless"}
     
-    pdf.output(str(pdf_output_path))
+    # 1. Font Metadata Extraction
+    docx_fonts = extract_docx_fonts(docx_path)
+    logger.info(f"DOCX requested fonts: {docx_fonts}")
+    
+    # 2. Strict Font Validation
+    missing = check_fonts_availability(docx_fonts)
+    if missing:
+        error_msg = f"Strict font preservation failed. Missing fonts: {', '.join(missing)}. Please upload these fonts to the server registry to ensure 100% fidelity."
+        logger.error(error_msg)
+        raise ValueError(error_msg)
+
+    # 3. Synchronize Registry with System Fontconfig
+    setup_libreoffice_fonts()
+
+    # 4. Render using LibreOffice Headless
+    # LibreOffice expects an output directory and generates a file with the same base name.
+    output_dir = pdf_output_path.parent
+    cmd = [
+        soffice_path,
+        "--headless",
+        "--convert-to", "pdf:writer_pdf_Export",
+        "--outdir", str(output_dir),
+        str(docx_path)
+    ]
+    
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        # Find the generated file (soffice uses input filename with .pdf)
+        generated_pdf = output_dir / f"{docx_path.stem}.pdf"
+        if generated_pdf.exists():
+            if generated_pdf != pdf_output_path:
+                if pdf_output_path.exists(): pdf_output_path.unlink()
+                shutil.move(str(generated_pdf), str(pdf_output_path))
+        else:
+            raise RuntimeError(f"LibreOffice succeeded but output file not found: {generated_pdf}")
+            
+    except subprocess.CalledProcessError as e:
+        logger.error(f"LibreOffice Error: {e.stderr}")
+        raise RuntimeError("PDF rendering failed in the headless engine.")
+
+    # 5. Validation & Mismatch Logging
+    pdf_fonts = extract_pdf_fonts(pdf_output_path)
+    logger.info(f"PDF embedded fonts: {pdf_fonts}")
+    
+    mismatches = []
+    for requested in docx_fonts:
+        # Simple fuzzy match: 'Arial' in 'Arial-Bold'
+        if not any(requested.lower() in pf.lower() or pf.lower() in requested.lower() for pf in pdf_fonts):
+            # Ignore standard MS theme fonts
+            if not any(x in requested.lower() for x in ["minor", "major", "theme"]):
+                mismatches.append(requested)
+    
+    if mismatches:
+        logger.warning(f"FONT MISMATCH DETECTED: Requested {mismatches} but they were not found in the output PDF.")
+        report["warnings"] = f"Font mismatch detected for: {mismatches}"
+        
     return report
+
+
+
+# LibreOffice-compatible input formats and their soffice filter names
+LIBREOFFICE_INPUT_FORMATS = {
+    'doc', 'docx', 'odt', 'rtf', 'html', 'htm', 'txt',
+    'xls', 'xlsx', 'csv', 'ods',
+    'ppt', 'pptx', 'odp', 'pps', 'ppsx',
+    'docm', 'dotx', 'dot',
+}
+
+# Maps target extension to LibreOffice --convert-to argument
+LIBREOFFICE_OUTPUT_MAP = {
+    'pdf':  'pdf:writer_pdf_Export',
+    'docx': 'docx:MS Word 2007 XML',
+    'doc':  'doc:MS Word 97',
+    'odt':  'odt',
+    'rtf':  'rtf',
+    'html': 'html:XHTML Writer File:UTF-8',
+    'txt':  'txt:Text (encoded):UTF-8',
+    'xlsx': 'xlsx:Calc MS Excel 2007 XML',
+    'xls':  'xls:MS Excel 97',
+    'csv':  'csv:Text - txt - csv (StarCalc)',
+    'ods':  'ods',
+    'pptx': 'pptx:Impress MS PowerPoint 2007 XML',
+    'ppt':  'ppt:MS PowerPoint 97',
+    'odp':  'odp',
+}
+
+def convert_document_with_libreoffice(input_path: Path, output_path: Path, target_format: str) -> dict:
+    """
+    Convert any LibreOffice-compatible document to target_format using soffice headless.
+    Returns report dict. Raises RuntimeError on failure.
+    """
+    report = {"status": "success", "engine": "LibreOffice-Headless", "target_format": target_format}
+
+    soffice_path = "soffice"
+    if shutil.which("soffice") is None:
+        mac_soffice = Path("/Applications/LibreOffice.app/Contents/MacOS/soffice")
+        if mac_soffice.exists():
+            soffice_path = str(mac_soffice)
+        else:
+            raise RuntimeError(
+                "LibreOffice (soffice) not found. Install from https://www.libreoffice.org/ "
+                "or run: brew install --cask libreoffice"
+            )
+
+    fmt_key = target_format.lower().lstrip('.')
+    lo_filter = LIBREOFFICE_OUTPUT_MAP.get(fmt_key)
+    if not lo_filter:
+        raise ValueError(f"Unsupported target format: {target_format}. Supported: {list(LIBREOFFICE_OUTPUT_MAP.keys())}")
+
+    output_dir = output_path.parent
+    cmd = [
+        soffice_path, "--headless",
+        "--convert-to", lo_filter,
+        "--outdir", str(output_dir),
+        str(input_path)
+    ]
+
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=120, check=True)
+        logger.info(f"soffice stdout: {result.stdout.strip()}")
+    except subprocess.CalledProcessError as e:
+        logger.error(f"LibreOffice error: {e.stderr}")
+        raise RuntimeError(f"LibreOffice conversion failed: {e.stderr[:200]}")
+    except subprocess.TimeoutExpired:
+        raise RuntimeError("LibreOffice conversion timed out (>120s)")
+
+    # soffice writes <stem>.<ext> in output_dir
+    generated = output_dir / f"{input_path.stem}.{fmt_key}"
+    if not generated.exists():
+        # Try alternate: soffice may use a slightly different output name
+        candidates = list(output_dir.glob(f"{input_path.stem}.*"))
+        if candidates:
+            generated = candidates[0]
+        else:
+            raise RuntimeError(f"soffice succeeded but output not found. Expected: {generated}")
+
+    if generated != output_path:
+        if output_path.exists():
+            output_path.unlink()
+        shutil.move(str(generated), str(output_path))
+
+    report["output_path"] = str(output_path)
+    return report
+
 
 def process_txt_to_pdf(txt_path: Path, pdf_output_path: Path):
     """Convert a plain text file to PDF with full Indic shaping support."""

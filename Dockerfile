@@ -34,6 +34,7 @@ RUN apt-get update && apt-get install -y \
     tesseract-ocr-mal \
     tesseract-ocr-ori \
     tesseract-ocr-pan \
+    tesseract-ocr-san \
     && rm -rf /var/lib/apt/lists/*
 
 # Install python dependencies

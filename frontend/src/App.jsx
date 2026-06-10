@@ -16,18 +16,16 @@ const OcrTool = React.lazy(() => import('./components/OcrTool'));
 const ImageConverter = React.lazy(() => import('./pages/ImageConverter'));
 const VideoConverter = React.lazy(() => import('./pages/VideoConverter'));
 const AudioConverter = React.lazy(() => import('./pages/AudioConverter'));
+const Pricing = React.lazy(() => import('./pages/Pricing'));
+const Converter = React.lazy(() => import('./pages/Converter'));
 
 function App() {
   const [isWakingUp, setIsWakingUp] = useState(true);
   const { theme, setTheme } = useStore();
 
   useEffect(() => {
-    // Initial theme setup
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    // Force light mode
+    setTheme('light');
 
     const wakeServer = async () => {
       try {
@@ -63,6 +61,7 @@ function App() {
           }>
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="/converter" element={<Converter />} />
               
               {/* Tool Routes */}
               <Route path="/docx-to-pdf" element={<DocxToPdf />} />
@@ -74,6 +73,7 @@ function App() {
               <Route path="/image-converter" element={<ImageConverter />} />
               <Route path="/video-converter" element={<VideoConverter />} />
               <Route path="/audio-converter" element={<AudioConverter />} />
+              <Route path="/pricing" element={<Pricing />} />
 
               {/* Redirects for requested paths */}
               <Route path="/pdf-tools" element={<Navigate to="/" replace />} />

@@ -15,13 +15,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.append(str(BASE_DIR / "backend"))
 
 try:
-    from processor import process_docx_to_pdf_final, process_txt_to_pdf
+    from processor import process_docx_to_pdf_final, process_txt_to_pdf, convert_document_with_libreoffice
     from pdf_processor import process_pdf_to_docx
     from font_manager import initialize_font_registry
     from merger import merge_pdfs, merge_docx, create_zip_archive
     from security_manager import security_manager
 except ImportError:
-    from .processor import process_docx_to_pdf_final
+    from .processor import process_docx_to_pdf_final, process_txt_to_pdf, convert_document_with_libreoffice
     from .pdf_processor import process_pdf_to_docx
     from .font_manager import initialize_font_registry
     from .merger import merge_pdfs, merge_docx, create_zip_archive
@@ -80,6 +80,7 @@ def handle_job_failure(job, connection, type, value, traceback):
     batch_id = job.kwargs.get('batch_id') or (job.args[2] if len(job.args) > 2 else None)
     if batch_id:
         update_batch_progress(batch_id, False)
+    # Return False so RQ's built-in handler still marks the job as failed in Redis
 
 def update_batch_progress(batch_id: str, success: bool):
     """Update batch progress atomically and trigger merge exactly once."""
@@ -118,27 +119,20 @@ def convert_docx_to_pdf_task(input_path: str, output_path: str, batch_id: str = 
         temp_output = Path(temp_dir) / "output.pdf"
         
         try:
-            # 1. Decrypt ciphertext to temporary plaintext file
             security_manager.decrypt_to_file(Path(input_path), temp_input)
-            
-            # 2. Process
             report = process_docx_to_pdf_final(temp_input, temp_output)
-            
-            # 3. Encrypt output
             security_manager.encrypt_file(temp_output, Path(output_path))
-            
             logger.info(f"Job {job.id} completed successfully.")
-            
-            # Cleanup encrypted input after success
-            if os.path.exists(input_path):
-                os.remove(input_path)
-                
             update_batch_progress(batch_id, True)
-            return {"status": "success", "report": report, "output_path": str(output_path), "batch_id": batch_id}
+            result = {"status": "success", "report": report, "output_path": str(output_path), "batch_id": batch_id}
         except Exception as e:
             logger.error(f"Job {job.id} failed: {str(e)}")
             update_batch_progress(batch_id, False)
             raise e
+
+    # Delete encrypted source only after confirmed success — outside try so retries can still read it
+    Path(input_path).unlink(missing_ok=True)
+    return result
 
 def convert_pdf_to_docx_task(input_path: str, output_path: str, batch_id: str = None):
     """RQ Task for PDF to DOCX conversion with encryption."""
@@ -150,27 +144,19 @@ def convert_pdf_to_docx_task(input_path: str, output_path: str, batch_id: str = 
         temp_output = Path(temp_dir) / "output.docx"
         
         try:
-            # 1. Decrypt
             security_manager.decrypt_to_file(Path(input_path), temp_input)
-            
-            # 2. Process
             report = process_pdf_to_docx(temp_input, temp_output)
-            
-            # 3. Encrypt
             security_manager.encrypt_file(temp_output, Path(output_path))
-            
             logger.info(f"Job {job.id} completed successfully.")
-            
-            # Cleanup encrypted input
-            if os.path.exists(input_path):
-                os.remove(input_path)
-                
             update_batch_progress(batch_id, True)
-            return {"status": "success", "report": report, "output_path": str(output_path), "batch_id": batch_id}
+            result = {"status": "success", "report": report, "output_path": str(output_path), "batch_id": batch_id}
         except Exception as e:
             logger.error(f"Job {job.id} failed: {str(e)}")
             update_batch_progress(batch_id, False)
             raise e
+
+    Path(input_path).unlink(missing_ok=True)
+    return result
 
 def convert_txt_to_pdf_task(input_path: str, output_path: str, batch_id: str = None):
     """RQ Task for TXT to PDF conversion with encryption."""
@@ -182,27 +168,19 @@ def convert_txt_to_pdf_task(input_path: str, output_path: str, batch_id: str = N
         temp_output = Path(temp_dir) / "output.pdf"
         
         try:
-            # 1. Decrypt
             security_manager.decrypt_to_file(Path(input_path), temp_input)
-            
-            # 2. Process
             report = process_txt_to_pdf(temp_input, temp_output)
-            
-            # 3. Encrypt output
             security_manager.encrypt_file(temp_output, Path(output_path))
-            
             logger.info(f"Job {job.id} completed successfully.")
-            
-            # Cleanup encrypted input
-            if os.path.exists(input_path):
-                os.remove(input_path)
-                
             update_batch_progress(batch_id, True)
-            return {"status": "success", "report": report, "output_path": str(output_path), "batch_id": batch_id}
+            result = {"status": "success", "report": report, "output_path": str(output_path), "batch_id": batch_id}
         except Exception as e:
             logger.error(f"Job {job.id} failed: {str(e)}")
             update_batch_progress(batch_id, False)
             raise e
+
+    Path(input_path).unlink(missing_ok=True)
+    return result
 
 def merge_batch_task(batch_id: str):
     """Task to merge successful encrypted outputs."""
@@ -274,3 +252,27 @@ def merge_batch_task(batch_id: str):
         except Exception as e:
             logger.error(f"Batch merge failed for {batch_id}: {e}")
             redis_conn.hset(batch_key, "status", "failed_merge")
+
+
+def convert_document_task(input_path: str, output_path: str, target_format: str, batch_id: str = None):
+    """RQ Task: convert any LibreOffice-compatible document to target_format."""
+    job = get_current_job()
+    logger.info(f"Starting job {job.id}: document -> {target_format} (Batch: {batch_id})")
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_input = Path(temp_dir) / f"input{Path(input_path).suffix}"
+        temp_output = Path(temp_dir) / f"output.{target_format.lower().lstrip('.')}"
+
+        try:
+            security_manager.decrypt_to_file(Path(input_path), temp_input)
+            report = convert_document_with_libreoffice(temp_input, temp_output, target_format)
+            security_manager.encrypt_file(temp_output, Path(output_path))
+            update_batch_progress(batch_id, True)
+            result = {"status": "success", "report": report, "output_path": str(output_path), "batch_id": batch_id}
+        except Exception as e:
+            logger.error(f"Job {job.id} failed: {e}")
+            update_batch_progress(batch_id, False)
+            raise
+
+    Path(input_path).unlink(missing_ok=True)
+    return result
