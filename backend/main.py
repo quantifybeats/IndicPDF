@@ -9,6 +9,7 @@ from typing import List
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, BackgroundTasks, Depends, Security
 from fastapi.responses import FileResponse, HTMLResponse, Response
 from fastapi.security.api_key import APIKeyHeader
+from pydantic import BaseModel
 from redis import Redis
 from rq import Queue
 from rq.job import Job
@@ -71,6 +72,11 @@ UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 MAX_UPLOAD_BYTES = 25 * 1024 * 1024  # single shared limit; checked during streaming
+MAX_EXPORT_TEXT_BYTES = 1 * 1024 * 1024  # QA F2: cap export payload
+
+
+def export_text_too_large(text: str) -> bool:
+    return len(text.encode("utf-8")) > MAX_EXPORT_TEXT_BYTES
 
 logger.info(f"BASE_DIR: {BASE_DIR}")
 logger.info(f"FRONTEND_DIST: {FRONTEND_DIST} (Exists: {FRONTEND_DIST.exists()})")
@@ -678,6 +684,46 @@ async def startup_event():
     logger.info(f"Connected to Redis at {REDIS_URL}")
     # Initialize the periodic cleanup cycle (2 hours)
     q.enqueue(cleanup_old_files_task, 2)
+
+class PdfExportRequest(BaseModel):
+    clean_text: str
+    filename: str = "indicpdf-reconstruction"
+
+
+@app.post("/api/export/pdf")
+@limiter.limit("5/minute")
+async def export_pdf(request: Request, payload: PdfExportRequest):
+    """Render reconstructed text to PDF via the existing Indic-aware
+    txt→pdf worker task (queued, font-registry shaping, 300s timeout)."""
+    if not payload.clean_text.strip():
+        return err(400, "No reconstructed text is available for PDF export.", "EMPTY_TEXT")
+    if export_text_too_large(payload.clean_text):
+        return err(413, "Export text exceeds the 1 MB limit.", "TOO_LARGE")
+
+    file_id = str(uuid.uuid4())
+    input_path = UPLOAD_DIR / f"{file_id}.txt"
+    output_path = OUTPUT_DIR / f"{file_id}.pdf"
+
+    # Write plaintext to a temp file, encrypt at rest like every other upload
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False, encoding="utf-8") as tmp:
+        tmp_path = Path(tmp.name)
+        tmp.write(payload.clean_text)
+    try:
+        security_manager.encrypt_file(tmp_path, input_path)
+    finally:
+        tmp_path.unlink(missing_ok=True)
+
+    q_instance = Queue("fast", connection=redis_conn)
+    job = q_instance.enqueue(
+        convert_txt_to_pdf_task,
+        args=(str(input_path), str(output_path)),
+        job_id=file_id,
+        meta={"original_stem": Path(payload.filename).stem or "indicpdf-reconstruction"},
+        retry=retry_logic(),
+        job_timeout=300,
+    )
+    return {"job_id": job.id, "status": "queued"}
+
 
 @app.get("/{full_path:path}")
 async def serve_frontend(full_path: str):
