@@ -15,17 +15,19 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.append(str(BASE_DIR / "backend"))
 
 try:
-    from processor import process_docx_to_pdf_final, process_txt_to_pdf
+    from processor import process_docx_to_pdf_final, process_txt_to_pdf, convert_document_with_libreoffice
     from pdf_processor import process_pdf_to_docx
     from font_manager import initialize_font_registry
     from merger import merge_pdfs, merge_docx, create_zip_archive
     from security_manager import security_manager
+    from reconstruction_engine import IndicReconstructionEngine, EngineResult
 except ImportError:
-    from .processor import process_docx_to_pdf_final
+    from .processor import process_docx_to_pdf_final, process_txt_to_pdf, convert_document_with_libreoffice
     from .pdf_processor import process_pdf_to_docx
     from .font_manager import initialize_font_registry
     from .merger import merge_pdfs, merge_docx, create_zip_archive
     from .security_manager import security_manager
+    from .reconstruction_engine import IndicReconstructionEngine, EngineResult
 
 logger = logging.getLogger(__name__)
 
@@ -80,6 +82,7 @@ def handle_job_failure(job, connection, type, value, traceback):
     batch_id = job.kwargs.get('batch_id') or (job.args[2] if len(job.args) > 2 else None)
     if batch_id:
         update_batch_progress(batch_id, False)
+    # Return False so RQ's built-in handler still marks the job as failed in Redis
 
 def update_batch_progress(batch_id: str, success: bool):
     """Update batch progress atomically and trigger merge exactly once."""
@@ -118,27 +121,20 @@ def convert_docx_to_pdf_task(input_path: str, output_path: str, batch_id: str = 
         temp_output = Path(temp_dir) / "output.pdf"
         
         try:
-            # 1. Decrypt ciphertext to temporary plaintext file
             security_manager.decrypt_to_file(Path(input_path), temp_input)
-            
-            # 2. Process
             report = process_docx_to_pdf_final(temp_input, temp_output)
-            
-            # 3. Encrypt output
             security_manager.encrypt_file(temp_output, Path(output_path))
-            
             logger.info(f"Job {job.id} completed successfully.")
-            
-            # Cleanup encrypted input after success
-            if os.path.exists(input_path):
-                os.remove(input_path)
-                
             update_batch_progress(batch_id, True)
-            return {"status": "success", "report": report, "output_path": str(output_path), "batch_id": batch_id}
+            result = {"status": "success", "report": report, "output_path": str(output_path), "batch_id": batch_id}
         except Exception as e:
             logger.error(f"Job {job.id} failed: {str(e)}")
             update_batch_progress(batch_id, False)
             raise e
+
+    # Delete encrypted source only after confirmed success — outside try so retries can still read it
+    Path(input_path).unlink(missing_ok=True)
+    return result
 
 def convert_pdf_to_docx_task(input_path: str, output_path: str, batch_id: str = None):
     """RQ Task for PDF to DOCX conversion with encryption."""
@@ -150,27 +146,19 @@ def convert_pdf_to_docx_task(input_path: str, output_path: str, batch_id: str = 
         temp_output = Path(temp_dir) / "output.docx"
         
         try:
-            # 1. Decrypt
             security_manager.decrypt_to_file(Path(input_path), temp_input)
-            
-            # 2. Process
             report = process_pdf_to_docx(temp_input, temp_output)
-            
-            # 3. Encrypt
             security_manager.encrypt_file(temp_output, Path(output_path))
-            
             logger.info(f"Job {job.id} completed successfully.")
-            
-            # Cleanup encrypted input
-            if os.path.exists(input_path):
-                os.remove(input_path)
-                
             update_batch_progress(batch_id, True)
-            return {"status": "success", "report": report, "output_path": str(output_path), "batch_id": batch_id}
+            result = {"status": "success", "report": report, "output_path": str(output_path), "batch_id": batch_id}
         except Exception as e:
             logger.error(f"Job {job.id} failed: {str(e)}")
             update_batch_progress(batch_id, False)
             raise e
+
+    Path(input_path).unlink(missing_ok=True)
+    return result
 
 def convert_txt_to_pdf_task(input_path: str, output_path: str, batch_id: str = None):
     """RQ Task for TXT to PDF conversion with encryption."""
@@ -182,27 +170,19 @@ def convert_txt_to_pdf_task(input_path: str, output_path: str, batch_id: str = N
         temp_output = Path(temp_dir) / "output.pdf"
         
         try:
-            # 1. Decrypt
             security_manager.decrypt_to_file(Path(input_path), temp_input)
-            
-            # 2. Process
             report = process_txt_to_pdf(temp_input, temp_output)
-            
-            # 3. Encrypt output
             security_manager.encrypt_file(temp_output, Path(output_path))
-            
             logger.info(f"Job {job.id} completed successfully.")
-            
-            # Cleanup encrypted input
-            if os.path.exists(input_path):
-                os.remove(input_path)
-                
             update_batch_progress(batch_id, True)
-            return {"status": "success", "report": report, "output_path": str(output_path), "batch_id": batch_id}
+            result = {"status": "success", "report": report, "output_path": str(output_path), "batch_id": batch_id}
         except Exception as e:
             logger.error(f"Job {job.id} failed: {str(e)}")
             update_batch_progress(batch_id, False)
             raise e
+
+    Path(input_path).unlink(missing_ok=True)
+    return result
 
 def merge_batch_task(batch_id: str):
     """Task to merge successful encrypted outputs."""
@@ -274,3 +254,133 @@ def merge_batch_task(batch_id: str):
         except Exception as e:
             logger.error(f"Batch merge failed for {batch_id}: {e}")
             redis_conn.hset(batch_key, "status", "failed_merge")
+
+
+def convert_document_task(input_path: str, output_path: str, target_format: str, batch_id: str = None):
+    """RQ Task: convert any LibreOffice-compatible document to target_format."""
+    job = get_current_job()
+    logger.info(f"Starting job {job.id}: document -> {target_format} (Batch: {batch_id})")
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_input = Path(temp_dir) / f"input{Path(input_path).suffix}"
+        temp_output = Path(temp_dir) / f"output.{target_format.lower().lstrip('.')}"
+
+        try:
+            security_manager.decrypt_to_file(Path(input_path), temp_input)
+            report = convert_document_with_libreoffice(temp_input, temp_output, target_format)
+            security_manager.encrypt_file(temp_output, Path(output_path))
+            update_batch_progress(batch_id, True)
+            result = {"status": "success", "report": report, "output_path": str(output_path), "batch_id": batch_id}
+        except Exception as e:
+            logger.error(f"Job {job.id} failed: {e}")
+            update_batch_progress(batch_id, False)
+            raise
+
+    Path(input_path).unlink(missing_ok=True)
+    return result
+
+
+import json
+
+
+def engine_result_to_payload(result: "EngineResult") -> dict:
+    """Serialize an EngineResult into the v2 ProcessResult contract,
+    plus a top-level success flag (QA F3)."""
+    return {
+        "success": result.success,
+        "clean_text": result.text,
+        "original_ocr_text": result.original_text,
+        "layout_structure": [
+            {
+                "type": "paragraph",
+                "content": segment.text,
+                "confidence": segment.confidence,
+                "reading_order": index + 1,
+            }
+            for index, segment in enumerate(result.segments)
+        ],
+        "confidence_scores": {
+            "document": result.aggregate_confidence,
+            "word_avg": (
+                sum(c for s in result.segments for c in (s.word_confidences or [s.confidence]))
+                / max(1, sum(len(s.word_confidences or [s.confidence]) for s in result.segments))
+            ),
+            "line_avg": (
+                sum(s.confidence for s in result.segments) / max(1, len(result.segments))
+            ),
+            "layout": result.aggregate_confidence if result.segments else 0.0,
+            "quality": result.quality_score,
+        },
+        "word_confidence": [
+            {"text": token, "confidence": conf, "status": segment.status}
+            for segment in result.segments
+            for token, conf in zip(
+                segment.text.split(),
+                segment.word_confidences or [segment.confidence] * len(segment.text.split()),
+            )
+        ],
+        "line_confidence": [
+            {
+                "line_number": segment.line_number,
+                "text": segment.text,
+                "confidence": segment.confidence,
+                "low_confidence_tokens": segment.text.split() if segment.confidence < 0.85 else [],
+            }
+            for segment in result.segments
+        ],
+        "language_metadata": {
+            "detected_language": result.detected_language,
+            "script": result.script,
+            "source_type": result.source_type,
+            **result.metadata,
+        },
+        "quality_assessment": {
+            "status": "usable" if result.success else "processing_incomplete",
+            "readability_score": result.quality_score,
+            "detected_issues": result.detected_issues,
+            "recommendations": result.recommendations,
+        },
+        "warning_flags": result.warnings,
+        "processing_stages": result.processing_stages,
+    }
+
+
+def process_reconstruction_task(input_path: str, original_filename: str, lang: str = "auto"):
+    """RQ Task: confidence-scored document reconstruction (v2 engine).
+
+    Runs entirely in the worker (QA F2/F8). A processing failure is a
+    *successful job* with success:false in the payload — the API and UI
+    use that flag (QA F3). Only infrastructure errors raise.
+    """
+    job = get_current_job()
+    logger.info(f"Starting job {job.id}: reconstruction ({original_filename})")
+
+    suffix = Path(original_filename).suffix.lower() or Path(input_path).suffix
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_input = Path(temp_dir) / f"input{suffix}"
+        security_manager.decrypt_to_file(Path(input_path), temp_input)
+
+        engine = IndicReconstructionEngine(lang=lang)
+        result = engine.process_path(temp_input, original_filename=original_filename)
+
+    payload = engine_result_to_payload(result)
+
+    # Persist payload encrypted, same lifecycle as other outputs (2h cleanup)
+    output_path = OUTPUT_DIR / f"{job.id}.recon.json"
+    tmp_path = None
+    try:
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as tmp:
+            tmp_path = Path(tmp.name)
+            json.dump(payload, tmp, ensure_ascii=False)
+        security_manager.encrypt_file(tmp_path, output_path)
+    finally:
+        if tmp_path is not None:
+            tmp_path.unlink(missing_ok=True)
+
+    Path(input_path).unlink(missing_ok=True)
+    return {
+        "status": "success",
+        "reconstruction": True,
+        "success": payload["success"],
+        "output_path": str(output_path),
+    }

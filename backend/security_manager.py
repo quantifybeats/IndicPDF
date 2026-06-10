@@ -24,7 +24,11 @@ class SecurityManager:
                 logger.error(f"Failed to decode INDICPDF_MASTER_KEY: {e}")
                 self.key = os.urandom(32) # Fallback to prevent crash, but breaks persistence
         else:
-            logger.warning("INDICPDF_MASTER_KEY not found in environment. Generating a transient key.")
+            logger.warning(
+                "INDICPDF_MASTER_KEY not set. Using an ephemeral key — "
+                "encrypted files will NOT be readable after a restart. "
+                "Set INDICPDF_MASTER_KEY to a base64-encoded 32-byte key in production."
+            )
             self.key = os.urandom(32)
             
         self.aesgcm = AESGCM(self.key)

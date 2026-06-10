@@ -20,6 +20,21 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     libharfbuzz-dev \
     libfreetype6-dev \
+    libreoffice-writer \
+    libreoffice-java-common \
+    fontconfig \
+    poppler-utils \
+    tesseract-ocr \
+    tesseract-ocr-hin \
+    tesseract-ocr-tel \
+    tesseract-ocr-tam \
+    tesseract-ocr-ben \
+    tesseract-ocr-guj \
+    tesseract-ocr-kan \
+    tesseract-ocr-mal \
+    tesseract-ocr-ori \
+    tesseract-ocr-pan \
+    tesseract-ocr-san \
     && rm -rf /var/lib/apt/lists/*
 
 # Install python dependencies

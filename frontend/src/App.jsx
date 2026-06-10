@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import axios from 'axios';
+import { useStore } from './store';
 
 // Pages
 import Home from './pages/Home';
@@ -11,11 +12,22 @@ const PdfToDocx = React.lazy(() => import('./pages/PdfToDocx'));
 const TxtToPdf = React.lazy(() => import('./pages/TxtToPdf'));
 const PdfAnalyser = React.lazy(() => import('./pages/PdfAnalyser'));
 const EnglishFontConverter = React.lazy(() => import('./pages/EnglishFontConverter'));
+const OcrTool = React.lazy(() => import('./components/OcrTool'));
+const ReconstructionTool = React.lazy(() => import('./pages/ReconstructionTool'));
+const ImageConverter = React.lazy(() => import('./pages/ImageConverter'));
+const VideoConverter = React.lazy(() => import('./pages/VideoConverter'));
+const AudioConverter = React.lazy(() => import('./pages/AudioConverter'));
+const Pricing = React.lazy(() => import('./pages/Pricing'));
+const Converter = React.lazy(() => import('./pages/Converter'));
 
 function App() {
   const [isWakingUp, setIsWakingUp] = useState(true);
+  const { theme, setTheme } = useStore();
 
   useEffect(() => {
+    // Force light mode
+    setTheme('light');
+
     const wakeServer = async () => {
       try {
         await axios.get('/health', { timeout: 10000 });
@@ -30,10 +42,10 @@ function App() {
 
   if (isWakingUp) {
     return (
-      <div className="min-h-screen bg-bg flex flex-col items-center justify-center p-6 text-center">
-        <div className="w-16 h-16 border-4 border-surface border-t-primary rounded-full animate-spin mb-8"></div>
-        <h1 className="text-2xl font-black mb-2 tracking-tight">Waking up IndicPDF Engine...</h1>
-        <p className="text-text-muted max-w-[400px]">Our high-fidelity rendering core is initializing on the Render cloud. This usually takes 10-15 seconds. Thank you for your patience!</p>
+      <div className={`min-h-screen flex flex-col items-center justify-center p-6 text-center transition-colors duration-500 ${theme === 'dark' ? 'bg-[#0B0B0B] text-white' : 'bg-[#F8F9FA] text-[#111827]'}`}>
+        <div className="w-16 h-16 border-4 border-surface-overlay border-t-primary rounded-full animate-spin mb-8"></div>
+        <h1 className="text-2xl font-black mb-2 tracking-tight">Initializing Engine...</h1>
+        <p className="text-text-muted max-w-[400px]">Connecting to our high-fidelity rendering core on Render Cloud. Thank you for your patience.</p>
       </div>
     );
   }
@@ -45,11 +57,12 @@ function App() {
         <main className="flex-grow">
           <Suspense fallback={
             <div className="flex items-center justify-center min-h-[60vh]">
-              <div className="animate-pulse text-text-muted font-bold italic">Loading IndicPDF Workspace...</div>
+              <div className="animate-pulse text-text-muted font-black italic tracking-widest uppercase text-xs">Synchronizing Workspace...</div>
             </div>
           }>
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="/converter" element={<Converter />} />
               
               {/* Tool Routes */}
               <Route path="/docx-to-pdf" element={<DocxToPdf />} />
@@ -57,7 +70,13 @@ function App() {
               <Route path="/txt-to-pdf" element={<TxtToPdf />} />
               <Route path="/pdf-analyser" element={<PdfAnalyser />} />
               <Route path="/english-font-converter" element={<EnglishFontConverter />} />
-              
+              <Route path="/ocr" element={<OcrTool />} />
+              <Route path="/reconstruct" element={<ReconstructionTool />} />
+              <Route path="/image-converter" element={<ImageConverter />} />
+              <Route path="/video-converter" element={<VideoConverter />} />
+              <Route path="/audio-converter" element={<AudioConverter />} />
+              <Route path="/pricing" element={<Pricing />} />
+
               {/* Redirects for requested paths */}
               <Route path="/pdf-tools" element={<Navigate to="/" replace />} />
               <Route path="/font-converter" element={<Navigate to="/english-font-converter" replace />} />

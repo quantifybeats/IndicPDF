@@ -208,13 +208,55 @@ class FontRegistry:
 # Global registry instance
 font_registry = FontRegistry()
 
+def _load_from_index(index_path: Path, fonts_root: Path) -> bool:
+    """Load font registry from pre-built JSON index. Returns True on success."""
+    if not index_path.exists():
+        return False
+    try:
+        import json
+        data = json.loads(index_path.read_text())
+        if data.get("version", 0) < 2:
+            return False  # stale index from old format
+        for entry in data.get("fonts", []):
+            abs_path = fonts_root / entry["rel_path"]
+            if not abs_path.exists():
+                continue
+            meta = FontMetadata(
+                path=abs_path,
+                postscript_name=entry["postscript_name"],
+                full_name=entry["full_name"],
+                family_name=entry["family_name"],
+                unicode_ranges=set(entry.get("unicode_ranges", [])),
+                family_names={entry["family_name"], entry["full_name"], entry["postscript_name"]},
+                weight=entry.get("weight", "regular"),
+                style=entry.get("style", "normal"),
+            )
+            font_registry._register_metadata(meta)
+            # Populate script_fallback from explicit list if stored by build_font_index.py
+            for script_name in entry.get("scripts", []):
+                if script_name not in font_registry.script_fallback:
+                    font_registry.script_fallback[script_name] = []
+                if meta not in font_registry.script_fallback[script_name]:
+                    font_registry.script_fallback[script_name].append(meta)
+        return True
+    except Exception as e:
+        print(f"[font_manager] index load failed: {e}")
+        return False
+
+
 def initialize_font_registry():
-    # Discovery absolute base path
     backend_dir = Path(__file__).resolve().parent
     base_dir = backend_dir.parent
     base_fonts_path = base_dir / "fonts"
-    
-    font_registry.scan_directory(base_fonts_path / "system")
-    font_registry.scan_directory(base_fonts_path / "fallback")
-    font_registry.scan_directory(base_fonts_path / "uploads")
-    print(f"Font Registry initialized with {len(font_registry.registry)} entries from {base_fonts_path}")
+    index_path = base_fonts_path / "fonts_index.json"
+
+    if _load_from_index(index_path, base_fonts_path):
+        print(f"Font Registry loaded from index: {len(font_registry.registry)} entries")
+        # Always scan uploads (user-supplied fonts, not in index)
+        font_registry.scan_directory(base_fonts_path / "uploads")
+    else:
+        # Fallback: full filesystem scan (slower but always works)
+        font_registry.scan_directory(base_fonts_path / "system")
+        font_registry.scan_directory(base_fonts_path / "fallback")
+        font_registry.scan_directory(base_fonts_path / "uploads")
+        print(f"Font Registry initialized (scanned): {len(font_registry.registry)} entries")

@@ -1,45 +1,48 @@
 import React from 'react';
-import ToolCard from './ToolCard';
 
-const tools = [
+const features = [
   {
-    id: 'docx-to-pdf',
-    icon: '📝',
-    title: 'DOCX to PDF',
-    description: 'Convert Microsoft Word documents to high-fidelity PDF with perfect Indic script rendering.',
+    icon: '◎',
+    title: 'Indic Script Support',
+    desc: 'We support Telugu, Devanagari, Tamil, Bengali, Gujarati, Kannada, Malayalam, Odia and more Indic scripts with perfect glyph rendering.',
   },
   {
-    id: 'pdf-to-docx',
-    icon: '📋',
-    title: 'PDF to DOCX',
-    description: 'Extract text from PDFs and convert them into editable Word files while preserving structure.',
+    icon: '⚡',
+    title: 'Fast and easy',
+    desc: 'Just drop your file on the page, choose a tool and click Convert. We aim to process all conversions in under 1-2 minutes.',
   },
   {
-    id: 'txt-to-pdf',
-    icon: '📜',
-    title: 'TXT to PDF',
-    description: 'Convert plain text files to professional PDFs with automated font shaping and layout.',
+    icon: '☁',
+    title: 'Server-side processing',
+    desc: 'All conversions run on our cloud servers and will not consume any capacity from your computer.',
   },
   {
-    id: 'pdf-analyser',
-    icon: '🔍',
-    title: 'PDF Analyser',
-    description: 'Check PDF health, font embedding, and searchability. Get a quality score for your documents.',
+    icon: '⚙',
+    title: '9 Language OCR',
+    desc: 'Our OCR engine supports Hindi, Telugu, Tamil, Bengali, Gujarati, Kannada, Malayalam, Odia and Punjabi using Tesseract.',
   },
   {
-    id: 'english-font-converter',
-    icon: '𝔄',
-    title: 'English Font Converter',
-    description: 'Create stylish English text for social media and documents using unique Unicode characters.',
+    icon: '✓',
+    title: 'Security guaranteed',
+    desc: 'We delete uploaded files instantly and converted ones after 24 hours. No one has access to your files and privacy is guaranteed.',
+  },
+  {
+    icon: '🖥',
+    title: 'All devices supported',
+    desc: 'IndicPDF is browser-based and works for all platforms. There is no need to download or install any software.',
   },
 ];
 
 const ToolGrid = () => {
   return (
-    <section className="tool-grid-section py-8 px-6 max-w-[1200px] mx-auto" id="all">
-      <div className="tool-grid grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-6">
-        {tools.map((tool) => (
-          <ToolCard key={tool.id} {...tool} />
+    <section style={{ background: '#F7F7F7', padding: '60px 24px' }}>
+      <div className="feature-grid" style={{ maxWidth: 900, margin: '0 auto' }}>
+        {features.map(f => (
+          <div key={f.title} style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 32, marginBottom: 16, color: '#999' }}>{f.icon}</div>
+            <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 10, color: '#333' }}>{f.title}</h3>
+            <p style={{ fontSize: 14, color: '#777', lineHeight: 1.6, margin: 0 }}>{f.desc}</p>
+          </div>
         ))}
       </div>
     </section>

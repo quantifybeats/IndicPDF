@@ -1,0 +1,109 @@
+<h2>How should users access tools?</h2>
+<p class="subtitle">All options are light mode, warm feel, no page redirects. Pick the layout structure.</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#FAF9F6;padding:14px;border-radius:10px;font-family:'Segoe UI',sans-serif;">
+      <!-- Navbar -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #E8E3DB;">
+        <span style="color:#1a1a1a;font-weight:800;font-size:12px;letter-spacing:-0.3px;">IndicPDF</span>
+        <span style="color:#888;font-size:8px;">Free · No signup needed</span>
+      </div>
+      <!-- Tab bar -->
+      <div style="display:flex;gap:4px;margin-bottom:10px;overflow:hidden;">
+        <div style="background:#C2410C;color:white;font-size:8px;font-weight:700;padding:4px 8px;border-radius:6px;white-space:nowrap;">DOCX → PDF</div>
+        <div style="background:#F5F0E8;color:#666;font-size:8px;padding:4px 8px;border-radius:6px;white-space:nowrap;">PDF → DOCX</div>
+        <div style="background:#F5F0E8;color:#666;font-size:8px;padding:4px 8px;border-radius:6px;white-space:nowrap;">TXT → PDF</div>
+        <div style="background:#F5F0E8;color:#666;font-size:8px;padding:4px 8px;border-radius:6px;white-space:nowrap;">Analyser</div>
+        <div style="background:#F5F0E8;color:#666;font-size:8px;padding:4px 8px;border-radius:6px;white-space:nowrap;">Fonts</div>
+      </div>
+      <!-- Active tool workspace -->
+      <div style="background:white;border:1px solid #E8E3DB;border-radius:8px;padding:10px;">
+        <div style="color:#1a1a1a;font-size:10px;font-weight:700;margin-bottom:2px;">Convert DOCX → PDF</div>
+        <div style="color:#888;font-size:7px;margin-bottom:8px;">Supports Telugu, Devanagari & Tamil scripts</div>
+        <div style="border:2px dashed #C2410C;border-radius:6px;padding:10px;text-align:center;color:#C2410C;font-size:8px;">
+          Drop your .docx file here<br>
+          <span style="color:#aaa;font-size:7px;">or click to browse</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Horizontal Tab Bar <span style="background:#C2410C;color:white;font-size:9px;padding:2px 8px;border-radius:99px;margin-left:6px;">Recommended</span></h3>
+      <p>Tabs across the top of the page. Click a tab → the tool workspace swaps in below. No page load, no scroll. Clean and familiar — feels like a native desktop app.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#FAF9F6;padding:14px;border-radius:10px;font-family:'Segoe UI',sans-serif;">
+      <!-- Navbar -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #E8E3DB;">
+        <span style="color:#1a1a1a;font-weight:800;font-size:12px;">IndicPDF</span>
+        <span style="color:#888;font-size:8px;">Free · No signup needed</span>
+      </div>
+      <!-- Two-column layout -->
+      <div style="display:flex;gap:8px;">
+        <!-- Sidebar -->
+        <div style="width:70px;flex-shrink:0;">
+          <div style="background:#C2410C;color:white;font-size:7px;font-weight:700;padding:5px 6px;border-radius:6px;margin-bottom:3px;">DOCX→PDF</div>
+          <div style="background:#F0EBE3;color:#666;font-size:7px;padding:5px 6px;border-radius:6px;margin-bottom:3px;">PDF→DOCX</div>
+          <div style="background:#F0EBE3;color:#666;font-size:7px;padding:5px 6px;border-radius:6px;margin-bottom:3px;">TXT→PDF</div>
+          <div style="background:#F0EBE3;color:#666;font-size:7px;padding:5px 6px;border-radius:6px;margin-bottom:3px;">Analyser</div>
+          <div style="background:#F0EBE3;color:#666;font-size:7px;padding:5px 6px;border-radius:6px;">Fonts</div>
+        </div>
+        <!-- Main panel -->
+        <div style="flex:1;background:white;border:1px solid #E8E3DB;border-radius:8px;padding:8px;">
+          <div style="color:#1a1a1a;font-size:9px;font-weight:700;margin-bottom:2px;">Convert DOCX → PDF</div>
+          <div style="color:#888;font-size:6px;margin-bottom:6px;">Telugu · Devanagari · Tamil</div>
+          <div style="border:2px dashed #C2410C;border-radius:6px;padding:8px;text-align:center;color:#C2410C;font-size:7px;">
+            Drop .docx here
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Sidebar + Main Panel</h3>
+      <p>Tool list on the left, workspace on the right. Persistent sidebar always visible. Works great on desktop, collapses to a dropdown on mobile.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#FAF9F6;padding:14px;border-radius:10px;font-family:'Segoe UI',sans-serif;">
+      <!-- Navbar -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #E8E3DB;">
+        <span style="color:#1a1a1a;font-weight:800;font-size:12px;">IndicPDF</span>
+        <span style="color:#888;font-size:8px;">Free · No signup needed</span>
+      </div>
+      <!-- Small hero text -->
+      <div style="margin-bottom:8px;">
+        <div style="color:#1a1a1a;font-size:11px;font-weight:800;margin-bottom:2px;">Convert Indic Documents</div>
+        <div style="color:#888;font-size:7px;">Pick a tool below — no account needed.</div>
+      </div>
+      <!-- Icon grid — clicking opens inline -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:8px;">
+        <div style="background:#C2410C;color:white;border-radius:8px;padding:7px;text-align:center;">
+          <div style="font-size:14px;margin-bottom:2px;">📄</div>
+          <div style="font-size:6px;font-weight:700;">DOCX→PDF</div>
+        </div>
+        <div style="background:#F0EBE3;color:#555;border-radius:8px;padding:7px;text-align:center;">
+          <div style="font-size:14px;margin-bottom:2px;">🔄</div>
+          <div style="font-size:6px;font-weight:700;">PDF→DOCX</div>
+        </div>
+        <div style="background:#F0EBE3;color:#555;border-radius:8px;padding:7px;text-align:center;">
+          <div style="font-size:14px;margin-bottom:2px;">📝</div>
+          <div style="font-size:6px;font-weight:700;">TXT→PDF</div>
+        </div>
+      </div>
+      <!-- Expanded tool panel below grid -->
+      <div style="background:white;border:1.5px solid #C2410C;border-radius:8px;padding:8px;">
+        <div style="color:#1a1a1a;font-size:9px;font-weight:700;margin-bottom:5px;">▾ DOCX → PDF</div>
+        <div style="border:2px dashed #C2410C;border-radius:6px;padding:8px;text-align:center;color:#C2410C;font-size:7px;">Drop .docx here</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Grid Launcher + Inline Expand</h3>
+      <p>Tool icons in a grid. Click one → it expands into a workspace right below the grid. Others collapse. Feels playful and app-like, especially on mobile.</p>
+    </div>
+  </div>
+
+</div>

@@ -1,59 +1,81 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { ArrowRight, Zap, Shield, Sparkles } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useStore } from '../store';
 
 const Hero = () => {
-  return (
-    <section className="hero-section pt-24 pb-16 px-6 text-center overflow-hidden relative">
-      {/* Background Glows */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px] pointer-events-none"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[30%] h-[30%] bg-primary/5 rounded-full blur-[100px] pointer-events-none"></div>
+  const navigate = useNavigate();
+  const inputRef = useRef();
+  const addFiles = useStore((state) => state.addFiles);
+  const [dragActive, setDragActive] = useState(false);
 
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="max-w-[900px] mx-auto relative z-10"
+  const handleFile = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    addFiles(files);
+    navigate('/converter');
+  };
+
+  const handleDrag = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    const files = Array.from(e.dataTransfer.files || []);
+    if (files.length > 0) {
+      addFiles(files);
+      navigate('/converter');
+    }
+  };
+
+  return (
+    <section style={{ textAlign: 'center', padding: '60px 24px 48px', background: '#fff' }} className="transition-colors duration-300 dark:bg-bg">
+      <h1 className="hero-h1 text-primary" style={{ fontSize: 42, fontWeight: 700, marginBottom: 12, fontFamily: 'inherit' }}>
+        Indic File Converter
+      </h1>
+      <p className="hero-sub text-text-muted" style={{ fontSize: 18, marginBottom: 40 }}>
+        Convert your Indic documents to any format
+      </p>
+
+      {/* Dark upload box */}
+      <div 
+        className={`hero-box transition-all duration-300 ${dragActive ? 'scale-102 ring-2 ring-primary bg-[#3A3A3A]' : 'bg-[#2D2D2D]'}`}
+        style={{ borderRadius: 8, padding: '48px 40px', maxWidth: 680, margin: '0 auto', border: dragActive ? '2px dashed #FF4B4B' : '2px dashed transparent' }}
+        onDragEnter={handleDrag}
+        onDragOver={handleDrag}
+        onDragLeave={handleDrag}
+        onDrop={handleDrop}
       >
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface border border-border mb-8">
-          <Sparkles size={14} className="text-primary" />
-          <span className="text-[11px] font-black uppercase tracking-widest text-text-muted">Enterprise Indic Shaping Engine</span>
-        </div>
-        
-        <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tight leading-[1.05]">
-          Indic script documents,<br />
-          <span className="text-primary">perfectly rendered.</span>
-        </h1>
-        
-        <p className="text-lg md:text-xl text-text-muted mb-10 max-w-[700px] mx-auto leading-relaxed">
-          High-fidelity PDF conversion and text extraction for Telugu, Hindi, and Tamil. 
-          Zero broken glyphs, zero matra displacement, 100% Unicode compliant.
-        </p>
-        
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <a href="#all" className="action-btn !mt-0 !w-auto px-10 py-4 flex items-center gap-2 group">
-            Start Using Tools <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-          </a>
-          <button className="px-10 py-4 bg-surface border border-border rounded-lg font-bold hover:bg-surface/80 transition-all">
-            View Documentation
+        <div className="hero-btn-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 16 }}>
+          <button
+            onClick={() => inputRef.current.click()}
+            style={{ background: '#FF4B4B', color: '#fff', border: 'none', borderRadius: 4, padding: '14px 32px', fontSize: 16, fontWeight: 600, cursor: 'pointer', letterSpacing: 0.3 }}
+            onMouseEnter={e => e.currentTarget.style.background = '#e03e3e'}
+            onMouseLeave={e => e.currentTarget.style.background = '#FF4B4B'}
+          >
+            Choose Files
           </button>
         </div>
-
-        <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-[800px] mx-auto opacity-60">
-          <div className="flex items-center gap-3 justify-center">
-            <Zap size={18} className="text-primary" />
-            <span className="text-xs font-bold uppercase tracking-widest">Fast Processing</span>
-          </div>
-          <div className="flex items-center gap-3 justify-center">
-            <Shield size={18} className="text-primary" />
-            <span className="text-xs font-bold uppercase tracking-widest">Secure & Private</span>
-          </div>
-          <div className="flex items-center gap-3 justify-center">
-            <Sparkles size={18} className="text-primary" />
-            <span className="text-xs font-bold uppercase tracking-widest">Perfect Ligatures</span>
-          </div>
-        </div>
-      </motion.div>
+        <p style={{ color: '#888', fontSize: 13, margin: 0 }}>
+          {dragActive ? 'Drop your files now!' : 'Drop files here. Free for everyone, no account needed.'}
+        </p>
+        <input
+          ref={inputRef}
+          type="file"
+          multiple
+          style={{ display: 'none' }}
+          onChange={handleFile}
+          accept=".docx,.doc,.pdf,.txt,.jpg,.jpeg,.png,.gif,.bmp,.webp,.mp4,.avi,.mov,.mkv,.mp3,.wav,.flac,.aac,.ogg"
+        />
+      </div>
     </section>
   );
 };
