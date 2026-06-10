@@ -69,6 +69,8 @@ OUTPUT_DIR = BASE_DIR / "data" / "outputs"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
+MAX_UPLOAD_BYTES = 25 * 1024 * 1024  # single shared limit; checked during streaming
+
 logger.info(f"BASE_DIR: {BASE_DIR}")
 logger.info(f"FRONTEND_DIST: {FRONTEND_DIST} (Exists: {FRONTEND_DIST.exists()})")
 if FRONTEND_DIST.exists():
@@ -90,16 +92,29 @@ def retry_logic():
     return Retry(max=2, interval=[10, 30])
 
 async def secure_file_upload(file: UploadFile, destination_path: Path):
-    """Helper to stream an upload to a temp file and then encrypt it in chunks."""
+    """Stream an upload to a temp file with a hard size cap, then encrypt it.
+
+    The cap is enforced per-chunk so an oversized body is aborted after at
+    most 25 MB + 1 chunk, instead of being buffered fully before validation.
+    """
+    total = 0
     try:
         with tempfile.NamedTemporaryFile(delete=True) as tmp:
             while True:
-                chunk = await file.read(1024 * 1024) # 1MB chunks
+                chunk = await file.read(1024 * 1024)  # 1MB chunks
                 if not chunk:
                     break
+                total += len(chunk)
+                if total > MAX_UPLOAD_BYTES:
+                    raise HTTPException(
+                        status_code=413,
+                        detail=f"File {file.filename} exceeds 25 MB limit.",
+                    )
                 tmp.write(chunk)
             tmp.flush()
             security_manager.encrypt_file(Path(tmp.name), destination_path)
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Failed to securely process upload {file.filename}: {e}")
         raise HTTPException(status_code=500, detail=f"Secure processing failed for {file.filename}")
@@ -132,7 +147,7 @@ async def upload_files(request: Request, files: List[UploadFile] = File(...)):
         size = file.file.tell()
         file.file.seek(0)
 
-        if size > 25 * 1024 * 1024:
+        if size > MAX_UPLOAD_BYTES:
             return err(400, f"File {file.filename} exceeds 25 MB limit.", "TOO_LARGE")
 
         queue_name = "slow" if size > 5 * 1024 * 1024 else "fast"
@@ -225,7 +240,7 @@ async def upload_batch(request: Request, files: List[UploadFile] = File(...)):
         file.file.seek(0, 2)
         size = file.file.tell()
         file.file.seek(0)
-        if size > 25 * 1024 * 1024:
+        if size > MAX_UPLOAD_BYTES:
             return err(400, f"File {file.filename} exceeds 25 MB limit.", "TOO_LARGE")
 
         file_ext = Path(file.filename).suffix.lower()
@@ -502,7 +517,7 @@ async def convert_document(
     file.file.seek(0, 2)
     size = file.file.tell()
     file.file.seek(0)
-    if size > 25 * 1024 * 1024:
+    if size > MAX_UPLOAD_BYTES:
         return err(400, "File exceeds 25 MB limit.", "TOO_LARGE")
 
     file_id = str(uuid.uuid4())
