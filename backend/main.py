@@ -3,6 +3,7 @@ import uuid
 import logging
 import shutil
 import tempfile
+import json
 from pathlib import Path
 from typing import List
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, BackgroundTasks, Depends, Security
@@ -77,7 +78,7 @@ if FRONTEND_DIST.exists():
     logger.info(f"Contents of FRONTEND_DIST: {[f.name for f in FRONTEND_DIST.iterdir()]}")
 
 # Import tasks (must be importable by worker too)
-from tasks import convert_docx_to_pdf_task, convert_pdf_to_docx_task, convert_txt_to_pdf_task, cleanup_old_files_task, convert_document_task
+from tasks import convert_docx_to_pdf_task, convert_pdf_to_docx_task, convert_txt_to_pdf_task, cleanup_old_files_task, convert_document_task, process_reconstruction_task
 from processor import LIBREOFFICE_INPUT_FORMATS, LIBREOFFICE_OUTPUT_MAP
 from ocr_processor import LANG_MAP as OCR_LANG_MAP
 from security_manager import security_manager
@@ -225,6 +226,82 @@ async def ocr_upload(
         job_timeout=300,
     )
     return {"job_id": job_id}
+
+
+RECON_EXTENSIONS = {".pdf", ".docx", ".png", ".jpg", ".jpeg", ".tiff", ".tif"}
+
+
+@app.post("/api/process")
+@limiter.limit("5/minute")
+async def process_documents(
+    request: Request,
+    files: List[UploadFile] = File(...),
+    lang: str = Form(default="auto"),
+):
+    """Confidence-scored reconstruction. Multi-file: one job per file (QA F6)."""
+    if len(files) > 10:
+        return err(400, "Max 10 files allowed per request.", "BATCH_LIMIT")
+
+    jobs = []
+    for file in files:
+        ext = Path(file.filename or "").suffix.lower()
+        if ext not in RECON_EXTENSIONS:
+            jobs.append({"original_name": file.filename, "job_id": None,
+                         "status": "rejected",
+                         "detail": f"Unsupported file type: {ext or 'none'}"})
+            continue
+
+        header = await file.read(4)
+        await file.seek(0)
+        if ext == ".pdf" and not header.startswith(b"%PDF"):
+            jobs.append({"original_name": file.filename, "job_id": None,
+                         "status": "rejected", "detail": "Invalid PDF signature."})
+            continue
+        if ext == ".docx" and not header.startswith(b"PK\x03\x04"):
+            jobs.append({"original_name": file.filename, "job_id": None,
+                         "status": "rejected", "detail": "Invalid DOCX signature."})
+            continue
+
+        file_id = str(uuid.uuid4())
+        input_path = UPLOAD_DIR / f"{file_id}{ext}"
+        await secure_file_upload(file, input_path)  # streams + caps (QA F4)
+
+        q_instance = Queue("slow", connection=redis_conn)  # OCR is CPU-heavy
+        job = q_instance.enqueue(
+            process_reconstruction_task,
+            args=(str(input_path), file.filename, lang),
+            job_id=file_id,
+            meta={"original_stem": Path(file.filename).stem},
+            retry=retry_logic(),
+            job_timeout=300,  # QA F2/F8: hard processing timeout
+        )
+        jobs.append({"original_name": file.filename, "job_id": job.id, "status": "queued"})
+
+    if not any(j["job_id"] for j in jobs):
+        return err(400, "No processable files in request.", "NO_VALID_FILES")
+    return {"jobs": jobs}
+
+
+@app.get("/api/process/result/{job_id}")
+async def get_process_result(job_id: str):
+    """Fetch the rich reconstruction payload for a finished job."""
+    try:
+        job = Job.fetch(job_id, connection=redis_conn)
+    except Exception:
+        raise HTTPException(status_code=404, detail="Job not found")
+    if not job.is_finished:
+        raise HTTPException(status_code=409, detail=f"Job is in state: {job.get_status()}")
+
+    output_path_str = (job.result or {}).get("output_path")
+    if not output_path_str or not Path(output_path_str).exists():
+        raise HTTPException(status_code=404, detail="Result expired or missing")
+
+    decrypted = security_manager.decrypt_to_memory(Path(output_path_str))
+    payload = json.loads(decrypted)
+    # QA F3: unusable input → explicit 422 with full diagnostics in the body
+    status_code = 200 if payload.get("success") else 422
+    return JSONResponse(status_code=status_code, content=payload)
+
 
 @app.post("/batch/upload")
 @limiter.limit("2/minute")
