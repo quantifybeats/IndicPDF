@@ -367,13 +367,15 @@ def process_reconstruction_task(input_path: str, original_filename: str, lang: s
 
     # Persist payload encrypted, same lifecycle as other outputs (2h cleanup)
     output_path = OUTPUT_DIR / f"{job.id}.recon.json"
-    with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as tmp:
-        json.dump(payload, tmp, ensure_ascii=False)
-        tmp_path = Path(tmp.name)
+    tmp_path = None
     try:
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as tmp:
+            tmp_path = Path(tmp.name)
+            json.dump(payload, tmp, ensure_ascii=False)
         security_manager.encrypt_file(tmp_path, output_path)
     finally:
-        tmp_path.unlink(missing_ok=True)
+        if tmp_path is not None:
+            tmp_path.unlink(missing_ok=True)
 
     Path(input_path).unlink(missing_ok=True)
     return {

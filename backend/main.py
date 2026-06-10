@@ -292,6 +292,9 @@ async def get_process_result(job_id: str):
     if not job.is_finished:
         raise HTTPException(status_code=409, detail=f"Job is in state: {job.get_status()}")
 
+    if not (job.result or {}).get("reconstruction"):
+        raise HTTPException(status_code=404, detail="Not a reconstruction job")
+
     output_path_str = (job.result or {}).get("output_path")
     if not output_path_str or not Path(output_path_str).exists():
         raise HTTPException(status_code=404, detail="Result expired or missing")
