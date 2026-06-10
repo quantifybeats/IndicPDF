@@ -79,6 +79,7 @@ from tasks import convert_docx_to_pdf_task, convert_pdf_to_docx_task, convert_tx
 from processor import LIBREOFFICE_INPUT_FORMATS, LIBREOFFICE_OUTPUT_MAP
 from ocr_processor import LANG_MAP as OCR_LANG_MAP
 from security_manager import security_manager
+from http_utils import content_disposition
 import io
 
 def retry_logic():
@@ -426,13 +427,14 @@ async def download_result(job_id: str):
     output_path = Path(output_path_str)
     original_stem = job.meta.get("original_stem", "file")
     download_name = f"IndicPDF_{original_stem}{output_path.suffix}"
+    disposition = content_disposition(download_name)
 
     # OCR jobs write plaintext directly — skip decryption
     if job.result.get("ocr"):
         return Response(
             content=output_path.read_bytes(),
             media_type="text/plain; charset=utf-8",
-            headers={"Content-Disposition": f'attachment; filename="{download_name}"'}
+            headers={"Content-Disposition": disposition}
         )
 
     # Decrypt in memory and stream
@@ -441,7 +443,7 @@ async def download_result(job_id: str):
         return Response(
             content=decrypted_bytes,
             media_type="application/octet-stream",
-            headers={"Content-Disposition": f'attachment; filename="{download_name}"'}
+            headers={"Content-Disposition": disposition}
         )
     except Exception as e:
         logger.error(f"Decryption failed during download: {e}")
@@ -466,7 +468,7 @@ async def download_batch_result(batch_id: str):
         return Response(
             content=decrypted_bytes,
             media_type="application/octet-stream",
-            headers={"Content-Disposition": f'attachment; filename="IndicPDF_batch{final_path.suffix}"'}
+            headers={"Content-Disposition": content_disposition(f"IndicPDF_batch{final_path.suffix}")}
         )
     except Exception as e:
         logger.error(f"Batch decryption failed during download: {e}")
