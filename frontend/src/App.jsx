@@ -13,6 +13,7 @@ const TxtToPdf = React.lazy(() => import('./pages/TxtToPdf'));
 const PdfAnalyser = React.lazy(() => import('./pages/PdfAnalyser'));
 const EnglishFontConverter = React.lazy(() => import('./pages/EnglishFontConverter'));
 const OcrTool = React.lazy(() => import('./components/OcrTool'));
+const ReconstructionTool = React.lazy(() => import('./pages/ReconstructionTool'));
 const ImageConverter = React.lazy(() => import('./pages/ImageConverter'));
 const VideoConverter = React.lazy(() => import('./pages/VideoConverter'));
 const AudioConverter = React.lazy(() => import('./pages/AudioConverter'));
@@ -70,6 +71,7 @@ function App() {
               <Route path="/pdf-analyser" element={<PdfAnalyser />} />
               <Route path="/english-font-converter" element={<EnglishFontConverter />} />
               <Route path="/ocr" element={<OcrTool />} />
+              <Route path="/reconstruct" element={<ReconstructionTool />} />
               <Route path="/image-converter" element={<ImageConverter />} />
               <Route path="/video-converter" element={<VideoConverter />} />
               <Route path="/audio-converter" element={<AudioConverter />} />

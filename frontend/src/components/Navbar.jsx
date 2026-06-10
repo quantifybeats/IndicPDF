@@ -9,6 +9,7 @@ const TOOLS = [
   { label: 'PDF Analyser', to: '/pdf-analyser', icon: <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#FF4B4B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="9" r="5"/><path d="M14 14l3 3"/></svg> },
   { label: 'English Fonts', to: '/english-font-converter', icon: <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#FF4B4B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 15L8 5l4 10M5.5 12h5M13 5h3M14.5 5v10"/></svg> },
   { label: 'OCR', to: '/ocr', icon: <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#FF4B4B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="14" height="10" rx="1"/><path d="M7 9h6M7 12h4"/></svg> },
+  { label: 'Reconstruct', to: '/reconstruct', icon: <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#FF4B4B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="14" height="10" rx="1"/><path d="M7 9h6M7 12h4"/></svg> },
   { label: 'Image Converter', to: '/image-converter', icon: <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#FF4B4B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="14" height="12" rx="2"/><circle cx="7.5" cy="8.5" r="1.5"/><path d="M3 14l4-4 3 3 2-2 5 5"/></svg> },
   { label: 'Video Converter', to: '/video-converter', icon: <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#FF4B4B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="12" height="10" rx="2"/><path d="M14 8l4-2v8l-4-2V8z"/></svg> },
   { label: 'Audio Converter', to: '/audio-converter', icon: <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#FF4B4B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 4v12M6 7v6M3 9v2M12 7v6M15 9v2"/></svg> },
@@ -49,6 +50,7 @@ const Navbar = () => {
             )}
           </li>
           <li><Link to="/ocr" style={{ color: '#555', fontSize: 14, fontWeight: 500, textDecoration: 'none' }}>OCR</Link></li>
+          <li><Link to="/reconstruct" style={{ color: '#555', fontSize: 14, fontWeight: 500, textDecoration: 'none' }}>Reconstruct</Link></li>
           <li><Link to="/pricing" style={{ color: '#555', fontSize: 14, fontWeight: 500, textDecoration: 'none' }}>Pricing</Link></li>
         </ul>
 
