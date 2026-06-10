@@ -57,11 +57,35 @@ class EngineResult:
         return bool(self.text.strip())
 
 
-def _pdf_to_images(path: Path):
-    """Render PDF pages to PIL images. Separate function so tests can stub it."""
-    from pdf2image import convert_from_path
+MAX_PDF_PAGES = 50
+_PDF_RENDER_CHUNK = 5
 
-    return convert_from_path(str(path), dpi=300)
+
+def _pdf_to_images(path: Path):
+    """Yield PDF pages as PIL images in small chunks to bound memory.
+
+    Renders _PDF_RENDER_CHUNK pages per pdf2image call instead of the whole
+    document at once (a 300 DPI page is ~25 MB uncompressed; the host has
+    512 MB). Stops at MAX_PDF_PAGES.
+    """
+    from pdf2image import convert_from_path
+    from pdf2image.exceptions import PDFPageCountError
+
+    first = 1
+    while first <= MAX_PDF_PAGES:
+        try:
+            batch = convert_from_path(
+                str(path), dpi=300,
+                first_page=first, last_page=first + _PDF_RENDER_CHUNK - 1,
+            )
+        except PDFPageCountError:
+            break
+        if not batch:
+            break
+        yield from batch
+        if len(batch) < _PDF_RENDER_CHUNK:
+            break
+        first += _PDF_RENDER_CHUNK
 
 
 class IndicReconstructionEngine:
@@ -202,7 +226,10 @@ class IndicReconstructionEngine:
         lines: Dict[tuple, dict] = {}
         for i in range(len(data["text"])):
             word = (data["text"][i] or "").strip()
-            conf = float(data["conf"][i])
+            try:
+                conf = float(data["conf"][i])
+            except (TypeError, ValueError):
+                continue
             if not word or conf < 0:
                 continue
             key = (data["block_num"][i], data["par_num"][i], data["line_num"][i])
@@ -233,35 +260,38 @@ class IndicReconstructionEngine:
 
     def _process_pdf(self, path: Path, name: str) -> EngineResult:
         stages = ["input_validation", "pdf_page_render", "tesseract_ocr", "confidence_scoring"]
+        segments: List[OCRSegment] = []
+        warnings: List[str] = []
+        page_count = 0
         try:
-            images = _pdf_to_images(path)
+            for image in _pdf_to_images(path):
+                page_count += 1
+                try:
+                    page_segments, page_warnings = self._ocr_image(image)
+                except OcrDependencyError as exc:
+                    # QA F7: surface the real cause, never "no text extracted"
+                    return self._dependency_failure(name, "pdf", stages, str(exc))
+                finally:
+                    # release page bitmap before rendering the next chunk
+                    getattr(image, "close", lambda: None)()
+                warnings.extend(page_warnings)
+                for segment in page_segments:
+                    segment.line_number = len(segments) + 1
+                    segments.append(segment)
         except OcrDependencyError as exc:
             return self._dependency_failure(name, "pdf", stages, str(exc))
         except Exception as exc:
             return self._failure(name, "pdf", stages, issue="pdf_processing_failed",
                                  recommendation=f"PDF processing failed: {exc}")
-        if not images:
+
+        if page_count == 0:
             return self._failure(name, "pdf", stages, issue="pdf_contains_no_pages",
                                  recommendation="The PDF has no renderable pages.")
-
-        segments: List[OCRSegment] = []
-        warnings: List[str] = []
-        for page_index, image in enumerate(images):
-            try:
-                page_segments, page_warnings = self._ocr_image(image)
-            except OcrDependencyError as exc:
-                # QA F7: surface the real cause, never "no text extracted"
-                return self._dependency_failure(name, "pdf", stages, str(exc))
-            warnings.extend(page_warnings)
-            for segment in page_segments:
-                segment.line_number = len(segments) + 1
-                segments.append(segment)
-
         if not segments:
             return self._failure(name, "pdf", stages, issue="pdf_ocr_returned_no_text",
                                  recommendation="Upload a clearer scan, or the PDF may be blank.")
         result = self._result_from_segments(name, "pdf", segments, sorted(set(warnings)), stages)
-        result.metadata["page_count"] = str(len(images))
+        result.metadata["page_count"] = str(page_count)
         return result
 
     # -------------------------------------------------------------- Helpers
