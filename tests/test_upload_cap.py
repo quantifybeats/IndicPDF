@@ -48,3 +48,20 @@ async def test_at_limit_stream_is_accepted(tmp_path, monkeypatch):
     exact = FakeUpload(b"x" * backend_main.MAX_UPLOAD_BYTES)
     await backend_main.secure_file_upload(exact, tmp_path / "out.bin")
     assert called.get("ok")  # F9: exactly-at-limit stays accepted
+
+
+@pytest.mark.asyncio
+async def test_ocr_endpoint_oversized_stream_returns_413(tmp_path, monkeypatch):
+    """OCR endpoint now uses secure_file_upload — oversized uploads must be rejected."""
+    from fastapi import HTTPException
+    import main as backend_main
+
+    monkeypatch.setattr(
+        backend_main.security_manager, "encrypt_file", lambda src, dst: None
+    )
+
+    oversized = FakeUpload(b"x" * (backend_main.MAX_UPLOAD_BYTES + 1))
+    oversized.filename = "big.pdf"
+    with pytest.raises(HTTPException) as exc_info:
+        await backend_main.secure_file_upload(oversized, tmp_path / "ocr_out.bin")
+    assert exc_info.value.status_code == 413
