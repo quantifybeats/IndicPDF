@@ -306,7 +306,7 @@ export default function Converter() {
         ctx.fillStyle = '#111827';
         ctx.fillRect(0, 0, 600, 450);
         
-        ctx.fillStyle = '#FF4B4B';
+        ctx.fillStyle = '#F97316';
         ctx.font = 'bold 24px sans-serif';
         ctx.fillText('IndicPDF Converter Core', 50, 70);
         
@@ -365,7 +365,7 @@ export default function Converter() {
       {dragActive && (
         <div 
           className="fixed inset-0 bg-primary/10 backdrop-blur-md z-50 flex items-center justify-center pointer-events-none"
-          style={{ border: '4px dashed #FF4B4B' }}
+          style={{ border: '4px dashed #F97316' }}
         >
           <div className="text-center p-8 bg-white dark:bg-zinc-900 border border-primary/20 rounded-2xl shadow-2xl max-w-sm">
             <Upload className="w-16 h-16 text-primary mx-auto animate-bounce mb-4" />

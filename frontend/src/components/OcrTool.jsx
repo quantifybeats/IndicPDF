@@ -133,10 +133,10 @@ export default function OcrTool() {
     return (
       <div style={{ background: '#fff', minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
         <div style={{ textAlign: 'center', maxWidth: 400 }}>
-          <p style={{ color: '#FF4B4B', fontSize: 16, fontWeight: 600, marginBottom: 24 }}>⚠ {errorMsg}</p>
+          <p style={{ color: '#F97316', fontSize: 16, fontWeight: 600, marginBottom: 24 }}>⚠ {errorMsg}</p>
           <button
             onClick={handleReset}
-            style={{ background: '#FF4B4B', color: '#fff', border: 'none', borderRadius: 4, padding: '12px 32px', fontSize: 15, fontWeight: 600, cursor: 'pointer' }}
+            style={{ background: '#F97316', color: '#fff', border: 'none', borderRadius: 4, padding: '12px 32px', fontSize: 15, fontWeight: 600, cursor: 'pointer' }}
           >
             Try Again
           </button>
@@ -149,7 +149,7 @@ export default function OcrTool() {
     return (
       <div style={{ background: '#fff', minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ width: 48, height: 48, border: '4px solid #E8E8E8', borderTopColor: '#FF4B4B', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 24px' }}></div>
+          <div style={{ width: 48, height: 48, border: '4px solid #E8E8E8', borderTopColor: '#F97316', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 24px' }}></div>
           <p style={{ fontSize: 16, color: '#555', fontWeight: 600 }}>
             {status === 'uploading' ? 'Uploading your file...' : 'Running OCR — extracting text...'}
           </p>
@@ -164,7 +164,7 @@ export default function OcrTool() {
     <div style={{ background: '#fff', minHeight: '80vh' }}>
       {/* Hero section */}
       <div style={{ textAlign: 'center', padding: '60px 24px 48px' }}>
-        <h1 style={{ fontSize: 36, fontWeight: 700, color: '#FF4B4B', marginBottom: 12 }}>
+        <h1 style={{ fontSize: 36, fontWeight: 700, color: '#F97316', marginBottom: 12 }}>
           Optical Character Recognition (OCR). Online &amp; Free
         </h1>
         <p style={{ fontSize: 18, color: '#777', marginBottom: 40 }}>
@@ -180,9 +180,9 @@ export default function OcrTool() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 16 }}>
             <button
               onClick={() => inputRef.current.click()}
-              style={{ background: '#FF4B4B', color: '#fff', border: 'none', borderRadius: 4, padding: '14px 32px', fontSize: 16, fontWeight: 600, cursor: 'pointer' }}
-              onMouseEnter={e => e.currentTarget.style.background = '#e03e3e'}
-              onMouseLeave={e => e.currentTarget.style.background = '#FF4B4B'}
+              style={{ background: '#F97316', color: '#fff', border: 'none', borderRadius: 4, padding: '14px 32px', fontSize: 16, fontWeight: 600, cursor: 'pointer' }}
+              onMouseEnter={e => e.currentTarget.style.background = '#EA580C'}
+              onMouseLeave={e => e.currentTarget.style.background = '#F97316'}
             >
               Choose Files
             </button>
@@ -226,12 +226,12 @@ export default function OcrTool() {
             onClick={handleConvert}
             disabled={!file}
             style={{
-              width: '100%', background: file ? '#FF4B4B' : '#ccc', color: '#fff',
+              width: '100%', background: file ? '#F97316' : '#ccc', color: '#fff',
               border: 'none', borderRadius: 4, padding: '16px 0', fontSize: 16,
               fontWeight: 700, cursor: file ? 'pointer' : 'not-allowed', letterSpacing: 0.5,
             }}
-            onMouseEnter={e => { if (file) e.currentTarget.style.background = '#e03e3e'; }}
-            onMouseLeave={e => { if (file) e.currentTarget.style.background = '#FF4B4B'; }}
+            onMouseEnter={e => { if (file) e.currentTarget.style.background = '#EA580C'; }}
+            onMouseLeave={e => { if (file) e.currentTarget.style.background = '#F97316'; }}
           >
             Recognize
           </button>
@@ -251,7 +251,7 @@ export default function OcrTool() {
               { step: '3', title: 'Download text', desc: 'Click "Recognize" and download the extracted text file once processing is complete.' },
             ].map(item => (
               <div key={item.step} style={{ textAlign: 'center' }}>
-                <div style={{ width: 48, height: 48, borderRadius: '50%', background: '#FF4B4B', color: '#fff', fontSize: 20, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                <div style={{ width: 48, height: 48, borderRadius: '50%', background: '#F97316', color: '#fff', fontSize: 20, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
                   {item.step}
                 </div>
                 <h4 style={{ fontSize: 15, fontWeight: 700, color: '#333', marginBottom: 8 }}>{item.title}</h4>

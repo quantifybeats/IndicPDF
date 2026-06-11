@@ -10,7 +10,7 @@ export default function UploadErrorList({ errors, onDismiss, onClearAll }) {
           {errors.length} file{errors.length > 1 ? 's' : ''} could not be added
         </span>
         {errors.length > 1 && (
-          <button onClick={onClearAll} style={{ fontSize: 12, color: '#FF4B4B', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500 }}>
+          <button onClick={onClearAll} style={{ fontSize: 12, color: '#F97316', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500 }}>
             Clear all
           </button>
         )}
