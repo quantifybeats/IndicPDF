@@ -35,7 +35,7 @@ A single helper producing an RFC 6266/5987-compliant header: ASCII-only `filenam
 - Create: `backend/http_utils.py`
 - Test: `tests/test_http_utils.py`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 ```python
 # tests/test_http_utils.py
@@ -78,12 +78,12 @@ def test_empty_and_hostile_names_get_default():
         assert "/" not in fallback and "\\" not in fallback
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `cd /Users/jay/IndicPdf-Main && python -m pytest tests/test_http_utils.py -v`
 Expected: FAIL with `ModuleNotFoundError: No module named 'http_utils'`
 
-- [ ] **Step 3: Implement `backend/http_utils.py`**
+- [x] **Step 3: Implement `backend/http_utils.py`**
 
 ```python
 # backend/http_utils.py
@@ -122,12 +122,12 @@ def content_disposition(filename: str, default: str = "download") -> str:
     return f"attachment; filename=\"{ascii_name[:120]}\"; filename*=UTF-8''{utf8_name}"
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `cd /Users/jay/IndicPdf-Main && python -m pytest tests/test_http_utils.py -v`
 Expected: 4 PASSED
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 cd /Users/jay/IndicPdf-Main
@@ -144,7 +144,7 @@ Main's `/download/{job_id}` and `/batch/download/{batch_id}` interpolate `origin
 **Files:**
 - Modify: `backend/main.py:428` and `backend/main.py:435,444,469` (the three `Content-Disposition` header dicts)
 
-- [ ] **Step 1: Import the helper in `backend/main.py`**
+- [x] **Step 1: Import the helper in `backend/main.py`**
 
 Below the existing `from security_manager import security_manager` line (main.py:81), add:
 
@@ -152,7 +152,7 @@ Below the existing `from security_manager import security_manager` line (main.py
 from http_utils import content_disposition
 ```
 
-- [ ] **Step 2: Replace the three header constructions**
+- [x] **Step 2: Replace the three header constructions**
 
 In `download_result` (main.py:428-445), replace:
 
@@ -194,7 +194,7 @@ with:
             headers={"Content-Disposition": content_disposition(f"IndicPDF_batch{final_path.suffix}")}
 ```
 
-- [ ] **Step 3: Write a regression test**
+- [x] **Step 3: Write a regression test**
 
 ```python
 # tests/test_download_headers.py
@@ -213,12 +213,12 @@ def test_indic_original_stem_does_not_crash_header_encoding():
         header.encode("latin-1")  # would raise UnicodeEncodeError pre-fix
 ```
 
-- [ ] **Step 4: Run tests**
+- [x] **Step 4: Run tests**
 
 Run: `cd /Users/jay/IndicPdf-Main && python -m pytest tests/test_download_headers.py tests/test_http_utils.py -v`
 Expected: ALL PASSED
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 cd /Users/jay/IndicPdf-Main
@@ -236,7 +236,7 @@ git commit -m "fix: latin-1-safe download filenames for Indic upload names (QA F
 - Modify: `backend/main.py:91-104` (`secure_file_upload`)
 - Test: `tests/test_upload_cap.py`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```python
 # tests/test_upload_cap.py
@@ -294,12 +294,12 @@ async def test_at_limit_stream_is_accepted(tmp_path, monkeypatch):
 
 Note: needs `pytest-asyncio`. If absent: `pip install pytest-asyncio` and add to `requirements.txt` dev section.
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd /Users/jay/IndicPdf-Main && python -m pytest tests/test_upload_cap.py -v`
 Expected: FAIL — `AttributeError: module 'main' has no attribute 'MAX_UPLOAD_BYTES'`
 
-- [ ] **Step 3: Implement the cap**
+- [x] **Step 3: Implement the cap**
 
 In `backend/main.py`, add a constant near the other config (below `OUTPUT_DIR`, ~line 70):
 
@@ -341,12 +341,12 @@ async def secure_file_upload(file: UploadFile, destination_path: Path):
 
 Also replace the four existing literal checks `if size > 25 * 1024 * 1024:` (main.py:134, 227, 503 and the seek/tell in `/batch/upload/unified`) with `if size > MAX_UPLOAD_BYTES:` — keep them as cheap early rejections; the streaming cap is the backstop.
 
-- [ ] **Step 4: Run tests**
+- [x] **Step 4: Run tests**
 
 Run: `cd /Users/jay/IndicPdf-Main && python -m pytest tests/test_upload_cap.py -v`
 Expected: 2 PASSED
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 cd /Users/jay/IndicPdf-Main
@@ -370,7 +370,7 @@ Port of donor `hybrid_engine.py` with four deliberate changes:
 - Test: `tests/test_reconstruction_engine.py`
 - Reference (do not modify): `/Users/jay/IndicPDF/backend/hybrid_engine.py`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 ```python
 # tests/test_reconstruction_engine.py
@@ -461,12 +461,12 @@ def test_pdf_dependency_failure_is_propagated(tmp_path, monkeypatch):
     assert "pdf_ocr_returned_no_text" not in result.detected_issues
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `cd /Users/jay/IndicPdf-Main && python -m pytest tests/test_reconstruction_engine.py -v`
 Expected: FAIL with `ModuleNotFoundError: No module named 'reconstruction_engine'`
 
-- [ ] **Step 3: Implement `backend/reconstruction_engine.py`**
+- [x] **Step 3: Implement `backend/reconstruction_engine.py`**
 
 ```python
 # backend/reconstruction_engine.py
@@ -801,12 +801,12 @@ class _DocxTooLarge(Exception):
     """str(exc) is the machine-readable issue code."""
 ```
 
-- [ ] **Step 4: Run tests**
+- [x] **Step 4: Run tests**
 
 Run: `cd /Users/jay/IndicPdf-Main && python -m pytest tests/test_reconstruction_engine.py -v`
 Expected: 5 PASSED
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 cd /Users/jay/IndicPdf-Main
@@ -825,7 +825,7 @@ git commit -m "feat: port v2 reconstruction engine with real word confidences (Q
 - Modify: `backend/main.py` (two new endpoints; extend imports)
 - Test: `tests/test_reconstruction_task.py`
 
-- [ ] **Step 1: Write the failing test for the task's serialization**
+- [x] **Step 1: Write the failing test for the task's serialization**
 
 ```python
 # tests/test_reconstruction_task.py
@@ -870,12 +870,12 @@ def test_failure_payload_is_marked_unsuccessful():
     assert "docx_extraction_failed" in payload["quality_assessment"]["detected_issues"]
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd /Users/jay/IndicPdf-Main && python -m pytest tests/test_reconstruction_task.py -v`
 Expected: FAIL — `ImportError: cannot import name 'engine_result_to_payload' from 'tasks'`
 
-- [ ] **Step 3: Append the task + serializer to `backend/tasks.py`**
+- [x] **Step 3: Append the task + serializer to `backend/tasks.py`**
 
 Add to the imports block (inside both branches of the existing try/except import at tasks.py:17-28):
 
@@ -991,12 +991,12 @@ def process_reconstruction_task(input_path: str, original_filename: str, lang: s
     }
 ```
 
-- [ ] **Step 4: Run the serializer tests**
+- [x] **Step 4: Run the serializer tests**
 
 Run: `cd /Users/jay/IndicPdf-Main && python -m pytest tests/test_reconstruction_task.py -v`
 Expected: 2 PASSED
 
-- [ ] **Step 5: Add the endpoints to `backend/main.py`**
+- [x] **Step 5: Add the endpoints to `backend/main.py`**
 
 Extend the task import line (main.py:78) to include the new task:
 
@@ -1084,12 +1084,12 @@ async def get_process_result(job_id: str):
     return JSONResponse(status_code=status_code, content=payload)
 ```
 
-- [ ] **Step 6: Verify the app imports cleanly**
+- [x] **Step 6: Verify the app imports cleanly**
 
 Run: `cd /Users/jay/IndicPdf-Main/backend && python -c "import main" && cd .. && python -m pytest tests/test_reconstruction_task.py tests/test_reconstruction_engine.py -v`
 Expected: import succeeds (Redis connection is lazy), all tests PASS
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 cd /Users/jay/IndicPdf-Main
@@ -1107,7 +1107,7 @@ git commit -m "feat: queued multi-file reconstruction pipeline (QA F2, F3, F6, F
 - Modify: `backend/main.py` (one new endpoint, after `get_process_result`)
 - Test: `tests/test_export_endpoint.py`
 
-- [ ] **Step 1: Write the failing test for the cap logic**
+- [x] **Step 1: Write the failing test for the cap logic**
 
 ```python
 # tests/test_export_endpoint.py
@@ -1130,12 +1130,12 @@ def test_export_request_model_rejects_oversized_text():
     assert backend_main.export_text_too_large("చిన్న పాఠ్యం") is False
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `cd /Users/jay/IndicPdf-Main && python -m pytest tests/test_export_endpoint.py -v`
 Expected: FAIL — `AttributeError: module 'main' has no attribute 'MAX_EXPORT_TEXT_BYTES'`
 
-- [ ] **Step 3: Implement the endpoint**
+- [x] **Step 3: Implement the endpoint**
 
 In `backend/main.py`, add near `MAX_UPLOAD_BYTES`:
 
@@ -1190,12 +1190,12 @@ async def export_pdf(request: Request, payload: PdfExportRequest):
     return {"job_id": job.id, "status": "queued"}
 ```
 
-- [ ] **Step 4: Run tests**
+- [x] **Step 4: Run tests**
 
 Run: `cd /Users/jay/IndicPdf-Main && python -m pytest tests/test_export_endpoint.py -v && cd backend && python -c "import main"`
 Expected: 2 PASSED, clean import
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 cd /Users/jay/IndicPdf-Main
@@ -1214,7 +1214,7 @@ Port of donor `App.tsx` UI to Main's conventions (JSX, axios, `OcrTool`-style po
 - Test: `frontend/src/pages/__tests__/ReconstructionTool.test.jsx`
 - Reference (do not modify): `/Users/jay/IndicPDF/frontend/src/App.tsx`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 ```jsx
 // frontend/src/pages/__tests__/ReconstructionTool.test.jsx
@@ -1263,12 +1263,12 @@ describe('ReconstructionTool', () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `cd /Users/jay/IndicPdf-Main/frontend && npx vitest run src/pages/__tests__/ReconstructionTool.test.jsx`
 Expected: FAIL — cannot resolve `../ReconstructionTool`
 
-- [ ] **Step 3: Implement `frontend/src/pages/ReconstructionTool.jsx`**
+- [x] **Step 3: Implement `frontend/src/pages/ReconstructionTool.jsx`**
 
 ```jsx
 // frontend/src/pages/ReconstructionTool.jsx
@@ -1532,12 +1532,12 @@ export default function ReconstructionTool() {
 }
 ```
 
-- [ ] **Step 4: Run tests**
+- [x] **Step 4: Run tests**
 
 Run: `cd /Users/jay/IndicPdf-Main/frontend && npx vitest run src/pages/__tests__/ReconstructionTool.test.jsx`
 Expected: 4 PASSED
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 cd /Users/jay/IndicPdf-Main
@@ -1553,7 +1553,7 @@ git commit -m "feat: ReconstructionTool page with multi-file upload and failure 
 - Modify: `frontend/src/App.jsx` (import + route, follow the lazy-import pattern used by the other pages)
 - Modify: `frontend/src/components/Navbar.jsx` (nav link next to the existing OCR link)
 
-- [ ] **Step 1: Add the route**
+- [x] **Step 1: Add the route**
 
 In `frontend/src/App.jsx`, add with the other page imports (match the existing import style — check whether pages there use `React.lazy`; mirror it):
 
@@ -1567,7 +1567,7 @@ Add inside `<Routes>` after the `/ocr` route (App.jsx:72):
               <Route path="/reconstruct" element={<ReconstructionTool />} />
 ```
 
-- [ ] **Step 2: Add the Navbar link**
+- [x] **Step 2: Add the Navbar link**
 
 In `frontend/src/components/Navbar.jsx`, locate the existing OCR link (grep for `"/ocr"`) and add beside it, matching the surrounding element's classes exactly:
 
@@ -1577,12 +1577,12 @@ In `frontend/src/components/Navbar.jsx`, locate the existing OCR link (grep for 
 
 (Replace the comment with the literal class string copied from the adjacent OCR link — this is a copy-the-sibling edit, both desktop and mobile menu sections if Navbar has both.)
 
-- [ ] **Step 3: Verify the build**
+- [x] **Step 3: Verify the build**
 
 Run: `cd /Users/jay/IndicPdf-Main/frontend && npm run build`
 Expected: build succeeds, no unresolved imports
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 cd /Users/jay/IndicPdf-Main
@@ -1600,11 +1600,11 @@ The engine needs `pdf2image` (Python) and `poppler-utils` (system) for the PDF p
 - Modify: `requirements.txt`
 - Modify: `Dockerfile`
 
-- [ ] **Step 1: Check what's already present**
+- [x] **Step 1: Check what's already present**
 
 Run: `grep -E "pdf2image|Pillow|pytest-asyncio" /Users/jay/IndicPdf-Main/requirements.txt; grep "poppler" /Users/jay/IndicPdf-Main/Dockerfile`
 
-- [ ] **Step 2: Add anything missing**
+- [x] **Step 2: Add anything missing**
 
 To `requirements.txt` (only the lines the grep did not find):
 
@@ -1620,12 +1620,12 @@ To the Dockerfile apt-get block (after `tesseract-ocr-san \`, Dockerfile:37), if
     poppler-utils \
 ```
 
-- [ ] **Step 3: Verify install resolves**
+- [x] **Step 3: Verify install resolves**
 
 Run: `cd /Users/jay/IndicPdf-Main && pip install -r requirements.txt --dry-run`
 Expected: resolves without conflicts
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 cd /Users/jay/IndicPdf-Main
@@ -1637,17 +1637,17 @@ git commit -m "chore: add pdf2image/poppler deps for reconstruction engine"
 
 ### Task 10: End-to-end verification + donor repo retirement
 
-- [ ] **Step 1: Full backend test suite**
+- [x] **Step 1: Full backend test suite**
 
 Run: `cd /Users/jay/IndicPdf-Main && python -m pytest tests/ -v --ignore=tests/stress_test.py --ignore=tests/memory_stress.py`
 Expected: all green (pre-existing failures, if any, noted but not introduced by this work — compare against `git stash` baseline if unsure)
 
-- [ ] **Step 2: Frontend test suite + build**
+- [x] **Step 2: Frontend test suite + build**
 
 Run: `cd /Users/jay/IndicPdf-Main/frontend && npx vitest run && npm run build`
 Expected: all green, build succeeds
 
-- [ ] **Step 3: Live smoke test (needs Redis + worker running)**
+- [x] **Step 3: Live smoke test (needs Redis + worker running)**
 
 ```bash
 cd /Users/jay/IndicPdf-Main
@@ -1710,7 +1710,7 @@ EOF
 
 Expected: `E2E SMOKE: ALL PASS`
 
-- [ ] **Step 4: Update QA report change log**
+- [x] **Step 4: Update QA report change log**
 
 Append to `/Users/jay/IndicPDF/docs/QA_REPORT_v1.md` §6:
 
@@ -1722,7 +1722,7 @@ Append to `/Users/jay/IndicPDF/docs/QA_REPORT_v1.md` §6:
 
 Also copy the report into the host repo: `cp /Users/jay/IndicPDF/docs/QA_REPORT_v1.md /Users/jay/IndicPdf-Main/docs/QA_REPORT_v1.md` and commit.
 
-- [ ] **Step 5: Mark the donor repo retired**
+- [x] **Step 5: Mark the donor repo retired**
 
 Create `/Users/jay/IndicPDF/RETIRED.md`:
 
@@ -1736,7 +1736,7 @@ Do not develop here. See
 `IndicPdf-Main/docs/superpowers/plans/2026-06-10-v2-engine-integration.md`.
 ```
 
-- [ ] **Step 6: Final commit**
+- [x] **Step 6: Final commit**
 
 ```bash
 cd /Users/jay/IndicPdf-Main
