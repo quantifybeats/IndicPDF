@@ -12,7 +12,7 @@ const Logo = ({ iconOnly = false, className = "" }) => {
           <defs>
             <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="var(--primary)" />
-              <stop offset="100%" stopColor="#C084FC" />
+              <stop offset="100%" stopColor="#FDBA74" />
             </linearGradient>
           </defs>
           

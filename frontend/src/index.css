@@ -4,33 +4,36 @@
 
 @layer base {
   :root {
-    --primary: #FF4B4B;
-    --primary-hover: #E53E3E;
-    --primary-rgb: 255 75 75;
-    --bg: #FFFFFF;
+    /* Brand orange (#F97316 / #EA580C) */
+    --primary: #F97316;
+    --primary-hover: #EA580C;
+    --primary-rgb: 249 115 22;
+    --accent-indigo: #fb7185;
+    --bg: #FAFAFB;
     --surface: #FFFFFF;
-    --surface-overlay: #F7F7F7;
-    --border: #E8E8E8;
-    --border-rgb: 232 232 232;
-    --text: #333333;
-    --text-muted: #777777;
-    --shadow: 0 2px 8px rgba(0,0,0,0.08);
-    --shadow-lg: 0 8px 24px rgba(0,0,0,0.10);
+    --surface-overlay: #FBF5F0;
+    --border: #EFEAE4;
+    --border-rgb: 239 234 228;
+    --text: #18181B;
+    --text-muted: #71717A;
+    --shadow: 0 2px 12px rgba(24,16,48,0.06);
+    --shadow-lg: 0 16px 48px rgba(234,88,12,0.12);
   }
 
   .dark {
-    --primary: #FF4B4B;
-    --primary-hover: #E53E3E;
-    --primary-rgb: 255 75 75;
-    --bg: #FFFFFF;
-    --surface: #FFFFFF;
-    --surface-overlay: #F7F7F7;
-    --border: #E8E8E8;
-    --border-rgb: 232 232 232;
-    --text: #333333;
-    --text-muted: #777777;
-    --shadow: 0 2px 8px rgba(0,0,0,0.08);
-    --shadow-lg: 0 8px 24px rgba(0,0,0,0.10);
+    --primary: #F97316;
+    --primary-hover: #EA580C;
+    --primary-rgb: 249 115 22;
+    --accent-indigo: #fb7185;
+    --bg: #0A0A0F;
+    --surface: #121218;
+    --surface-overlay: #1A1A22;
+    --border: #26262F;
+    --border-rgb: 38 38 47;
+    --text: #FAFAFA;
+    --text-muted: #A1A1AA;
+    --shadow: 0 2px 12px rgba(0,0,0,0.4);
+    --shadow-lg: 0 16px 48px rgba(0,0,0,0.5);
   }
 
   body {
@@ -69,8 +72,8 @@
 .mobile-menu {
   display: none;
   flex-direction: column;
-  background: #fff;
-  border-top: 1px solid #E8E8E8;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
   padding: 16px 24px;
   gap: 16px;
 }
@@ -167,4 +170,53 @@
   .workspace-card {
     @apply bg-surface border border-border shadow-shadow-lg rounded-radius-xl overflow-hidden;
   }
+}
+
+/* ── Reference UI visual language (glass / gradient / orbs) ── */
+@layer utilities {
+  .glass {
+    background: rgb(255 255 255 / 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgb(255 255 255 / 0.4);
+  }
+  .dark .glass {
+    background: rgb(10 10 15 / 0.6);
+    border-color: rgb(255 255 255 / 0.08);
+  }
+  /* Gradient ink for headings — falls back to solid text where unsupported */
+  .text-gradient {
+    background: linear-gradient(120deg, var(--text) 0%, var(--text-muted) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .text-gradient-brand {
+    background: linear-gradient(120deg, var(--primary) 0%, #fdba74 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+/* Soft floating brand orbs behind the hero / dropzone */
+.orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(110px);
+  opacity: 0.45;
+  pointer-events: none;
+  z-index: 0;
+}
+.orb-primary { background: rgb(var(--primary-rgb) / 0.55); }
+.orb-indigo  { background: var(--accent-indigo); opacity: 0.30; }
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%      { transform: translateY(-24px) scale(1.05); }
+}
+.animate-float-slow { animation: float-slow 9s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float-slow { animation: none; }
 }
