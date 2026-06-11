@@ -12,6 +12,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, HTMLResponse, Response
 from pydantic import BaseModel
 from redis import Redis
+from redis.exceptions import ConnectionError as RedisConnectionError
 from rq import Queue
 from rq.job import Job
 
@@ -55,6 +56,15 @@ from starlette.requests import Request
 limiter = Limiter(key_func=get_remote_address)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    try:
+        redis_conn.ping()
+    except RedisConnectionError as e:
+        logger.critical(
+            f"Cannot reach Redis at {REDIS_URL}. "
+            "In the monolith container start.sh must launch redis-server first; "
+            "otherwise point REDIS_URL at a reachable Redis instance."
+        )
+        raise RuntimeError(f"Redis unreachable at {REDIS_URL}") from e
     logger.info(f"Connected to Redis at {REDIS_URL}")
     q.enqueue(cleanup_old_files_task, 2)
     yield

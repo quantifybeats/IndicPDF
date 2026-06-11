@@ -18,6 +18,7 @@ WORKDIR /app
 
 # Install system dependencies for HarfBuzz and font processing
 RUN apt-get update && apt-get install -y \
+    redis-server \
     libharfbuzz-dev \
     libfreetype6-dev \
     libreoffice-writer \
