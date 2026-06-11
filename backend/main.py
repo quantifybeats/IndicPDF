@@ -6,9 +6,10 @@ import tempfile
 import json
 from pathlib import Path
 from typing import List
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException, BackgroundTasks, Depends, Security
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, HTMLResponse, Response
-from fastapi.security.api_key import APIKeyHeader
 from pydantic import BaseModel
 from redis import Redis
 from rq import Queue
@@ -33,20 +34,12 @@ if str(BACKEND_DIR) not in sys.path:
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-import secrets
-
-# Security Configuration
-API_KEY_NAME = "X-API-Key"
-api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
-INTERNAL_API_KEY = os.environ.get("INDICPDF_API_KEY", "dev-key-placeholder")
-
-async def get_api_key(api_key_header: str = Security(api_key_header)):
-    # Constant-time comparison to prevent timing attacks
-    if secrets.compare_digest(api_key_header or "", INTERNAL_API_KEY):
-        return api_key_header
-    raise HTTPException(
-        status_code=403, detail="Could not validate credentials"
-    )
+# NOTE: This is a public, same-origin web tool — the conversion endpoints are
+# intentionally unauthenticated (the SPA calls them without credentials). A
+# previous APIKeyHeader/get_api_key dependency was defined but wired to zero
+# routes (QA F5), which misrepresented the security posture; it was removed.
+# Abuse is bounded by the per-IP rate limits below. INDICPDF_API_KEY is still
+# read (as a prod sentinel) by retry_logic().
 
 # Redis & RQ Setup
 REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379")
@@ -60,9 +53,24 @@ from starlette.requests import Request
 
 # Initialize Limiter
 limiter = Limiter(key_func=get_remote_address)
-app = FastAPI(title="IndicPDF Production API")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info(f"Connected to Redis at {REDIS_URL}")
+    q.enqueue(cleanup_old_files_task, 2)
+    yield
+
+
+app = FastAPI(title="IndicPDF Production API", lifespan=lifespan)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Return a clean 400 instead of pydantic's verbose 422 (QA F11)."""
+    first = exc.errors()[0] if exc.errors() else {}
+    detail = first.get("msg", "Invalid request")
+    return JSONResponse(status_code=400, content={"detail": detail, "code": "INVALID_REQUEST"})
 
 IS_VERCEL = "VERCEL" in os.environ
 # Ensure directories exist
@@ -72,6 +80,7 @@ UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 MAX_UPLOAD_BYTES = 25 * 1024 * 1024  # single shared limit; checked during streaming
+# Guard uses strict `>` so exactly 25 MB is accepted (QA F9 — intentional, do not change to `>=`).
 MAX_EXPORT_TEXT_BYTES = 1 * 1024 * 1024  # QA F2: cap export payload
 
 
@@ -140,8 +149,15 @@ async def upload_files(request: Request, files: List[UploadFile] = File(...)):
     for file in files:
         file_ext = Path(file.filename).suffix.lower()
         if file_ext not in [".docx", ".pdf", ".txt"]:
+            # Don't silently drop: surface a per-file rejection (QA F8).
+            job_ids.append({
+                "original_name": file.filename,
+                "job_id": None,
+                "status": "rejected",
+                "detail": f"Unsupported file type: {file_ext or 'none'}. Allowed: .docx, .pdf, .txt",
+            })
             continue
-            
+
         # 0. Magic Byte Validation & Size Routing
         header = await file.read(4)
         await file.seek(0)
@@ -222,8 +238,7 @@ async def ocr_upload(
         return err(400, f"Unknown language: {lang}.", "INVALID_PARAM")
     job_id = str(uuid.uuid4())
     input_path = UPLOAD_DIR / f"{job_id}_input{ext}"
-    contents = await file.read()
-    input_path.write_bytes(contents)
+    await secure_file_upload(file, input_path)
     q.enqueue(
         "backend.worker.process_ocr",
         job_id=job_id,
@@ -530,20 +545,13 @@ async def download_result(job_id: str):
     download_name = f"IndicPDF_{original_stem}{output_path.suffix}"
     disposition = content_disposition(download_name)
 
-    # OCR jobs write plaintext directly — skip decryption
-    if job.result.get("ocr"):
-        return Response(
-            content=output_path.read_bytes(),
-            media_type="text/plain; charset=utf-8",
-            headers={"Content-Disposition": disposition}
-        )
+    media_type = "text/plain; charset=utf-8" if job.result.get("ocr") else "application/octet-stream"
 
-    # Decrypt in memory and stream
     try:
         decrypted_bytes = security_manager.decrypt_to_memory(output_path)
         return Response(
             content=decrypted_bytes,
-            media_type="application/octet-stream",
+            media_type=media_type,
             headers={"Content-Disposition": disposition}
         )
     except Exception as e:
@@ -633,12 +641,16 @@ async def analyse_pdf_quality(file: UploadFile = File(...)):
     """Analyse a PDF for quality metrics (Fonts, Searchability, Compression)."""
     if not file.filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files can be analysed.")
-    
+
     try:
         from pypdf import PdfReader
         import io
-        
-        content = await file.read()
+
+        # Read at most MAX_UPLOAD_BYTES+1 to detect oversized bodies without
+        # buffering the whole payload — reject before handing to PdfReader.
+        content = await file.read(MAX_UPLOAD_BYTES + 1)
+        if len(content) > MAX_UPLOAD_BYTES:
+            raise HTTPException(status_code=413, detail="File exceeds 25 MB limit.")
         reader = PdfReader(io.BytesIO(content))
         
         pages = len(reader.pages)
@@ -678,12 +690,6 @@ async def analyse_pdf_quality(file: UploadFile = File(...)):
     except Exception as e:
         logger.error(f"Analysis failed: {e}")
         raise HTTPException(status_code=500, detail="Internal analysis error")
-
-@app.on_event("startup")
-async def startup_event():
-    logger.info(f"Connected to Redis at {REDIS_URL}")
-    # Initialize the periodic cleanup cycle (2 hours)
-    q.enqueue(cleanup_old_files_task, 2)
 
 class PdfExportRequest(BaseModel):
     clean_text: str
@@ -728,11 +734,14 @@ async def export_pdf(request: Request, payload: PdfExportRequest):
 @app.get("/{full_path:path}")
 async def serve_frontend(full_path: str):
     """Serve the frontend SPA, allowing React Router to handle sub-paths."""
-    # 1. Try to serve exact file from dist (e.g., assets/index-hash.js)
-    file_path = FRONTEND_DIST / full_path
-    if file_path.exists() and file_path.is_file():
+    # 1. Try to serve exact file from dist (e.g., assets/index-hash.js).
+    #    Resolve and confine to FRONTEND_DIST so encoded "../" sequences
+    #    cannot escape the web root into source/secrets/system files.
+    dist_root = FRONTEND_DIST.resolve()
+    file_path = (dist_root / full_path).resolve()
+    if file_path.is_relative_to(dist_root) and file_path.is_file():
         return FileResponse(file_path)
-    
+
     # 2. Fallback to index.html for any other path (SPA routing)
     index_path = FRONTEND_DIST / "index.html"
     if index_path.exists():

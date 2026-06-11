@@ -11,26 +11,42 @@ CHUNK_SIZE = 64 * 1024
 
 class SecurityManager:
     def __init__(self):
-        # Master key must be 32 bytes for AES-256
+        # Master key must be exactly 32 bytes (base64-encoded) for AES-256.
         key_b64 = os.environ.get("INDICPDF_MASTER_KEY")
-        
+
         if key_b64:
             try:
                 self.key = base64.b64decode(key_b64)
-                if len(self.key) != 32:
-                    logger.warning("INDICPDF_MASTER_KEY is not 32 bytes. Using first 32 bytes or padding.")
-                    self.key = self.key[:32].ljust(32, b'\0')
             except Exception as e:
-                logger.error(f"Failed to decode INDICPDF_MASTER_KEY: {e}")
-                self.key = os.urandom(32) # Fallback to prevent crash, but breaks persistence
-        else:
+                raise RuntimeError(
+                    f"INDICPDF_MASTER_KEY is not valid base64: {e}"
+                ) from e
+            if len(self.key) != 32:
+                # Never silently pad/truncate — a wrong-length key is a
+                # misconfiguration that would corrupt every encrypted file.
+                raise RuntimeError(
+                    f"INDICPDF_MASTER_KEY must decode to exactly 32 bytes "
+                    f"(got {len(self.key)}). Generate one with: "
+                    "python -c \"import os,base64;print(base64.b64encode(os.urandom(32)).decode())\""
+                )
+        elif os.environ.get("INDICPDF_ALLOW_EPHEMERAL_KEY") == "1":
+            # Opt-in single-process/dev/test mode only. A random per-process
+            # key means a separate worker process CANNOT decrypt these files.
             logger.warning(
-                "INDICPDF_MASTER_KEY not set. Using an ephemeral key — "
-                "encrypted files will NOT be readable after a restart. "
-                "Set INDICPDF_MASTER_KEY to a base64-encoded 32-byte key in production."
+                "INDICPDF_MASTER_KEY not set; using an ephemeral key "
+                "(INDICPDF_ALLOW_EPHEMERAL_KEY=1). Cross-process decryption "
+                "WILL fail and files are unreadable after restart. Dev only."
             )
             self.key = os.urandom(32)
-            
+        else:
+            # Fail fast: a random fallback silently breaks the web↔worker
+            # pipeline (separate processes get different keys → InvalidTag).
+            raise RuntimeError(
+                "INDICPDF_MASTER_KEY is not set. Set a base64-encoded 32-byte "
+                "key (shared by the API and worker processes), or set "
+                "INDICPDF_ALLOW_EPHEMERAL_KEY=1 for single-process dev/test."
+            )
+
         self.aesgcm = AESGCM(self.key)
 
     def encrypt_file(self, plaintext_path: Path, ciphertext_path: Path):
