@@ -57,6 +57,27 @@ SCRIPT_RANGES = {
     "tamil": range(0x0B80, 0x0C00),
 }
 
+# A font is tagged with a script only if it covers most of these core letters.
+# Tagging on "any codepoint in the block" wrongly tagged e.g. Bengali fonts as
+# devanagari because they share the danda (U+0964) — producing tofu fallbacks
+# (QA F4). Core-letter coverage is what actually matters for rendering.
+SCRIPT_CORE = {
+    "devanagari": [0x0905, 0x0915, 0x0916, 0x0928, 0x0930, 0x0939, 0x093E],  # अ क ख न र ह ा
+    "telugu":     [0x0C05, 0x0C15, 0x0C16, 0x0C28, 0x0C30, 0x0C39],          # అ క ఖ న ర హ
+    "tamil":      [0x0B85, 0x0B95, 0x0B99, 0x0BA8, 0x0BB0, 0x0BB9],          # அ க ங ந ர ஹ
+}
+_SCRIPT_COVER_RATIO = 0.7
+
+
+def detect_scripts(codepoints: set) -> list:
+    """Return scripts whose core letters are sufficiently covered by the font."""
+    result = []
+    for name, core in SCRIPT_CORE.items():
+        covered = sum(1 for cp in core if cp in codepoints)
+        if covered / len(core) >= _SCRIPT_COVER_RATIO:
+            result.append(name)
+    return result
+
 # Regex that matches typical Google Fonts hash filenames (no human-readable stem)
 _HASH_RE = re.compile(r'^[A-Za-z0-9_\-]{25,}$')
 
@@ -174,8 +195,7 @@ def _extract_metadata(path: Path) -> dict | None:
                     codepoints.update(table.cmap.keys())
                 except Exception:
                     pass
-        scripts = [name for name, r in SCRIPT_RANGES.items()
-                   if any(cp in codepoints for cp in r)]
+        scripts = detect_scripts(codepoints)
         return {
             "postscript_name": ps_name,
             "full_name": full_name or ps_name,
@@ -234,8 +254,7 @@ def _extract_ttc(path: Path) -> list[dict]:
                         codepoints.update(table.cmap.keys())
                     except Exception:
                         pass
-            scripts = [name for name, r in SCRIPT_RANGES.items()
-                       if any(cp in codepoints for cp in r)]
+            scripts = detect_scripts(codepoints)
             results.append({
                 "rel_path": str(face_path.relative_to(FONTS_BASE.parent)),
                 "postscript_name": ps_name,
