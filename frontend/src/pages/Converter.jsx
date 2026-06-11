@@ -51,8 +51,9 @@ const LO_FORMATS = {
   'odp':  ['pdf', 'pptx', 'ppt'],
   'pps':  ['pdf', 'pptx', 'odp'],
   'ppsx': ['pdf', 'pptx', 'odp'],
-  // PDF → LibreOffice can open and re-export
-  'pdf':  ['docx', 'odt', 'html', 'txt', 'rtf', 'jpg'],
+  // PDF → LibreOffice can open and re-export (backend /convert has no image
+  // target, so no 'jpg' here — every offered format maps to a real conversion)
+  'pdf':  ['docx', 'odt', 'html', 'txt', 'rtf'],
 };
 
 const getAvailableOutputFormats = (ext) => {

@@ -7,6 +7,12 @@
       "runtimeArgs": ["run", "dev"],
       "port": 5173,
       "cwd": "frontend"
+    },
+    {
+      "name": "app",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["scripts/dev_serve.sh"],
+      "port": 8000
     }
   ]
 }

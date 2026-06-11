@@ -108,6 +108,31 @@ def extract_pdf_fonts(pdf_path: Path):
         logger.warning(f"Failed to extract PDF fonts: {e}")
     return fonts
 
+# QA F12: the FPDF fallback loads the entire DOCX XML via python-docx and
+# renders run-by-run with HarfBuzz shaping. A small (~90 KB) upload whose
+# word/document.xml decompresses to tens of MB (a zip-amplification bomb that
+# passes the 25 MB *compressed* upload cap) then pins a CPU for minutes and,
+# with one worker, starves the whole queue. Bound it the same way the
+# reconstruction engine does (QA F5).
+MAX_DOCX_XML_BYTES = 20 * 1024 * 1024   # decompressed word/document.xml
+MAX_RENDER_PARAGRAPHS = 5000
+
+
+def _assert_docx_within_render_limits(docx_path: Path) -> None:
+    """Reject decompression bombs before python-docx loads the whole tree."""
+    try:
+        with zipfile.ZipFile(docx_path) as archive:
+            info = archive.getinfo("word/document.xml")
+    except KeyError:
+        return  # no document.xml — let Document() raise its own clear error
+    if info.file_size > MAX_DOCX_XML_BYTES:
+        raise ValueError(
+            f"DOCX content too large to render: word/document.xml decompresses "
+            f"to {info.file_size // (1024 * 1024)} MB (limit "
+            f"{MAX_DOCX_XML_BYTES // (1024 * 1024)} MB). Split the document and retry."
+        )
+
+
 def process_docx_to_pdf_fpdf_fallback(docx_path: Path, pdf_output_path: Path):
     """Fallback docx to pdf conversion using fpdf2 directly."""
     logger.warning("LibreOffice headless not found. Falling back to native FPDF rendering.")
@@ -119,6 +144,7 @@ def process_docx_to_pdf_fpdf_fallback(docx_path: Path, pdf_output_path: Path):
         "status": "success",
         "engine": "FPDF-Native-Fallback"
     }
+    _assert_docx_within_render_limits(docx_path)
     doc = Document(docx_path)
     pdf = IndicPDF()
     pdf.set_auto_page_break(auto=True, margin=15)
@@ -208,15 +234,29 @@ def process_docx_to_pdf_fpdf_fallback(docx_path: Path, pdf_output_path: Path):
     from docx.oxml.ns import qn
     from docx.text.paragraph import Paragraph
     from docx.table import Table
+    rendered = 0
+    truncated = False
     for block in doc.element.body:
+        if rendered >= MAX_RENDER_PARAGRAPHS:
+            truncated = True
+            break
         if block.tag == qn("w:p"):
             _render_paragraph(Paragraph(block, doc))
+            rendered += 1
         elif block.tag == qn("w:tbl"):
             tbl = Table(block, doc)
             for row in tbl.rows:
                 for cell in row.cells:
                     for para in cell.paragraphs:
                         _render_paragraph(para)
+                        rendered += 1
+
+    if truncated:
+        # Don't silently drop content (QA F12): cap and flag it.
+        report["warnings"].append(
+            f"Document exceeded {MAX_RENDER_PARAGRAPHS} paragraphs; output truncated."
+        )
+        report["truncated"] = True
 
     pdf.output(str(pdf_output_path))
     return report
