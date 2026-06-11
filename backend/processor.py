@@ -114,6 +114,8 @@ def process_docx_to_pdf_fpdf_fallback(docx_path: Path, pdf_output_path: Path):
     report = {
         "font_substitutions": [],
         "legacy_conversions": [],
+        "legacy_unsupported": [],
+        "warnings": [],
         "status": "success",
         "engine": "FPDF-Native-Fallback"
     }
@@ -134,12 +136,40 @@ def process_docx_to_pdf_fpdf_fallback(docx_path: Path, pdf_output_path: Path):
             encoding_type = encoding_manager.detect_legacy_encoding(requested_font)
             processed_text = run.text
             if encoding_type:
-                processed_text = encoding_manager.convert_to_unicode(run.text, encoding_type)
-                report["legacy_conversions"].append({"font": requested_font, "type": encoding_type})
+                if encoding_manager.legacy_supported(encoding_type):
+                    processed_text = encoding_manager.convert_to_unicode(run.text, encoding_type)
+                    report["legacy_conversions"].append({"font": requested_font, "type": encoding_type})
+                else:
+                    # QA F6: a legacy 8-bit Indic font we can't faithfully map.
+                    # Don't claim a conversion — the output for this run is
+                    # unreliable; surface it instead of silently garbling.
+                    entry = {"font": requested_font, "type": encoding_type}
+                    if entry not in report["legacy_unsupported"]:
+                        report["legacy_unsupported"].append(entry)
+                        report["warnings"].append(
+                            f"Unsupported legacy encoding '{encoding_type}' "
+                            f"(font '{requested_font}'); text rendered as-is and may be garbled."
+                        )
 
-            resolved_path = font_registry.resolve_font(requested_font)
+            # Detect script up front so font resolution is script-aware. The
+            # prebuilt font index carries no per-glyph unicode_ranges, so the
+            # char-only fallback in resolve_font can't match — without an
+            # explicit script, Indic runs resolve to nothing and crash on
+            # helvetica (QA F3).
+            script = None
+            registry_script = None
+            if any(0x0900 <= ord(c) <= 0x097F for c in processed_text):
+                script, registry_script = "deva", "devanagari"
+            elif any(0x0C00 <= ord(c) <= 0x0C7F for c in processed_text):
+                script, registry_script = "telu", "telugu"
+            elif any(0x0B80 <= ord(c) <= 0x0BFF for c in processed_text):
+                script, registry_script = "taml", "tamil"
+
+            resolved_path = font_registry.resolve_font(requested_font, script=registry_script)
             if not resolved_path and processed_text:
-                resolved_path = font_registry.resolve_font(requested_font, ord(processed_text[0]))
+                resolved_path = font_registry.resolve_font(
+                    requested_font, ord(processed_text[0]), script=registry_script
+                )
 
             if resolved_path:
                 res_name = resolved_path.stem
@@ -157,18 +187,20 @@ def process_docx_to_pdf_fpdf_fallback(docx_path: Path, pdf_output_path: Path):
                         logger.error(f"Failed to add font {font_id}: {e}")
 
                 pdf.set_font(font_id, size=12)
-                script = None
-                if any(0x0900 <= ord(c) <= 0x097F for c in processed_text):
-                    script = "deva"
-                elif any(0x0C00 <= ord(c) <= 0x0C7F for c in processed_text):
-                    script = "telu"
-                elif any(0x0B80 <= ord(c) <= 0x0BFF for c in processed_text):
-                    script = "taml"
                 pdf.set_text_shaping(use_shaping_engine=bool(script), script=script, direction="ltr")
                 pdf.write(h=10, text=processed_text)
             else:
+                # No font covers this run. helvetica only handles latin-1, so
+                # guard the write — a single unsupported script must not abort
+                # the whole document (QA F3/F10).
                 pdf.set_font("helvetica", size=12)
-                pdf.write(h=10, text=processed_text)
+                try:
+                    pdf.write(h=10, text=processed_text)
+                except Exception as e:
+                    logger.warning(f"Skipped unrenderable run ({requested_font}): {e}")
+                    report.setdefault("unrendered_runs", []).append({
+                        "font": requested_font, "reason": "no_font_covers_script",
+                    })
 
         pdf.ln(10)
 

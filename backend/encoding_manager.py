@@ -50,6 +50,18 @@ class EncodingManager:
                 return encoding
         return None
 
+    # A legacy map is only "supported" if it is substantial enough to actually
+    # transliterate text. The shipped maps are placeholders (Kruti Dev/Shusha
+    # empty; APS/Anu a single codepoint), so converting with them would emit
+    # near-garbage while reporting success (QA F6). Gate on real coverage.
+    _MIN_LEGACY_MAP = 32
+
+    def legacy_supported(self, encoding_type: Optional[str]) -> bool:
+        """True only if we have a usable mapping table for this encoding."""
+        if not encoding_type:
+            return False
+        return len(self.legacy_maps.get(encoding_type, {})) >= self._MIN_LEGACY_MAP
+
     def convert_to_unicode(self, text: str, encoding_type: str) -> str:
         """Converts text from a legacy encoding to Unicode."""
         if encoding_type not in self.legacy_maps:

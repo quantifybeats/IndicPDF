@@ -1,6 +1,9 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import axios from 'axios';
 import SuccessView from './SuccessView';
+
+const POLL_MS = 2000;
+const MAX_POLLS = 150; // ~5 min cap so a stuck/queued job never spins forever
 
 const LANGUAGES = [
   { value: 'auto', label: 'Auto Detect' },
@@ -17,6 +20,17 @@ const LANGUAGES = [
   { value: 'english', label: 'English' },
 ];
 
+const MAX_OCR_BYTES = 25 * 1024 * 1024; // 25 MB — matches backend MAX_UPLOAD_BYTES
+const ALLOWED_OCR_EXTS = new Set(['.pdf', '.jpg', '.jpeg', '.png', '.tiff', '.tif']);
+
+function validateOcrFile(f) {
+  if (!f) return null;
+  const ext = '.' + f.name.split('.').pop().toLowerCase();
+  if (!ALLOWED_OCR_EXTS.has(ext)) return `Unsupported file type: ${ext}. Allowed: PDF, JPG, PNG, TIFF.`;
+  if (f.size > MAX_OCR_BYTES) return `File exceeds 25 MB limit (${(f.size / 1024 / 1024).toFixed(1)} MB).`;
+  return null;
+}
+
 export default function OcrTool() {
   const [file, setFile] = useState(null);
   const [lang, setLang] = useState('auto');
@@ -25,20 +39,32 @@ export default function OcrTool() {
   const [errorMsg, setErrorMsg] = useState('');
   const [dragOver, setDragOver] = useState(false);
   const inputRef = useRef();
+  const pollRef = useRef(null);
+
+  // Clear any in-flight poll when the component unmounts (no leaked intervals).
+  useEffect(() => () => { if (pollRef.current) clearInterval(pollRef.current); }, []);
 
   const handleFileSelect = (selected) => {
-    if (selected) setFile(selected);
+    if (!selected) return;
+    const err = validateOcrFile(selected);
+    if (err) { setErrorMsg(err); setStatus('error'); return; }
+    setFile(selected);
   };
 
   const handleDrop = useCallback((e) => {
     e.preventDefault();
     setDragOver(false);
     const dropped = e.dataTransfer.files[0];
-    if (dropped) setFile(dropped);
+    if (!dropped) return;
+    const err = validateOcrFile(dropped);
+    if (err) { setErrorMsg(err); setStatus('error'); return; }
+    setFile(dropped);
   }, []);
 
   const handleConvert = async () => {
     if (!file) return;
+    const clientErr = validateOcrFile(file);
+    if (clientErr) { setErrorMsg(clientErr); setStatus('error'); return; }
     setStatus('uploading');
     try {
       const formData = new FormData();
@@ -46,24 +72,37 @@ export default function OcrTool() {
       formData.append('lang', lang);
       const { data } = await axios.post('/ocr', formData);
       setStatus('processing');
+      let polls = 0;
       const poll = setInterval(async () => {
+        polls += 1;
+        if (polls > MAX_POLLS) {
+          clearInterval(poll);
+          pollRef.current = null;
+          setStatus('error');
+          setErrorMsg('Timed out waiting for the server. Please try again.');
+          return;
+        }
         try {
           const { data: s } = await axios.get(`/status/${data.job_id}`);
           if (s.status === 'finished') {
             clearInterval(poll);
+            pollRef.current = null;
             setResultUrl(`/download/${data.job_id}`);
             setStatus('done');
           } else if (s.status === 'failed') {
             clearInterval(poll);
+            pollRef.current = null;
             setStatus('error');
             setErrorMsg('OCR processing failed. Please try again.');
           }
         } catch {
           clearInterval(poll);
+          pollRef.current = null;
           setStatus('error');
           setErrorMsg('Connection error while checking status.');
         }
-      }, 2000);
+      }, POLL_MS);
+      pollRef.current = poll;
     } catch (err) {
       setStatus('error');
       setErrorMsg(err.response?.data?.detail || 'Upload failed.');
