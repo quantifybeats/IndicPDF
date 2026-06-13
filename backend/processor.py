@@ -54,6 +54,109 @@ def _is_indic_font(font_name: str) -> bool:
     n = font_name.lower()
     return any(kw in n for kw in _INDIC_KEYWORDS)
 
+
+# --- Indic fidelity helpers (defense-in-depth, shared by every render path) ---
+# (fpdf_script_tag, registry_script_name, unicode_start, unicode_end)
+_SCRIPT_RANGES = [
+    ("deva", "devanagari", 0x0900, 0x097F),
+    ("beng", "bengali",    0x0980, 0x09FF),
+    ("guru", "gurmukhi",   0x0A00, 0x0A7F),
+    ("gujr", "gujarati",   0x0A80, 0x0AFF),
+    ("orya", "odia",       0x0B00, 0x0B7F),
+    ("taml", "tamil",      0x0B80, 0x0BFF),
+    ("telu", "telugu",     0x0C00, 0x0C7F),
+    ("knda", "kannada",    0x0C80, 0x0CFF),
+    ("mlym", "malayalam",  0x0D00, 0x0D7F),
+]
+
+# Preferred installed family per registry script. Forced onto Indic-bearing runs
+# so a Latin font name on Indic text cannot trigger a tofu substitution.
+_SCRIPT_RENDER_FONT = {
+    "devanagari": "Noto Sans Devanagari",
+    "bengali":    "Noto Sans Bengali",
+    "gurmukhi":   "Noto Sans Gurmukhi",
+    "gujarati":   "Noto Sans Gujarati",
+    "odia":       "Noto Sans Oriya",
+    "tamil":      "Noto Sans Tamil",
+    "telugu":     "Noto Sans Telugu",
+    "kannada":    "Noto Sans Kannada",
+    "malayalam":  "Noto Sans Malayalam",
+}
+
+
+def _detect_script(text: str):
+    """Return (fpdf_tag, registry_script) for the first Indic script found, else (None, None)."""
+    for fpdf_tag, reg_name, lo, hi in _SCRIPT_RANGES:
+        if any(lo <= ord(c) <= hi for c in text):
+            return fpdf_tag, reg_name
+    return None, None
+
+
+def _clean_render_text(text: str) -> str:
+    """Strip PDF extraction artifacts and NFC-normalize text bound for a renderer."""
+    return unicodedata.normalize("NFC", encoding_manager.strip_all_junk(text or ""))
+
+
+def _preferred_render_font(text: str):
+    """(registry_script, Path) of an installed font for the text's script, else (None, None).
+
+    Prefers the curated family (Noto Sans <script>), then any registered font
+    covering that script."""
+    _, reg = _detect_script(text)
+    if not reg:
+        return None, None
+    pref = _SCRIPT_RENDER_FONT.get(reg)
+    if pref:
+        meta = font_registry.get_font_metadata(pref)
+        if meta:
+            return reg, meta.path
+    return reg, font_registry.resolve_font("Normal", script=reg)
+
+
+def _iter_doc_paragraphs(doc):
+    """Yield every paragraph in document order, including those inside tables."""
+    from docx.oxml.ns import qn
+    from docx.text.paragraph import Paragraph
+    from docx.table import Table
+    for block in doc.element.body:
+        if block.tag == qn("w:p"):
+            yield Paragraph(block, doc)
+        elif block.tag == qn("w:tbl"):
+            for row in Table(block, doc).rows:
+                for cell in row.cells:
+                    yield from cell.paragraphs
+
+
+def _sanitize_docx_for_render(src: Path) -> Path:
+    """Return a DOCX safe to hand to LibreOffice headless: extraction junk
+    stripped from every run, and Indic-bearing runs forced onto an installed
+    script font so they cannot be substituted into tofu (boxes).
+
+    Returns the original path untouched when nothing needed changing.
+    """
+    doc = Document(src)
+    changed = False
+    for para in _iter_doc_paragraphs(doc):
+        for run in para.runs:
+            cleaned = _clean_render_text(run.text)
+            if cleaned != run.text:
+                run.text = cleaned
+                changed = True
+            if not cleaned.strip():
+                continue
+            reg_script, path = _preferred_render_font(cleaned)
+            if reg_script and path:
+                meta = font_registry.get_font_metadata(_SCRIPT_RENDER_FONT.get(reg_script, ""))
+                desired = meta.family_name if meta else path.stem
+                if run.font.name != desired:
+                    run.font.name = desired
+                    changed = True
+    if not changed:
+        return src
+    out = src.with_name(f"{src.stem}_sanitized.docx")
+    doc.save(out)
+    return out
+
 def check_fonts_availability(requested_fonts):
     """Check only Indic fonts — LibreOffice handles standard Western fonts natively."""
     missing = []
@@ -159,11 +262,14 @@ def process_docx_to_pdf_fpdf_fallback(docx_path: Path, pdf_output_path: Path):
 
             requested_font = run.font.name or "Normal"
 
+            # Strip PDF text-extraction artifacts (cid markers, U+FFFD boxes)
+            # before anything renders them verbatim.
+            processed_text = _clean_render_text(run.text)
+
             encoding_type = encoding_manager.detect_legacy_encoding(requested_font)
-            processed_text = run.text
             if encoding_type:
                 if encoding_manager.legacy_supported(encoding_type):
-                    processed_text = encoding_manager.convert_to_unicode(run.text, encoding_type)
+                    processed_text = encoding_manager.convert_to_unicode(processed_text, encoding_type)
                     report["legacy_conversions"].append({"font": requested_font, "type": encoding_type})
                 else:
                     # QA F6: a legacy 8-bit Indic font we can't faithfully map.
@@ -182,14 +288,7 @@ def process_docx_to_pdf_fpdf_fallback(docx_path: Path, pdf_output_path: Path):
             # char-only fallback in resolve_font can't match — without an
             # explicit script, Indic runs resolve to nothing and crash on
             # helvetica (QA F3).
-            script = None
-            registry_script = None
-            if any(0x0900 <= ord(c) <= 0x097F for c in processed_text):
-                script, registry_script = "deva", "devanagari"
-            elif any(0x0C00 <= ord(c) <= 0x0C7F for c in processed_text):
-                script, registry_script = "telu", "telugu"
-            elif any(0x0B80 <= ord(c) <= 0x0BFF for c in processed_text):
-                script, registry_script = "taml", "tamil"
+            script, registry_script = _detect_script(processed_text)
 
             resolved_path = font_registry.resolve_font(requested_font, script=registry_script)
             if not resolved_path and processed_text:
@@ -279,9 +378,16 @@ def process_docx_to_pdf_final(docx_path: Path, pdf_output_path: Path):
         return process_docx_to_pdf_fpdf_fallback(docx_path, pdf_output_path)
 
     report = {"status": "success", "engine": "LibreOffice-Headless"}
-    
-    # 1. Font Metadata Extraction
-    docx_fonts = extract_docx_fonts(docx_path)
+
+    # 0. Sanitize for render: strip PDF extraction artifacts (cid markers,
+    # U+FFFD) from every run and force Indic-bearing runs onto an installed
+    # script font so LibreOffice cannot substitute them into tofu (boxes).
+    # Returns the original path when nothing needed fixing.
+    render_src = _sanitize_docx_for_render(docx_path)
+
+    # 1. Font Metadata Extraction (from the sanitized doc — its runs now request
+    # the fonts we will actually render with).
+    docx_fonts = extract_docx_fonts(render_src)
     logger.info(f"DOCX requested fonts: {docx_fonts}")
     
     # 2. Strict Font Validation
@@ -302,23 +408,27 @@ def process_docx_to_pdf_final(docx_path: Path, pdf_output_path: Path):
         "--headless",
         "--convert-to", "pdf:writer_pdf_Export",
         "--outdir", str(output_dir),
-        str(docx_path)
+        str(render_src)
     ]
-    
+
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, check=True)
         # Find the generated file (soffice uses input filename with .pdf)
-        generated_pdf = output_dir / f"{docx_path.stem}.pdf"
+        generated_pdf = output_dir / f"{render_src.stem}.pdf"
         if generated_pdf.exists():
             if generated_pdf != pdf_output_path:
                 if pdf_output_path.exists(): pdf_output_path.unlink()
                 shutil.move(str(generated_pdf), str(pdf_output_path))
         else:
             raise RuntimeError(f"LibreOffice succeeded but output file not found: {generated_pdf}")
-            
+
     except subprocess.CalledProcessError as e:
         logger.error(f"LibreOffice Error: {e.stderr}")
         raise RuntimeError("PDF rendering failed in the headless engine.")
+    finally:
+        # Drop the temp sanitized copy (never the caller's original).
+        if render_src != docx_path:
+            render_src.unlink(missing_ok=True)
 
     # 5. Validation & Mismatch Logging
     pdf_fonts = extract_pdf_fonts(pdf_output_path)

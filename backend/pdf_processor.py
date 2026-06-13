@@ -19,6 +19,15 @@ def normalize_font_name(font_name: str) -> str:
     match = re.search(r'[A-Z]{6}\+(.+)', font_name)
     return match.group(1) if match else font_name
 
+
+# Preferred installed family per script, so the emitted DOCX names a font the
+# reader actually has (a PDF subset name like 'ABCDEF+Foo' opens as tofu in Word).
+_SCRIPT_DOCX_FONT = {
+    "devanagari": "Noto Sans Devanagari",
+    "telugu":     "Noto Sans Telugu",
+    "tamil":      "Noto Sans Tamil",
+}
+
 def process_pdf_to_docx(pdf_path: Path, docx_output_path: Path):
     """Production-grade PDF to DOCX extractor using line-level logic."""
     report = {"pages_processed": 0, "status": "success"}
@@ -83,14 +92,20 @@ def process_pdf_to_docx(pdf_path: Path, docx_output_path: Path):
                             break
                     
                     run = paragraph.add_run(clean_text)
-                    
-                    metadata = font_registry.get_font_metadata(font_name)
-                    if metadata:
-                        run.font.name = metadata.family_name
-                    elif clean_text.strip():
-                        fallback = font_registry.resolve_font(font_name, ord(clean_text.strip()[0]), script=script)
-                        if fallback:
-                            run.font.name = fallback.stem
+
+                    # For Indic runs, name an installed script font so the DOCX
+                    # renders correctly in Word/LibreOffice instead of tofu.
+                    pref = _SCRIPT_DOCX_FONT.get(script) if script else None
+                    if pref and font_registry.get_font_metadata(pref):
+                        run.font.name = pref
+                    else:
+                        metadata = font_registry.get_font_metadata(font_name)
+                        if metadata:
+                            run.font.name = metadata.family_name
+                        elif clean_text.strip():
+                            fallback = font_registry.resolve_font(font_name, ord(clean_text.strip()[0]), script=script)
+                            if fallback:
+                                run.font.name = fallback.stem
                     
                     run.font.size = Pt(font_size)
 

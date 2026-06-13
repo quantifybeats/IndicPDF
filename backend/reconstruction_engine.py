@@ -14,6 +14,11 @@ from pathlib import Path
 from typing import Dict, List, Optional
 from xml.etree import ElementTree
 
+try:
+    from .encoding_manager import encoding_manager
+except (ImportError, ValueError):
+    from encoding_manager import encoding_manager
+
 # QA F5: caps applied before/while decompressing DOCX content
 MAX_DOCX_XML_BYTES = 20 * 1024 * 1024   # decompressed word/document.xml
 MAX_PARAGRAPHS = 5000
@@ -129,6 +134,9 @@ class IndicReconstructionEngine:
             return self._failure(name, "docx", stages, issue="docx_extraction_failed",
                                  recommendation=f"DOCX extraction failed: {exc}")
 
+        # Strip PDF text-extraction artifacts (cid markers, U+FFFD) that ride
+        # along when the DOCX was itself produced from a PDF.
+        text = encoding_manager.strip_all_junk(text)
         normalized = unicodedata.normalize("NFC", text).strip()
         if not normalized:
             return self._failure(name, "docx", stages, issue="docx_contains_no_extractable_text",

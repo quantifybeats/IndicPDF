@@ -286,14 +286,21 @@ import json
 def engine_result_to_payload(result: "EngineResult") -> dict:
     """Serialize an EngineResult into the v2 ProcessResult contract,
     plus a top-level success flag (QA F3)."""
+    try:
+        from .encoding_manager import encoding_manager
+    except (ImportError, ValueError):
+        from encoding_manager import encoding_manager
+    # Strip PDF extraction artifacts (cid markers, U+FFFD) before this text
+    # reaches the frontend, the PDF-export round-trip, or persistence.
+    strip = encoding_manager.strip_all_junk
     return {
         "success": result.success,
-        "clean_text": result.text,
+        "clean_text": strip(result.text),
         "original_ocr_text": result.original_text,
         "layout_structure": [
             {
                 "type": "paragraph",
-                "content": segment.text,
+                "content": strip(segment.text),
                 "confidence": segment.confidence,
                 "reading_order": index + 1,
             }

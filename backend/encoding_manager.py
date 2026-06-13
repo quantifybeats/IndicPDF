@@ -100,13 +100,22 @@ class EncodingManager:
         return None
 
     def strip_all_junk(self, text: str) -> str:
-        """Aggressively removes (cid:N), ( : N), and other PDF extraction artifacts."""
+        """Aggressively removes (cid:N), <cid:N>, [cid:N], bare cid:N, stray
+        ( : N), the Unicode replacement character (renders as a box), and other
+        PDF text-extraction artifacts. Matched code points sit *between* real
+        characters, so removing them recovers clean text rather than damaging it.
+        """
         if not text:
             return ""
-        text = re.sub(r'\(cid\s*:\s*\d+\s*\)', '', text)
-        text = re.sub(r'\(\s*:\s*\d+\s*\)', '', text)
-        text = re.sub(r'cid\s*:\s*\d+', '', text)
-        text = re.sub(r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]', '', text) 
+        # cid markers in any (or no) bracket style, case-insensitive, consuming a
+        # matching closing bracket when present: (cid:9) <cid:12> [cid:7] cid:9
+        text = re.sub(r'[\(\[\<]?\s*cid\s*[:\s]*\d+\s*[\)\]\>]?', '', text, flags=re.IGNORECASE)
+        # leftover empty markers like ( : 12 ), < : 3 >
+        text = re.sub(r'[\(\[\<]\s*:\s*\d+\s*[\)\]\>]', '', text)
+        # control characters
+        text = re.sub(r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]', '', text)
+        # Unicode replacement character — the literal "box" glyph
+        text = text.replace('�', '')
         return text
 
 # Global instance
