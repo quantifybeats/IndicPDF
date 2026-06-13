@@ -70,26 +70,63 @@ _SCRIPT_RANGES = [
 ]
 
 # Preferred installed family per registry script. Forced onto Indic-bearing runs
-# so a Latin font name on Indic text cannot trigger a tofu substitution.
+# so a Latin font name on Indic text cannot trigger a tofu substitution. NOTE:
+# the NotoSans{Tamil,Bengali,Gujarati,Kannada,Malayalam,Oriya} files in the repo
+# are broken ~21KB placeholders with no real glyphs, so the Lohit family (verified
+# to cover each script) is the curated choice for those. Devanagari/Telugu have
+# real Noto fonts. The pick is coverage-checked below regardless of this table.
 _SCRIPT_RENDER_FONT = {
     "devanagari": "Noto Sans Devanagari",
-    "bengali":    "Noto Sans Bengali",
-    "gurmukhi":   "Noto Sans Gurmukhi",
-    "gujarati":   "Noto Sans Gujarati",
-    "odia":       "Noto Sans Oriya",
-    "tamil":      "Noto Sans Tamil",
     "telugu":     "Noto Sans Telugu",
-    "kannada":    "Noto Sans Kannada",
-    "malayalam":  "Noto Sans Malayalam",
+    "tamil":      "Lohit Tamil",
+    "bengali":    "Lohit Bengali",
+    "gujarati":   "Lohit Gujarati",
+    "kannada":    "Lohit Kannada",
+    "malayalam":  "Lohit Malayalam",
+    "odia":       "Lohit Odia",
 }
+
+# One representative consonant per script, used to verify a candidate font really
+# contains the script's glyphs (guards against broken placeholder fonts).
+_SCRIPT_PROBE_CP = {
+    "devanagari": 0x0939, "telugu": 0x0C24, "tamil": 0x0BAE, "bengali": 0x09AC,
+    "gujarati": 0x0A97, "kannada": 0x0C95, "malayalam": 0x0D2E, "odia": 0x0B13,
+}
+
+# reg_script -> chosen FontMetadata (or None); resolved once per process.
+_render_font_cache = {}
+
+
+def _font_covers(path, codepoint: int) -> bool:
+    """True if the font's cmap actually maps codepoint (not just a name match)."""
+    try:
+        from fontTools.ttLib import TTFont
+        return codepoint in TTFont(str(path)).getBestCmap()
+    except Exception:
+        return False
+
+
+# Danda (U+0964) and double danda (U+0965) live in the Devanagari block but are
+# shared punctuation across Indic scripts — they must NOT decide the script.
+_SHARED_INDIC_PUNCT = {0x0964, 0x0965}
 
 
 def _detect_script(text: str):
-    """Return (fpdf_tag, registry_script) for the first Indic script found, else (None, None)."""
-    for fpdf_tag, reg_name, lo, hi in _SCRIPT_RANGES:
-        if any(lo <= ord(c) <= hi for c in text):
-            return fpdf_tag, reg_name
-    return None, None
+    """Return (fpdf_tag, registry_script) for the *dominant* Indic script in the
+    text, or (None, None). Picks the script with the most letters so a shared
+    danda can't misclassify e.g. Bengali or Odia as Devanagari."""
+    counts = {}
+    for ch in text:
+        cp = ord(ch)
+        if cp in _SHARED_INDIC_PUNCT:
+            continue
+        for fpdf_tag, reg_name, lo, hi in _SCRIPT_RANGES:
+            if lo <= cp <= hi:
+                counts[(fpdf_tag, reg_name)] = counts.get((fpdf_tag, reg_name), 0) + 1
+                break
+    if not counts:
+        return None, None
+    return max(counts.items(), key=lambda kv: kv[1])[0]
 
 
 def _clean_render_text(text: str) -> str:
@@ -97,20 +134,42 @@ def _clean_render_text(text: str) -> str:
     return unicodedata.normalize("NFC", encoding_manager.strip_all_junk(text or ""))
 
 
-def _preferred_render_font(text: str):
-    """(registry_script, Path) of an installed font for the text's script, else (None, None).
+def _preferred_render_font_meta(reg):
+    """Return a FontMetadata whose font actually covers `reg`'s glyphs, or None.
 
-    Prefers the curated family (Noto Sans <script>), then any registered font
-    covering that script."""
+    Tries the curated family first, then every font mapped to the script,
+    verifying real glyph coverage so broken placeholder fonts are skipped."""
+    if not reg:
+        return None
+    if reg in _render_font_cache:
+        return _render_font_cache[reg]
+    probe = _SCRIPT_PROBE_CP.get(reg)
+    candidates = []
+    pref = _SCRIPT_RENDER_FONT.get(reg)
+    if pref:
+        m = font_registry.get_font_metadata(pref)
+        if m:
+            candidates.append(m)
+    for m in font_registry.script_fallback.get(reg, []):
+        if m not in candidates:
+            candidates.append(m)
+    chosen = None
+    for m in candidates:
+        if probe is None or _font_covers(m.path, probe):
+            chosen = m
+            break
+    _render_font_cache[reg] = chosen
+    return chosen
+
+
+def _preferred_render_font(text: str):
+    """(registry_script, Path) of a coverage-verified font for the text's script,
+    else (registry_script or None, None)."""
     _, reg = _detect_script(text)
     if not reg:
         return None, None
-    pref = _SCRIPT_RENDER_FONT.get(reg)
-    if pref:
-        meta = font_registry.get_font_metadata(pref)
-        if meta:
-            return reg, meta.path
-    return reg, font_registry.resolve_font("Normal", script=reg)
+    meta = _preferred_render_font_meta(reg)
+    return reg, (meta.path if meta else None)
 
 
 def _iter_doc_paragraphs(doc):
@@ -144,10 +203,10 @@ def _sanitize_docx_for_render(src: Path) -> Path:
                 changed = True
             if not cleaned.strip():
                 continue
-            reg_script, path = _preferred_render_font(cleaned)
-            if reg_script and path:
-                meta = font_registry.get_font_metadata(_SCRIPT_RENDER_FONT.get(reg_script, ""))
-                desired = meta.family_name if meta else path.stem
+            _, reg_script = _detect_script(cleaned)
+            meta = _preferred_render_font_meta(reg_script)
+            if meta:
+                desired = meta.family_name
                 if run.font.name != desired:
                     run.font.name = desired
                     changed = True
@@ -290,7 +349,13 @@ def process_docx_to_pdf_fpdf_fallback(docx_path: Path, pdf_output_path: Path):
             # helvetica (QA F3).
             script, registry_script = _detect_script(processed_text)
 
-            resolved_path = font_registry.resolve_font(requested_font, script=registry_script)
+            # For Indic runs, pick a coverage-verified script font first (skips
+            # broken placeholder fonts); otherwise honour the requested font.
+            resolved_path = None
+            if registry_script:
+                _, resolved_path = _preferred_render_font(processed_text)
+            if not resolved_path:
+                resolved_path = font_registry.resolve_font(requested_font, script=registry_script)
             if not resolved_path and processed_text:
                 resolved_path = font_registry.resolve_font(
                     requested_font, ord(processed_text[0]), script=registry_script
@@ -564,21 +629,19 @@ def process_txt_to_pdf(txt_path: Path, pdf_output_path: Path):
             continue
             
         # 1. Junk Stripping & Normalization
-        processed_text = encoding_manager.strip_all_junk(para_text)
-        processed_text = unicodedata.normalize('NFC', processed_text)
-        
-        # 1.5 Script Detection
-        script = None
-        if any(0x0900 <= ord(c) <= 0x097F for c in processed_text): script = "deva"
-        elif any(0x0C00 <= ord(c) <= 0x0C7F for c in processed_text): script = "telu"
-        elif any(0x0B80 <= ord(c) <= 0x0BFF for c in processed_text): script = "taml"
+        processed_text = _clean_render_text(para_text)
 
-        script_map = {"deva": "devanagari", "telu": "telugu", "taml": "tamil"}
-        registry_script = script_map.get(script)
+        # 1.5 Script detection (all supported Indic scripts, danda-safe)
+        script, registry_script = _detect_script(processed_text)
 
-        # 2. Font Resolution (Using generic fallback)
-        res_path = font_registry.resolve_font("Normal", ord(processed_text.strip()[0]) if processed_text.strip() else None, script=registry_script)
-        
+        # 2. Font Resolution: coverage-verified script font first, then fallback.
+        first_cp = ord(processed_text.strip()[0]) if processed_text.strip() else None
+        res_path = None
+        if registry_script:
+            _, res_path = _preferred_render_font(processed_text)
+        if not res_path:
+            res_path = font_registry.resolve_font("Normal", first_cp, script=registry_script)
+
         if res_path:
             f_id = res_path.stem
             if f_id not in registered_fonts:

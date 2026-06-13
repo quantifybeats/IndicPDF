@@ -85,5 +85,36 @@ def test_sanitize_docx_strips_cid_and_forces_telugu_font(tmp_path):
         assert r.font.name and font_registry.get_font_metadata(r.font.name) is not None
 
 
+def test_detect_script_ignores_shared_danda():
+    """Bengali/Odia/Punjabi use the Devanagari danda (U+0964). Detection must
+    key off the dominant letters, not that shared punctuation mark."""
+    assert processor._detect_script("বাংলা ভাষা সুন্দর।")[1] == "bengali"
+    assert processor._detect_script("ଓଡ଼ିଆ ଭାଷା ସୁନ୍ଦର।")[1] == "odia"
+    assert processor._detect_script("हिंदी भाषा सुंदर है।")[1] == "devanagari"
+    assert processor._detect_script("தமிழ் மொழி அழகு.")[1] == "tamil"
+    assert processor._detect_script("ಕನ್ನಡ ಭಾಷೆ ಸುಂದರ.")[1] == "kannada"
+
+
+@pytest.mark.parametrize("script_text,reg,probe", [
+    ("हिंदी भाषा", "devanagari", 0x0939),
+    ("తెలుగు భాష", "telugu", 0x0C24),
+    ("தமிழ் மொழி", "tamil", 0x0BAE),
+    ("বাংলা ভাষা", "bengali", 0x09AC),
+    ("ગુજરાતી ભાષા", "gujarati", 0x0A97),
+    ("ಕನ್ನಡ ಭಾಷೆ", "kannada", 0x0C95),
+    ("മലയാളം ഭാഷ", "malayalam", 0x0D2E),
+    ("ଓଡ଼ିଆ ଭାଷା", "odia", 0x0B13),
+])
+def test_every_advertised_script_renders_with_a_covering_font(script_text, reg, probe):
+    """The site advertises perfect rendering for these scripts; each must select
+    a font whose cmap ACTUALLY contains the script's glyphs — broken ~21KB
+    placeholder fonts (named but glyphless) must be skipped."""
+    detected_reg = processor._detect_script(script_text)[1]
+    assert detected_reg == reg
+    rscript, path = processor._preferred_render_font(script_text)
+    assert path is not None and path.exists(), f"{reg}: no font selected"
+    assert processor._font_covers(path, probe), f"{reg}: {path.name} lacks the script's glyphs"
+
+
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-v"]))
