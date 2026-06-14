@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import axios from 'axios';
-import SuccessView from './SuccessView';
 
 const POLL_MS = 2000;
 const MAX_POLLS = 150; // ~5 min cap so a stuck/queued job never spins forever
@@ -36,6 +35,8 @@ export default function OcrTool() {
   const [lang, setLang] = useState('auto');
   const [status, setStatus] = useState('idle');
   const [resultUrl, setResultUrl] = useState(null);
+  const [resultText, setResultText] = useState('');
+  const [copied, setCopied] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [dragOver, setDragOver] = useState(false);
   const inputRef = useRef();
@@ -87,7 +88,14 @@ export default function OcrTool() {
           if (s.status === 'finished') {
             clearInterval(poll);
             pollRef.current = null;
-            setResultUrl(`/download/${data.job_id}`);
+            const url = `/download/${data.job_id}`;
+            setResultUrl(url);
+            // Pull the extracted text so the user SEES the result inline,
+            // not just a download button.
+            try {
+              const { data: txt } = await axios.get(url, { responseType: 'text' });
+              setResultText(typeof txt === 'string' ? txt : String(txt ?? ''));
+            } catch { /* download link still works even if inline fetch fails */ }
             setStatus('done');
           } else if (s.status === 'failed') {
             clearInterval(poll);
@@ -113,18 +121,56 @@ export default function OcrTool() {
     setFile(null);
     setStatus('idle');
     setResultUrl(null);
+    setResultText('');
+    setCopied(false);
     setErrorMsg('');
   };
 
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(resultText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch { /* clipboard may be blocked; download still available */ }
+  };
+
   if (status === 'done') {
+    const baseName = `${file?.name?.replace(/\.[^.]+$/, '') || 'document'}_ocr.txt`;
     return (
-      <div style={{ background: '#fff', minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-        <SuccessView
-          downloadUrl={resultUrl}
-          fileName={`${file?.name?.replace(/\.[^.]+$/, '')}_ocr.txt`}
-          onReset={handleReset}
-          message="Text extracted successfully!"
-        />
+      <div style={{ background: '#fff', minHeight: '80vh', padding: '48px 24px' }}>
+        <div style={{ maxWidth: 760, margin: '0 auto' }}>
+          <h2 style={{ fontSize: 24, fontWeight: 700, color: '#16a34a', marginBottom: 4 }}>✓ Text extracted</h2>
+          <p style={{ color: '#777', fontSize: 14, marginBottom: 20 }}>
+            {resultText ? `${resultText.length} characters recognized.` : 'Your file is ready to download.'}
+          </p>
+          {resultText && (
+            <textarea
+              readOnly
+              value={resultText}
+              style={{
+                width: '100%', minHeight: 280, padding: 16, fontSize: 15, lineHeight: 1.7,
+                border: '1px solid #E2E2E2', borderRadius: 8, color: '#222', background: '#FAFAFA',
+                fontFamily: 'system-ui, "Noto Sans", sans-serif', resize: 'vertical',
+              }}
+            />
+          )}
+          <div style={{ display: 'flex', gap: 12, marginTop: 20, flexWrap: 'wrap' }}>
+            {resultText && (
+              <button onClick={handleCopy}
+                style={{ background: '#F97316', color: '#fff', border: 'none', borderRadius: 6, padding: '12px 24px', fontSize: 15, fontWeight: 600, cursor: 'pointer' }}>
+                {copied ? 'Copied ✓' : 'Copy text'}
+              </button>
+            )}
+            <a href={resultUrl} download={baseName}
+              style={{ background: '#fff', color: '#F97316', border: '1.5px solid #F97316', borderRadius: 6, padding: '12px 24px', fontSize: 15, fontWeight: 600, textDecoration: 'none' }}>
+              Download .txt
+            </a>
+            <button onClick={handleReset}
+              style={{ background: 'transparent', color: '#777', border: '1.5px solid #ddd', borderRadius: 6, padding: '12px 24px', fontSize: 15, fontWeight: 600, cursor: 'pointer' }}>
+              New file
+            </button>
+          </div>
+        </div>
       </div>
     );
   }

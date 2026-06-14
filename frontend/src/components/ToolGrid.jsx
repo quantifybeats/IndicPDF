@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Languages, Zap, Cloud, ScanText, ShieldCheck, MonitorSmartphone } from 'lucide-react';
 
 const features = [
@@ -21,6 +22,7 @@ const features = [
     icon: ScanText,
     title: '9 Language OCR',
     desc: 'Hindi, Telugu, Tamil, Bengali, Gujarati, Kannada, Malayalam, Odia and Punjabi via Tesseract.',
+    to: '/ocr',
   },
   {
     icon: ShieldCheck,
@@ -48,18 +50,25 @@ const ToolGrid = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {features.map(({ icon: Icon, title, desc }) => (
-            <div
-              key={title}
-              className="group bg-surface border border-border rounded-radius-xl p-7 shadow-shadow transition-all duration-300 hover:-translate-y-1.5 hover:shadow-shadow-lg hover:border-primary/40"
-            >
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 bg-primary/10 text-primary border border-primary/20 group-hover:scale-110 transition-transform">
-                <Icon className="w-6 h-6" />
-              </div>
-              <h3 className="font-display text-lg font-bold mb-2 text-text">{title}</h3>
-              <p className="text-sm text-text-muted leading-relaxed">{desc}</p>
-            </div>
-          ))}
+          {features.map(({ icon: Icon, title, desc, to }) => {
+            const cardCls = "group bg-surface border border-border rounded-radius-xl p-7 shadow-shadow transition-all duration-300 hover:-translate-y-1.5 hover:shadow-shadow-lg hover:border-primary/40";
+            const inner = (
+              <>
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 bg-primary/10 text-primary border border-primary/20 group-hover:scale-110 transition-transform">
+                  <Icon className="w-6 h-6" />
+                </div>
+                <h3 className="font-display text-lg font-bold mb-2 text-text">
+                  {title}{to && <span className="text-primary"> →</span>}
+                </h3>
+                <p className="text-sm text-text-muted leading-relaxed">{desc}</p>
+              </>
+            );
+            return to ? (
+              <Link key={title} to={to} className={`${cardCls} no-underline block cursor-pointer`}>{inner}</Link>
+            ) : (
+              <div key={title} className={cardCls}>{inner}</div>
+            );
+          })}
         </div>
       </div>
     </section>

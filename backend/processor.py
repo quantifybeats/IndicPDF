@@ -211,6 +211,19 @@ def _sanitize_docx_for_render(src: Path) -> Path:
                 if run.font.name != desired:
                     run.font.name = desired
                     changed = True
+                # Indic is a complex script: also set the w:cs (and w:eastAsia)
+                # font slot, which python-docx's run.font.name does not touch, so
+                # LibreOffice/Word use this font for shaping rather than a default.
+                if reg_script:
+                    from docx.oxml.ns import qn
+                    rpr = run._element.get_or_add_rPr()
+                    rfonts = rpr.find(qn('w:rFonts'))
+                    if rfonts is None:
+                        rfonts = rpr.makeelement(qn('w:rFonts'), {})
+                        rpr.insert(0, rfonts)
+                    for attr in ('w:ascii', 'w:hAnsi', 'w:cs', 'w:eastAsia'):
+                        rfonts.set(qn(attr), desired)
+                    changed = True
     if not changed:
         return src
     out = src.with_name(f"{src.stem}_sanitized.docx")

@@ -69,21 +69,39 @@ def _detect_doc_script(text: str):
     return max(counts, key=counts.get) if counts else None
 
 
+def _set_run_fonts(run, name):
+    """Set the font on a run for ALL script classes. python-docx's run.font.name
+    only writes w:ascii/w:hAnsi, but Indic text is a *complex script* — Word and
+    LibreOffice pick the w:cs font for it. Without w:cs the reader renders Telugu
+    etc. with the default complex-script font (detached matras / wrong shaping).
+    Set w:cs (and w:eastAsia) too so the chosen font is used everywhere."""
+    from docx.oxml.ns import qn
+    run.font.name = name  # w:ascii + w:hAnsi
+    rpr = run._element.get_or_add_rPr()
+    rfonts = rpr.find(qn('w:rFonts'))
+    if rfonts is None:
+        rfonts = rpr.makeelement(qn('w:rFonts'), {})
+        rpr.insert(0, rfonts)
+    for attr in ('w:ascii', 'w:hAnsi', 'w:cs', 'w:eastAsia'):
+        rfonts.set(qn(attr), name)
+
+
 def _assign_docx_font(run, clean_text, source_font, script):
     """Name a font the reader has: an installed script font for Indic runs,
-    otherwise the resolved family for the run's original font."""
+    otherwise the resolved family for the run's original font. The name is
+    applied to the complex-script slot too, so Indic shaping survives in Word."""
     pref = _SCRIPT_DOCX_FONT.get(script) if script else None
     if pref and font_registry.get_font_metadata(pref):
-        run.font.name = pref
+        _set_run_fonts(run, pref)
         return
     metadata = font_registry.get_font_metadata(source_font)
     if metadata:
-        run.font.name = metadata.family_name
+        _set_run_fonts(run, metadata.family_name)
     elif clean_text.strip():
         fallback = font_registry.resolve_font(
             source_font, ord(clean_text.strip()[0]), script=script)
         if fallback:
-            run.font.name = fallback.stem
+            _set_run_fonts(run, fallback.stem)
 
 
 def _iter_glyphs(obj):
