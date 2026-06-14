@@ -667,31 +667,54 @@ async def analyse_pdf_quality(file: UploadFile = File(...)):
         size_kb = len(content) / 1024
         
         # Simple heuristics for quality
+        from pdf_processor import _is_tounicode_garbage
+
         has_text = False
+        extracted_parts = []
         embedded_fonts = True
         warnings = []
-        
+
         for page in reader.pages:
-            if page.extract_text().strip():
+            page_text = page.extract_text()
+            if page_text.strip():
                 has_text = True
+                extracted_parts.append(page_text)
             # Check for non-embedded fonts (simplified)
             if "/Resources" in page and "/Font" in page["/Resources"]:
                 pass # Logic could be deeper here
-        
+
+        # A PDF can have a text layer that is garbage: a corrupt ToUnicode CMap
+        # maps every glyph to the same wrong code point ('సససస'), so has_text is
+        # True but the text is unrecoverable by extraction. Detect and flag it
+        # rather than calling it "Searchable".
+        corrupt_text = has_text and _is_tounicode_garbage("\n".join(extracted_parts))
+
         score = 100
         if not has_text:
             score -= 40
             warnings.append("No searchable text layer found (Image-only PDF).")
+        elif corrupt_text:
+            score -= 40
+            warnings.append("Corrupt text layer detected (broken ToUnicode: glyphs "
+                            "map to the same character). Not recoverable by "
+                            "extraction — use OCR mode.")
         if size_kb / (pages or 1) > 1000:
             score -= 15
             warnings.append("Large file size detected; consider optimizing compression.")
-            
+
+        if corrupt_text:
+            text_status = "Corrupt text layer (broken ToUnicode)"
+        elif has_text:
+            text_status = "Searchable"
+        else:
+            text_status = "Not Searchable"
+
         return {
             "score": f"{max(score, 0)}/100",
             "size": f"{size_kb/1024:.1f} MB" if size_kb > 1024 else f"{size_kb:.0f} KB",
             "pages": pages,
             "fonts": "Fully Embedded" if embedded_fonts else "Suboptimal",
-            "text": "Searchable" if has_text else "Not Searchable",
+            "text": text_status,
             "render": "High Quality" if score > 80 else "Medium Quality",
             "compression": "Optimized" if size_kb < 5000 else "Uncompressed",
             "warnings": warnings,

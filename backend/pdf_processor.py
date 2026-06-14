@@ -1,6 +1,7 @@
 import re
 import statistics
 import unicodedata
+from collections import Counter
 from pathlib import Path
 from docx import Document
 from docx.shared import Pt
@@ -53,6 +54,53 @@ _SHARED_INDIC_PUNCT = {0x0964, 0x0965}
 _WORD_GAP = 0.28
 _PARA_GAP = 1.4
 _LINE_TOL = 0.6   # fraction of glyph height within which glyphs share a line
+
+
+# Broken-ToUnicode garbage signature. A corrupt ToUnicode CMap maps every glyph
+# to the same (or a tiny set of) wrong code point, so extraction yields a wall of
+# one repeated akshara ('సససస', 'తెతెతె', 'नननन'). Those are valid Indic code
+# points — they survive NFC and junk-stripping — so extraction cannot recover the
+# real text; only OCR or fixing the source can. Detect and refuse rather than
+# emit a confidently-wrong DOCX.
+_GARBAGE_MIN_LEN = 24       # too short to judge below this
+_GARBAGE_MAX_DISTINCT = 4   # real Indic text this long uses far more aksharas
+_GARBAGE_DOMINANCE = 0.40   # one char covering this share = repeated-glyph signature
+
+
+class ToUnicodeGarbageError(RuntimeError):
+    """The source PDF's text layer is corrupt (broken ToUnicode): glyphs all map
+    to the same wrong character, so no extractor can recover the real text."""
+
+
+def _indic_chars(text: str):
+    """Indic letters/signs in text, excluding the shared danda punctuation.
+    The garbage check scores on these alone so Latin in a mixed-language doc
+    can't dilute a broken Indic run below the threshold (real case:
+    'English ... नननन')."""
+    out = []
+    for ch in text:
+        cp = ord(ch)
+        if cp in _SHARED_INDIC_PUNCT:
+            continue
+        for _reg, lo, hi in _SCRIPT_RANGES:
+            if lo <= cp <= hi:
+                out.append(ch)
+                break
+    return out
+
+
+def _is_tounicode_garbage(text: str) -> bool:
+    """True when the Indic text shows the broken-ToUnicode signature: a long run
+    of aksharas collapsed onto one (or a few) repeated code points. Scored on the
+    Indic subset only, so Latin and normal Indic text return False — and a broken
+    Indic run survives dilution by surrounding Latin."""
+    indic = _indic_chars(text)
+    if len(indic) < _GARBAGE_MIN_LEN:
+        return False
+    if len(set(indic)) <= _GARBAGE_MAX_DISTINCT:
+        return True
+    top = Counter(indic).most_common(1)[0][1]
+    return (top / len(indic)) >= _GARBAGE_DOMINANCE
 
 
 def _detect_doc_script(text: str):
@@ -283,6 +331,16 @@ def process_pdf_to_docx(pdf_path: Path, docx_output_path: Path):
                 _emit_reflowed_page(doc, page_layout)
             else:
                 _emit_linewise_page(doc, page_layout)
+
+        # Refuse to ship a confidently-wrong DOCX: if extraction collapsed the
+        # whole document onto one repeated akshara, the source ToUnicode is
+        # corrupt and only OCR (or fixing the source) can recover it.
+        if _is_tounicode_garbage("\n".join(p.text for p in doc.paragraphs)):
+            raise ToUnicodeGarbageError(
+                "Source PDF text layer is corrupt (broken ToUnicode: every glyph "
+                "maps to the same character, e.g. 'సససస'). Text extraction cannot "
+                "recover it. Use OCR mode, or regenerate the source PDF."
+            )
 
         doc.save(docx_output_path)
     except Exception as e:
