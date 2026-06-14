@@ -70,20 +70,19 @@ _SCRIPT_RANGES = [
 ]
 
 # Preferred installed family per registry script. Forced onto Indic-bearing runs
-# so a Latin font name on Indic text cannot trigger a tofu substitution. NOTE:
-# the NotoSans{Tamil,Bengali,Gujarati,Kannada,Malayalam,Oriya} files in the repo
-# are broken ~21KB placeholders with no real glyphs, so the Lohit family (verified
-# to cover each script) is the curated choice for those. Devanagari/Telugu have
-# real Noto fonts. The pick is coverage-checked below regardless of this table.
+# so a Latin font name on Indic text cannot trigger a tofu substitution. The pick
+# is coverage-checked in _preferred_render_font_meta, so if a curated font is ever
+# missing/broken it falls through to any other font that actually covers the
+# script (e.g. the Lohit family) instead of rendering tofu.
 _SCRIPT_RENDER_FONT = {
     "devanagari": "Noto Sans Devanagari",
     "telugu":     "Noto Sans Telugu",
-    "tamil":      "Lohit Tamil",
-    "bengali":    "Lohit Bengali",
-    "gujarati":   "Lohit Gujarati",
-    "kannada":    "Lohit Kannada",
-    "malayalam":  "Lohit Malayalam",
-    "odia":       "Lohit Odia",
+    "tamil":      "Noto Sans Tamil",
+    "bengali":    "Noto Sans Bengali",
+    "gujarati":   "Noto Sans Gujarati",
+    "kannada":    "Noto Sans Kannada",
+    "malayalam":  "Noto Sans Malayalam",
+    "odia":       "Noto Sans Oriya",
 }
 
 # One representative consonant per script, used to verify a candidate font really
