@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "count": 286,
+  "count": 287,
   "fonts": [
     {
       "rel_path": "system/Bengali/2-c39J9j0IaUMQZwAJyJaOX1UUnf3GLnYjALsQNZ7ZI.ttf",
@@ -3040,6 +3040,17 @@
       "style": "italic",
       "scripts": [
         "telugu"
+      ]
+    },
+    {
+      "rel_path": "system/Punjabi/NotoSansGurmukhi-Regular.ttf",
+      "postscript_name": "NotoSansGurmukhi-Regular",
+      "full_name": "Noto Sans Gurmukhi Regular",
+      "family_name": "Noto Sans Gurmukhi",
+      "weight": "regular",
+      "style": "normal",
+      "scripts": [
+        "gurmukhi"
       ]
     }
   ]

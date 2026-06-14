@@ -83,6 +83,7 @@ _SCRIPT_RENDER_FONT = {
     "kannada":    "Noto Sans Kannada",
     "malayalam":  "Noto Sans Malayalam",
     "odia":       "Noto Sans Oriya",
+    "gurmukhi":   "Noto Sans Gurmukhi",
 }
 
 # One representative consonant per script, used to verify a candidate font really
@@ -90,6 +91,7 @@ _SCRIPT_RENDER_FONT = {
 _SCRIPT_PROBE_CP = {
     "devanagari": 0x0939, "telugu": 0x0C24, "tamil": 0x0BAE, "bengali": 0x09AC,
     "gujarati": 0x0A97, "kannada": 0x0C95, "malayalam": 0x0D2E, "odia": 0x0B13,
+    "gurmukhi": 0x0A2A,
 }
 
 # reg_script -> chosen FontMetadata (or None); resolved once per process.

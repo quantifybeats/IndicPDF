@@ -741,6 +741,25 @@ async def export_pdf(request: Request, payload: PdfExportRequest):
     return {"job_id": job.id, "status": "queued"}
 
 
+@app.get("/api/qa/indic-selftest")
+@limiter.limit("2/minute")
+async def indic_selftest(request: Request, formats: str = "txt,docx"):
+    """Run the Indic rendering-correctness self-test IN this (deployed) environment
+    — the only place font/renderer verdicts are trustworthy. Returns a per-
+    (script x format) pass/fail matrix with per-signal detail. Heavy (LibreOffice
+    + OCR), so it runs off the event loop and is rate limited."""
+    import asyncio
+    import indic_qa
+    fmts = tuple(f.strip() for f in formats.split(",") if f.strip() in ("txt", "docx"))
+    if not fmts:
+        return err(400, "formats must be a comma list of: txt, docx", "BAD_FORMATS")
+    try:
+        return await asyncio.to_thread(indic_qa.run_self_test, fmts)
+    except Exception as e:
+        logger.error(f"indic-selftest failed: {e}")
+        return err(500, "Self-test failed to run.", "SELFTEST_ERROR")
+
+
 @app.get("/{full_path:path}")
 async def serve_frontend(full_path: str):
     """Serve the frontend SPA, allowing React Router to handle sub-paths."""
